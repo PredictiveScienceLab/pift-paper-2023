@@ -4,7 +4,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from examples import Diffusion1D
+from problems import Diffusion1D
 
 example = Diffusion1D(
     kappa = 0.1,
