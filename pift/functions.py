@@ -10,7 +10,8 @@ Date:
 
 
 __all__ = [
-    "FunctionParameterization"
+    "FunctionParameterization",
+    "enforce_1d_boundary_conditions"
 ]
 
 
@@ -99,3 +100,15 @@ class FunctionParameterization:
         )
         obj.basis = basis
         return obj
+
+
+def enforce_1d_boundary_conditions(
+    psi: Callable,
+    a: float,
+    ya: float,
+    b: float,
+    yb: float
+) -> Callable:
+    return lambda x, w: (
+        (b - x) * ya + (x - a) * yb + (x - a) * (b - x) * psi(x, w)
+    )

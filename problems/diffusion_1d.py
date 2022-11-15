@@ -13,13 +13,15 @@ __all__ = ["Diffusion1D"]
 
 
 from typing import NamedTuple, Callable
-import numpy as np
-import jax.numpy as jnp
 from numpy.typing import NDArray
+
+import numpy as np
+from jax import grad
+import jax.numpy as jnp
 from scipy.integrate import solve_bvp
+from functools import partial
 
-from pift import uniformly_sample_1d_function_w_Gaussian_noise
-
+from pift import *
 
 class Diffusion1D(NamedTuple):
     name: str   = "1D diffusion example"
@@ -35,6 +37,10 @@ class Diffusion1D(NamedTuple):
     b: float    = 1.0
     # Boundary conditions
     yb: float = (1.0, 0.0)
+    # The measurement noise
+    sigma: float = 0.1
+    # The mumber of observations
+    num_samples: int = 100
 
     def rhs(self, x: NDArray, y: NDArray) -> NDArray:
         """The right hand size of the boundary value problem."""
@@ -56,18 +62,14 @@ class Diffusion1D(NamedTuple):
         assert res["success"]
         return lambda x: res.sol(x)[0, :]
 
-    def generate_experimental_data(
-            self,
-            num_samples: int = 100,
-            sigma: float = 0.1
-        ) -> NDArray:
+    def generate_experimental_data(self) -> NDArray:
         f = self.solve()
         xr, yr = uniformly_sample_1d_function_w_Gaussian_noise(
             f,
-            num_samples,
+            num_samples=self.num_sample,
             a=self.a,
             b=self.b,
-            sigma=sigma
+            sigma=self.sigma
         )
         res = {
             "solution": f,
@@ -75,3 +77,21 @@ class Diffusion1D(NamedTuple):
             "y": yr
         }
         return res
+
+    def make_pift_problem(self, V: FunctionParameterization) -> PiftProblem:
+        phi = enforce_1d_boundary_conditions(
+            V.eval,
+            self.a,
+            self.yb[0],
+            self.b,
+            self.yb[1]
+        )
+        gphi = grad(phi, argnums=0)
+        f = lambda x: jnp.exp(- x)
+        hamiltonian_density = lambda x, w, theta: (
+            0.5 * theta[0] * gphi(x, w) ** 2
+            - theta[1] * phi(x, w) * f(x)
+        )
+        log_theta_prior = lambda theta: 0.0
+        xs_all = np.linspace(self.a, self.b, 10000)
+        return make_pyro_model(phi, hamiltonian_density, xs_all)
