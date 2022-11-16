@@ -28,7 +28,7 @@ parser.add_option(
     dest="beta_max",
     help="the maximum beta",
     type="float",
-    default=1e5
+    default=1e7
 )
 parser.add_option(
     "--num-observations",
@@ -59,7 +59,7 @@ example = Diffusion1DGamma(
 )
 print(example)
 
-num_terms = 4
+num_terms = options.num_terms
 
 V = FunctionParameterization.from_basis(
     "psi",
@@ -90,16 +90,17 @@ func = lambda beta, gamma: log_like(jnp.array([beta, gamma]))[0]
 out = []
 for gamma in np.linspace(0.0, 1.0, 10):
     print(f"working on gamma={gamma:1.2f}")
-    beta_star, r = brentq(
-        func,
-        options.beta_min,
-        options.beta_max,
-        args=(gamma,),
-        xtol=1.0,
-        disp=False,
-        full_output=True
-    )
-    if not r.converged:
+    try:
+        beta_star, r = brentq(
+            func,
+            options.beta_min,
+            options.beta_max,
+            args=(gamma,),
+            xtol=1.0,
+            disp=False,
+            full_output=True
+        )
+    except:
         beta_star = self.beta_max
     print(f"result: {gamma:1.2f} {beta_star:1.0f}")
     out.append((gamma, beta_star))
