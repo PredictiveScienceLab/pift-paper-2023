@@ -101,7 +101,7 @@ for gamma in np.linspace(0.0, 1.0, 10):
             full_output=True
         )
     except:
-        beta_star = self.beta_max
+        beta_star = options.beta_max
     print(f"result: {gamma:1.2f} {beta_star:1.0f}")
     out.append((gamma, beta_star))
 out = np.array(out)
