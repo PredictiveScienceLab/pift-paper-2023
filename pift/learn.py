@@ -5,10 +5,8 @@ __all__ = [
     "learn",
     "GradMinusLogMarginalLikelihood",
     "adam",
-    "cg",
     "newton_raphson",
-    "stochastic_gradient_langevin_dynamics",
-    "stochastic_newton_langevin_dynamics"
+    "stochastic_gradient_langevin_dynamics"
 ]
 
 import sys
@@ -129,13 +127,6 @@ class GradMinusLogMarginalLikelihood:
             grad_U = grad_U_post - grad_U_prior
             grad_minus_log_p = grad_U - self.grad_log_prior(theta)
 
-            grad_U_post_v = np.var(grad_H_post, axis=0) / post_ws.shape[0]
-            grad_U_prior_v = np.var(grad_H_prior, axis=0) / prior_ws.shape[0]
-            grad_minus_log_p_v = grad_U_post_v + grad_U_prior_v
-
-            grad_U_post_c = np.cov(grad_H_post, rowvar=False) / post_ws.shape[0]
-            grad_U_prior_c = np.cov(grad_H_prior, rowvar=False) / prior_ws.shape[0]
-            grad_minus_log_p_c = grad_U_post_c + grad_U_prior_c
             if disp:
                 sys.stdout.write(f"-> {grad_minus_log_p}\n")
                 sys.stdout.flush()
@@ -143,7 +134,6 @@ class GradMinusLogMarginalLikelihood:
                 prior_ws, post_ws,
                 grad_H_prior, grad_H_post,
                 grad_U,
-                grad_minus_log_p_c,
                 grad_minus_log_p
             )
 
@@ -159,15 +149,12 @@ class GradMinusLogMarginalLikelihood:
                     prior_ws, post_ws,
                     grad_H_prior, grad_H_post,
                     grad_U,
-                    grad_minus_log_p_v,
                     grad_minus_log_p
                 ) = (
                     func_base(theta)
                 )
                 grad2_H_prior = self.vgrad2_hamiltonian(prior_ws, theta)
                 grad2_H_post = self.vgrad2_hamiltonian(post_ws, theta)
-                grad3_H_prior = self.vgrad3_hamiltonian(prior_ws, theta)
-                grad3_H_post = self.vgrad3_hamiltonian(post_ws, theta)
                 grad2_U = (
                     np.cov(grad_H_prior, rowvar=False)
                     -
@@ -179,7 +166,7 @@ class GradMinusLogMarginalLikelihood:
                 )
                 grad2_minus_log_p = grad2_U - self.grad2_log_prior(theta)
                 grad2_minus_log_p_inv = np.linalg.inv(grad2_U)
-                return grad_minus_log_p, grad2_minus_log_p_inv, grad_minus_log_p_v
+                return grad_minus_log_p, grad2_minus_log_p_inv
         else:
             func = lambda theta: func_base(theta)[-1]
         self.func = func
@@ -237,37 +224,6 @@ def adam(
         theta = theta - alpha * m_hat / (np.sqrt(v_hat) + epsilon)
         print_progress(disp, theta, g)
     return theta
-
-
-def cg(
-    A: NDArray,
-    b: NDArray,
-    t: int,
-    x0: NDArray
-) -> NDArray:
-    """Perform t steps of the Conjugate-Gradient algorithm starting at x0."""
-    assert A.ndim == 2
-    assert b.ndim == 1
-    assert A.shape[0] == A.shape[1]
-    assert b.shape[0] == A.shape[0]
-    assert t >= 1
-    assert x0.ndim == 1
-    assert x0.shape[0] == A.shape[0]
-
-    r = b - np.dot(A, x0)
-    p = r
-    rTr = np.dot(r, r)
-    x = x0
-    for k in range(t):
-        Ap = np.dot(A, p)
-        a = np.dot(r, r) / np.dot(p, Ap)
-        x = x + a * p
-        r = r - a * Ap
-        new_rTr = np.dot(r, r)
-        b = new_rTr / rTr
-        rTr = new_rTr
-        p = r + b * p
-    return x
 
 
 def newton_raphson(
@@ -330,32 +286,3 @@ def stochastic_gradient_langevin_dynamics(
         theta = theta - epsilon * (M @ g) + eta
         print_progress(disp, i, theta, g, prefix="sgld", fd=fd)
     return theta
-
-
-def stochastic_newton_langevin_dynamics(
-    func: Callable,
-    theta0: NDArray,
-    alpha: float = .01,
-    beta: float = 10.0,
-    gamma: float = 0.51,
-    t: int = 2,
-    maxit: int = 1000,
-    disp: bool = True
-) -> NDArray:
-    """This is an algorithm I came up with. I am not sure that it converges."""
-    i = 0
-    theta = theta0
-    while i <= maxit:
-        i += 1
-        epsilon = alpha / (beta + i) ** gamma
-        g, grad2_U_inv, Gamma = func(theta)
-        # H += np.eye(*H.shape) * 1e-3
-        L = np.linalg.cholesky(grad2_U_inv)
-        d = grad2_U_inv @ g + Gamma
-        #L[L <= 0.0] = 0.0
-        w = L @ np.random.randn(*theta.shape)
-        theta = theta - epsilon * d + np.sqrt(2.0 * epsilon) * w
-        print_progress(disp, theta, g)
-    return theta
-
-# def hessian_approximated_mcmc()
