@@ -9,7 +9,7 @@ Date:
 """
 
 
-__all__ = ["Diffusion1D"]
+__all__ = ["Diffusion1DGamma"]
 
 
 from typing import NamedTuple, Callable
@@ -23,12 +23,15 @@ from functools import partial
 
 from pift import *
 
-class Diffusion1D(NamedTuple):
+class Diffusion1DGamma(NamedTuple):
     name: str   = "1D diffusion example"
     # The number of discretization points
     n: int      = 1000
     # The source term
-    q: Callable = lambda x: jnp.exp(-x)
+    q: Callable = lambda x, gamma: (
+        gamma * jnp.cos(4.0 * x) + (1.0 - gamma) * jnp.exp(-x)
+    )
+
     # Parameter
     kappa: float = 0.25
     # Left boundary
@@ -36,15 +39,15 @@ class Diffusion1D(NamedTuple):
     # Right boundary
     b: float    = 1.0
     # Boundary conditions
-    yb: float = (1.0, 0.0)
+    yb: float = (0.0, 0.0)
     # The measurement noise
-    sigma: float = 0.1
+    sigma: float = 0.01
     # The mumber of observations
-    num_samples: int = 100
+    num_samples: int = 10
 
     def rhs(self, x: NDArray, y: NDArray) -> NDArray:
         """The right hand size of the boundary value problem."""
-        return y[1], -1.0 / self.kappa * self.q(x)
+        return y[1], -1.0 / self.kappa * self.q(x, 1.0)
 
     def bc(self, ya: NDArray, yb: NDArray) -> NDArray:
         return np.array([ya[0] - self.yb[0], yb[0] - self.yb[1]])
@@ -87,12 +90,11 @@ class Diffusion1D(NamedTuple):
             self.yb[1]
         )
         gphi = grad(phi, argnums=0)
-        f = lambda x: jnp.exp(- x)
         hamiltonian_density = lambda x, w, theta: (
-            0.5 * theta[0] * gphi(x, w) ** 2
-            - theta[1] * phi(x, w) * f(x)
+            theta[0] * (0.5 * self.kappa * gphi(x, w) ** 2
+            - phi(x, w) * self.q(x, theta[1]))
         )
-        log_theta_prior = lambda theta: 0.0
+        log_theta_prior = lambda theta: - jnp.log(theta[0])
         xs_all = np.linspace(self.a, self.b, 10000)
         return make_pyro_model(
             phi,
@@ -100,5 +102,7 @@ class Diffusion1D(NamedTuple):
             xs_all,
             log_theta_prior,
             weight_mean=jnp.zeros((V.num_params,)),
-            weight_scale=1.0 * jnp.ones((V.num_params,))
+            weight_scale=1000.0 * jnp.ones((V.num_params,)),
+            sigma_rate=None,
+            sigma=self.sigma
         )

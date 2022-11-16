@@ -1,4 +1,4 @@
-"""Replicate example 1 of the paper.
+"""Replicate Example 1 of the paper.
 
 TODO: Alex, you must modify this to generate the examples of the file.
 """
@@ -42,9 +42,6 @@ V = FunctionParameterization.from_basis(
     Fourier1DBasis(example.b, options.num_terms)
 )
 
-weight_mean = jnp.zeros((V.num_params,))
-weight_scale= jnp.ones((V.num_params,)) * options.spectrum_strength
-
 problem = example.make_pift_problem(V)
 
 rng_key = PRNGKey(123456)
@@ -61,9 +58,7 @@ mcmc = MCMCSampler(
 beta = options.beta
 
 samples = mcmc.sample(
-    theta=[example.kappa * beta, beta],
-    weight_mean=weight_mean,
-    weight_scale=weight_scale
+    theta=[example.kappa * beta, beta]
 )
 
 xs = np.linspace(example.a, example.b, 200)

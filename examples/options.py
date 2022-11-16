@@ -47,12 +47,5 @@ def make_standard_option_parser() -> OptionParser:
         type="int",
         default=4
     )
-    parser.add_option(
-        "--spectrum-strength",
-        dest="spectrum_strength",
-        help="the spectrum strength for the prior over the weights of the Fourier features",
-        type="float",
-        default=1.0
-    )
-
+    
     return parser

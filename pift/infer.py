@@ -35,12 +35,19 @@ class PiftProblem(NamedTuple):
     vwphi: Callable
     hamiltonian: Callable
     pyro_model: Callable
+    xs: NDArray
+    log_theta_prior: Callable
 
 
 def make_pyro_model(
     phi: Callable,
     hamiltonian_density: Callable,
-    xs_all: NDArray
+    xs_all: NDArray,
+    log_theta_prior: Callable,
+    weight_mean=None,
+    weight_scale=None,
+    sigma_rate=1.0,
+    sigma=None
 ) -> Callable:
     vphi = vmap(phi, (0, None))
     vwphi = vmap(vphi, (None, 0))
@@ -58,12 +65,17 @@ def make_pyro_model(
     def model(
             data=None,
             theta= None,
-            weight_mean=None,
-            weight_scale=None,
-            sigma_rate=1.0,
+            weight_mean=weight_mean,
+            weight_scale=weight_scale,
+            sigma_rate=sigma_rate,
+            sigma=sigma,
             xs_all: NDArray = xs_all,
             mini_batch: int = 1000
         ) -> None:
+
+            assert theta is not None
+            assert weight_mean is not None
+            assert weight_scale is not None
 
             # Subsample
             with numpyro.plate("batched_space", len(xs_all), mini_batch):
@@ -83,12 +95,16 @@ def make_pyro_model(
             )
 
             if data is not None:
-                s2 = numpyro.sample(
-                    "s2",
-                    dist.Exponential(
-                        sigma_rate
+                if sigma_rate is not None:
+                    s = numpyro.sample(
+                        "s",
+                        dist.Exponential(
+                            sigma_rate
+                        )
                     )
-                )
+                else:
+                    assert sigma is not None
+                    s = sigma
                 xr, yr = data
                 phir = vphi(xr, w)
                 with numpyro.plate("observed_data", len(yr)):
@@ -96,12 +112,12 @@ def make_pyro_model(
                         "predictions",
                         dist.Normal(
                             loc=phir,
-                            scale=s2
+                            scale=s
                         ),
                         obs=yr
                     )
 
-    return PiftProblem(phi, vphi, vwphi, hamiltonian, model)
+    return PiftProblem(phi, vphi, vwphi, hamiltonian, model, xs_all, log_theta_prior)
 
 
 class MCMCSampler:
