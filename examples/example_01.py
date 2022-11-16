@@ -30,12 +30,9 @@ parser.add_option(
 )
 (options, args) = parser.parse_args()
 
-example = Diffusion1D(
-    kappa = 0.1,
-    yb = (1.0, 0.0)
-)
+example = Diffusion1D()
 
-num_terms = 4
+num_terms = options.num_terms
 
 V = FunctionParameterization.from_basis(
     "psi",
@@ -63,11 +60,17 @@ samples = mcmc.sample(
 
 xs = np.linspace(example.a, example.b, 200)
 ws = samples["w"]
+samples_out = f"example_01_beta={beta:1.1f}" + "_ws.csv"
+np.savetxt(samples_out, ws)
+
 ys_pift = problem.vwphi(xs, ws)
+ys_out = f"example_01_beta={beta:1.1f}" + "_ys.csv"
+np.savetxt(ys_out, ys_pift)
 
 f = example.solve()
 ys_true = f(xs)
 
+# TODO - Make the figures compatible with paper
 fig, ax = plt.subplots()
 ax.plot(xs, ys_pift.T, "r", lw=0.1)
 ax.plot(xs, ys_true, "b--")
