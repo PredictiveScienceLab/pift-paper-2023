@@ -135,24 +135,18 @@ class MCMCSampler:
         self,
         pyro_model: Callable,
         rng_key: random.PRNGKey,
-        init_params: NDArray = None,
-        continue_init_params: bool = False,
         **kwargs
     ) -> None:
-        self.model = pyro_model
-        self.mcmc = MCMC(HMCECS(NUTS(pyro_model)), **kwargs)
-        self.init_params = init_params
+        self.pyro_model = pyro_model
+        self.mcmc_kwargs = kwargs
         self.rng_key = rng_key
-        self.continue_init_params = continue_init_params
 
     def sample(self, **kwargs) -> None:
         rng_key, self.rng_key = random.split(self.rng_key)
+        self.mcmc = MCMC(HMCECS(NUTS(self.pyro_model)), **self.mcmc_kwargs)
         self.mcmc.run(
             rng_key=rng_key,
-            init_params=self.init_params,
             **kwargs
         )
         samples = self.mcmc.get_samples()
-        # if self.continue_init_params:
-        #     self.init_params = ws[-1]
         return samples

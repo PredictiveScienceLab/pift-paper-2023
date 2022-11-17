@@ -2,7 +2,6 @@
 
 
 __all__ = [
-    "learn",
     "GradMinusLogMarginalLikelihood",
     "adam",
     "newton_raphson",
@@ -20,53 +19,6 @@ from functools import partial
 from .infer import *
 
 
-def learn(
-    hamiltonian: Callable,
-    log_prior: Callable,
-    model: Callable,
-    data: Any,
-    theta: NDArray,
-    init_params: NDArray,
-    out_file: str,
-    rng_key: random.PRNGKey,
-    xs: NDArray,
-    do_nr: bool = True,
-    nr_params = {},
-    do_sgld: bool = True,
-    sgld_params = {},
-    mcmc_params = {}
-):
-    """Trains the model doing first NR and the SGLD."""
-    func = GradMinusLogMarginalLikelihood(
-        hamiltonian,
-        log_prior,
-        model,
-        data=data,
-        return_hessian=True,
-        init_params=init_params,
-        rng_key=rng_key,
-        **mcmc_params
-    )
-
-    with open(out_file, "w") as fd:
-        if do_nr:
-            theta, H = newton_raphson(
-                func,
-                theta,
-                fd=fd,
-                **nr_params
-            )
-
-        if do_sgld:
-            theta, H = stochastic_gradient_langevin_dynamics(
-                func,
-                theta,
-                M=H,
-                fd=fd,
-                **sgld_params
-            )
-
-
 class GradMinusLogMarginalLikelihood:
 
     def __init__(
@@ -74,7 +26,6 @@ class GradMinusLogMarginalLikelihood:
         problem: PiftProblem,
         data: Any,
         rng_key: random.PRNGKey,
-        init_params: NDArray = None,
         xs: NDArray = np.linspace(0.0, 1.0, 1000),
         return_hessian: bool = False,
         disp: bool = False,
@@ -90,13 +41,11 @@ class GradMinusLogMarginalLikelihood:
         self.prior_mcmc = MCMCSampler(
             model_prior,
             rng_key=prior_key,
-            init_params=init_params,
             **kwargs
         )
         self.post_mcmc = MCMCSampler(
             model_post,
             rng_key=post_key,
-            init_params=init_params,
             **kwargs
         )
         self.xs = xs
@@ -234,23 +183,26 @@ def newton_raphson(
     disp: bool = True,
     max_beta: float = 10000.0,
     beta_index: int = -1,
+    tol: float = 1e-2,
     fd: Any = sys.stdout
 ) -> NDArray:
     i = 0
     theta = theta0
     while i <= maxit:
         i += 1
-        g, H, C, _ = func(theta)
-        # Check if the step is problematic
+        g, H = func(theta)
         step = H @ g
-        C_step = H @ C @ H
         next_beta = theta[beta_index] - alpha * step[beta_index]
         if next_beta >= max_beta:
             if disp:
                 s = "*** Stopping NR because beta became too big {theta[-1]:1.3e}"
                 print(s)
                 break
-        theta = theta - alpha * step
+        dtheta = alpha * step
+        theta = theta - dtheta
+        if np.linalg.norm(g) < tol:
+            print("*** Converged to desired accuracy.")
+            break
         print_progress(disp, i, theta, g, prefix="nr", fd=fd)
     return theta, H
 
@@ -274,6 +226,7 @@ def stochastic_gradient_langevin_dynamics(
     i = 0
     theta = theta0
     prev_epsilon = 0.0
+    thetas = []
     while i <= maxit:
         i += 1
         if i >= maxit_after_which_epsilon_is_fixed:
@@ -285,4 +238,5 @@ def stochastic_gradient_langevin_dynamics(
         eta = np.sqrt(2.0 * epsilon) * L @ np.random.randn(*theta.shape)
         theta = theta - epsilon * (M @ g) + eta
         print_progress(disp, i, theta, g, prefix="sgld", fd=fd)
-    return theta
+        thetas.append(theta)
+    return np.array(thetas)

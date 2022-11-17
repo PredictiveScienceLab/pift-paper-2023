@@ -81,7 +81,11 @@ class Diffusion1DGamma(NamedTuple):
         }
         return res
 
-    def make_pift_problem(self, V: FunctionParameterization) -> PiftProblem:
+    def make_pift_problem(
+        self,
+        V: FunctionParameterization,
+        gamma: float
+    ) -> PiftProblem:
         phi = enforce_1d_boundary_conditions(
             V.eval,
             self.a,
@@ -92,7 +96,7 @@ class Diffusion1DGamma(NamedTuple):
         gphi = grad(phi, argnums=0)
         hamiltonian_density = lambda x, w, theta: (
             theta[0] * (0.5 * self.kappa * gphi(x, w) ** 2
-            - phi(x, w) * self.q(x, theta[1]))
+            - phi(x, w) * self.q(x, gamma))
         )
         log_theta_prior = lambda theta: - jnp.log(theta[0])
         xs_all = np.linspace(self.a, self.b, 10000)

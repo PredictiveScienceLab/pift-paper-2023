@@ -14,18 +14,18 @@ from problems import Diffusion1D
 from options import make_standard_option_parser
 
 parser = make_standard_option_parser()
-parser.add_option(
+parser.add_argument(
     "--beta",
     dest="beta",
     help="the beta you want to run the simulation on",
-    type="float",
+    type=float,
     default=0.0
 )
-parser.add_option(
+parser.add_argument(
     "--figure-format",
     dest="figure_format",
     help="the figure format",
-    type="str",
+    type=str,
     default="png"
 )
 (options, args) = parser.parse_args()

@@ -13,51 +13,57 @@ from scipy.optimize import brentq
 
 from pift import *
 from problems import Diffusion1DGamma
-from options import make_standard_option_parser
+from options import *
 
 parser = make_standard_option_parser()
-parser.add_option(
-    "--beta-min",
-    dest="beta_min",
+add_nr_options(parser)
+add_sgld_options(parser)
+
+parser.add_argument(
+    "--beta-start",
+    dest="beta_start",
     help="the minimum beta",
-    type="float",
-    default=1e-3
+    type=float,
+    default=10.0
 )
-parser.add_option(
-    "--beta-max",
-    dest="beta_max",
-    help="the maximum beta",
-    type="float",
-    default=1e7
-)
-parser.add_option(
+parser.add_argument(
     "--num-observations",
     dest="num_observations",
     help="the number of observations to use in the example",
-    type="int",
+    type=int,
     default=10
 )
-parser.add_option(
+parser.add_argument(
     "--sigma",
     dest="sigma",
     help="the scale of the observation noise.",
-    type="float",
+    type=float,
     default=0.01
 )
-parser.add_option(
+parser.add_argument(
     "--figure-format",
     dest="figure_format",
     help="the figure format",
-    type="str",
+    type=str,
     default="png"
 )
+parser.add_argument(
+    "--gamma",
+    dest="gamma",
+    help="the gamma you want to do it on",
+    type=float,
+    default=0.0
+)
+
+# optimization options
+
+
 (options, args) = parser.parse_args()
 
 example = Diffusion1DGamma(
     sigma=options.sigma,
     num_samples=options.num_samples
 )
-print(example)
 
 num_terms = options.num_terms
 
@@ -69,8 +75,13 @@ V = FunctionParameterization.from_basis(
 result = example.generate_experimental_data()
 data = (result["x"], result["y"])
 
-problem = example.make_pift_problem(V)
-print(problem)
+#func = lambda beta, gamma: log_like(jnp.array([beta, gamma]))[0]
+
+gamma = options.gamma
+
+print(f"working on gamma={gamma:1.2f}")
+
+problem = example.make_pift_problem(V, gamma)
 
 rng_key = PRNGKey(123456)
 
@@ -78,42 +89,47 @@ log_like = GradMinusLogMarginalLikelihood(
     problem=problem,
     data=data,
     rng_key=rng_key,
-    disp=True,
+    disp=False,
     num_samples=options.num_samples,
     num_warmup=options.num_warmup,
     thinning=options.thinning,
-    progress_bar=False,
+    progress_bar=options.progress_bar,
+    return_hessian=True
 )
 
-func = lambda beta, gamma: log_like(jnp.array([beta, gamma]))[0]
+out_prefix = (
+    f"example_02_gamma={gamma:1.2f}_"
+    + f"s={options.sigma:1.3e}_n={options.num_samples}"
+)
 
-out = []
-for gamma in np.linspace(0.0, 1.0, 10):
-    print(f"working on gamma={gamma:1.2f}")
-    try:
-        beta_star, r = brentq(
-            func,
-            options.beta_min,
-            options.beta_max,
-            args=(gamma,),
-            xtol=1.0,
-            disp=False,
-            full_output=True
-        )
-    except:
-        beta_star = options.beta_max
-    print(f"result: {gamma:1.2f} {beta_star:1.0f}")
-    out.append((gamma, beta_star))
-out = np.array(out)
+out_opt = out_prefix + ".opt"
 
-out_file = "example_02.csv"
-print(f"saving results in `{out_file}`")
-np.savetxt(out_file, out)
+with open(out_opt, "w") as fd:
+    res = newton_raphson(
+        log_like,
+        theta0=jnp.array([options.beta_start]),
+        alpha=options.nr_alpha,
+        maxit=options.nr_maxit,
+        tol=options.nr_tol,
+        fd=fd
+    )
 
-fig_name = "example_02" + "." + options.figure_format
-print(f"saving figure `{fig_name}`")
-fig, ax = plt.subplots()
-ax.plot(out[:, 0], out[:, 1], 'bo')
-ax.set_xlabel(r"$\gamma$")
-ax.set_ylabel(r"$\beta$")
-fig.savefig(fig_name)
+    print("nr results:")
+    print(res)
+
+    beta_star = res[0]
+
+    theta_samples = stochastic_gradient_langevin_dynamics(
+        log_like,
+        theta0=res[0],
+        M=res[1],
+        alpha=options.sgld_alpha,
+        beta=options.sgld_beta,
+        gamma=options.sgld_gamma,
+        maxit=options.sgld_maxit,
+        maxit_after_which_epsilon_is_fixed=options.sgld_fix_it,
+        fd=fd
+    )
+
+out_mcmc = out_prefix = ".mcmc"
+np.savetxt(out_mcmc, theta_samples)
