@@ -58,18 +58,18 @@ parser.add_argument(
 # optimization options
 
 
-(options, args) = parser.parse_args()
+args = parser.parse_args()
 
 example = Diffusion1DGamma(
-    sigma=options.sigma,
-    num_samples=options.num_samples
+    sigma=args.sigma,
+    num_samples=args.num_samples
 )
 
-num_terms = options.num_terms
+num_terms = args.num_terms
 
 V = FunctionParameterization.from_basis(
     "psi",
-    Fourier1DBasis(example.b, options.num_terms)
+    Fourier1DBasis(example.b, args.num_terms)
 )
 
 result = example.generate_experimental_data()
@@ -77,7 +77,7 @@ data = (result["x"], result["y"])
 
 #func = lambda beta, gamma: log_like(jnp.array([beta, gamma]))[0]
 
-gamma = options.gamma
+gamma = args.gamma
 
 print(f"working on gamma={gamma:1.2f}")
 
@@ -90,16 +90,16 @@ log_like = GradMinusLogMarginalLikelihood(
     data=data,
     rng_key=rng_key,
     disp=False,
-    num_samples=options.num_samples,
-    num_warmup=options.num_warmup,
-    thinning=options.thinning,
-    progress_bar=options.progress_bar,
+    num_samples=args.num_samples,
+    num_warmup=args.num_warmup,
+    thinning=args.thinning,
+    progress_bar=args.progress_bar,
     return_hessian=True
 )
 
 out_prefix = (
     f"example_02_gamma={gamma:1.2f}_"
-    + f"s={options.sigma:1.3e}_n={options.num_samples}"
+    + f"s={args.sigma:1.3e}_n={args.num_samples}"
 )
 
 out_opt = out_prefix + ".opt"
@@ -107,10 +107,10 @@ out_opt = out_prefix + ".opt"
 with open(out_opt, "w") as fd:
     res = newton_raphson(
         log_like,
-        theta0=jnp.array([options.beta_start]),
-        alpha=options.nr_alpha,
-        maxit=options.nr_maxit,
-        tol=options.nr_tol,
+        theta0=jnp.array([args.beta_start]),
+        alpha=args.nr_alpha,
+        maxit=args.nr_maxit,
+        tol=args.nr_tol,
         fd=fd
     )
 
@@ -123,11 +123,11 @@ with open(out_opt, "w") as fd:
         log_like,
         theta0=res[0],
         M=res[1],
-        alpha=options.sgld_alpha,
-        beta=options.sgld_beta,
-        gamma=options.sgld_gamma,
-        maxit=options.sgld_maxit,
-        maxit_after_which_epsilon_is_fixed=options.sgld_fix_it,
+        alpha=args.sgld_alpha,
+        beta=args.sgld_beta,
+        gamma=args.sgld_gamma,
+        maxit=args.sgld_maxit,
+        maxit_after_which_epsilon_is_fixed=args.sgld_fix_it,
         fd=fd
     )
 

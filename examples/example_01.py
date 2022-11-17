@@ -28,15 +28,15 @@ parser.add_argument(
     type=str,
     default="png"
 )
-(options, args) = parser.parse_args()
+args = parser.parse_args()
 
 example = Diffusion1D()
 
-num_terms = options.num_terms
+num_terms = args.num_terms
 
 V = FunctionParameterization.from_basis(
     "psi",
-    Fourier1DBasis(example.b, options.num_terms)
+    Fourier1DBasis(example.b, args.num_terms)
 )
 
 problem = example.make_pift_problem(V)
@@ -46,13 +46,13 @@ rng_key = PRNGKey(123456)
 mcmc = MCMCSampler(
     problem.pyro_model,
     rng_key=rng_key,
-    num_warmup=options.num_warmup,
-    num_samples=options.num_samples,
-    thinning=options.thinning,
+    num_warmup=args.num_warmup,
+    num_samples=args.num_samples,
+    thinning=args.thinning,
     progress_bar=True
 )
 
-beta = options.beta
+beta = args.beta
 
 samples = mcmc.sample(
     theta=[example.kappa * beta, beta]
@@ -80,6 +80,6 @@ ax.set_xlabel("$x$")
 ax.set_ylabel(r"$\phi(x)$")
 ax.set_title(f"$\\beta={beta:1.1f}$")
 
-out_file = f"example_01_beta={beta:1.1f}" + "." + options.figure_format
+out_file = f"example_01_beta={beta:1.1f}" + "." + args.figure_format
 print(f"> writing: {out_file}")
 fig.savefig(out_file)
