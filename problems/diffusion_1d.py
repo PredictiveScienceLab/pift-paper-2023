@@ -30,7 +30,7 @@ class Diffusion1D(NamedTuple):
     # The source term
     q: Callable = lambda x: jnp.exp(-x)
     # Parameter
-    kappa: float = 0.25
+    kappa: float = 0.1
     # Left boundary
     a: float    = 0.0
     # Right boundary
