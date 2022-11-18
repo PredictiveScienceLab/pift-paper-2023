@@ -36,7 +36,7 @@ class Diffusion1D(NamedTuple):
     # Right boundary
     b: float    = 1.0
     # Boundary conditions
-    yb: float = (1.0, 0.0)
+    yb: float = (1.0, 0.1)
     # The measurement noise
     sigma: float = 0.1
     # The mumber of observations
