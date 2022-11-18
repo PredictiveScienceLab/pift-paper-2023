@@ -20,3 +20,5 @@ squared residual if you want.
 We will use a bisection algorithm to find the best beta. Vary:
   - number of observations
   - observation noise
+
+Alex is working on problem 1.
