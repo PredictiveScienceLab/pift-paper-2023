@@ -10,7 +10,9 @@ do
         --nr-maxit=10 \
         --nr-tol=1e-2 \
         --sgld-maxit=1000 \
-        --sgld-fix-it=900
+        --sgld-fix-it=900 \
+        --num-observations=$n \
+        --sigma=$s
     done
   done
 done

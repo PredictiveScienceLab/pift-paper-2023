@@ -69,16 +69,30 @@ np.savetxt(ys_out, ys_pift)
 
 f = example.solve()
 ys_true = f(xs)
-
 # TODO - Make the figures compatible with paper
-fig, ax = plt.subplots()
-ax.plot(xs, ys_pift.T, "r", lw=0.1)
-ax.plot(xs, ys_true, "b--")
-ax.plot(example.a, example.yb[0], "ko")
-ax.plot(example.b, example.yb[1], "ko")
-ax.set_xlabel("$x$")
-ax.set_ylabel(r"$\phi(x)$")
-ax.set_title(f"$\\beta={beta:1.1f}$")
+import seaborn as sns
+plt.style.use("bmh")
+
+
+plt.rcParams.update({'font.size': 9})
+sns.set_context("paper")
+sns.set_style("white")
+
+fig, ax = plt.subplots(figsize = [5.1667/2, 5.1667/2])
+ax.plot(xs, ys_pift.T[:,0:10], "r", lw=0.5)
+ax.plot(xs, ys_true, "k--", label='exact', lw=2.0)
+ax.plot(xs, jnp.quantile(ys_pift, q = 0.5, axis = 0), "b-.", label = 'median', lw=2.0)
+plt.fill_between(xs, jnp.quantile(ys_pift, q = 0.025, axis=0), jnp.quantile(ys_pift, q = 0.975, axis=0),
+                 alpha = 0.5, color = 'cornflowerblue')
+ax.plot(example.a, example.yb[0], "kx", markersize = 7, markeredgewidth=2)
+ax.plot(example.b, example.yb[1], "kx", markersize = 7, markeredgewidth=2)
+ax.set_xlabel("$x$", fontsize=10.0)
+ax.set_ylabel(r"$\phi(x)$", fontsize = 10.0)
+ax.set_title(f"$\\beta={beta:1.1f}$", fontsize=10.0)
+plt.ylim([-0.1,1.5])
+plt.xlim([0.0-.1,1.0+.1])
+plt.legend(loc = 'best', fontsize = 9.0)
+plt.tight_layout()
 
 out_file = f"example_01_beta={beta:1.1f}" + "." + args.figure_format
 print(f"> writing: {out_file}")
