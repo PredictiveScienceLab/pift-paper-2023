@@ -62,7 +62,7 @@ args = parser.parse_args()
 
 example = Diffusion1DGamma(
     sigma=args.sigma,
-    num_samples=args.num_samples
+    num_samples=args.num_observations
 )
 
 num_terms = args.num_terms
@@ -99,12 +99,19 @@ log_like = GradMinusLogMarginalLikelihood(
 
 out_prefix = (
     f"example_02_gamma={gamma:1.2f}_"
-    + f"s={args.sigma:1.3e}_n={args.num_samples}"
+    + f"s={args.sigma:1.3e}_n={args.num_observations}"
 )
 
 out_opt = out_prefix + ".opt"
 
+def func(theta, fd):
+    g = log_like(jnp.array([theta]))[0]
+    print(theta, g, file=fd, flush=True)
+    return g
+
 with open(out_opt, "w") as fd:
+#    res = brentq(func, 1.0, 1e6, args=(fd,), xtol=1)
+
     res = newton_raphson(
         log_like,
         theta0=jnp.array([args.beta_start]),

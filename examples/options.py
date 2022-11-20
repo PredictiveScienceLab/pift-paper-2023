@@ -33,14 +33,14 @@ def make_standard_option_parser(**kwargs) -> ArgumentParser:
         dest="thinning",
         help="keep every `thinning` samples from MCMC",
         type=int,
-        default=1
+        default=10
     )
     parser.add_argument(
         "--num-samples",
         dest="num_samples",
         help="total number of MCMC samplers",
         type=int,
-        default=100
+        default=10000
     )
     parser.add_argument(
         "--progress-bar",
