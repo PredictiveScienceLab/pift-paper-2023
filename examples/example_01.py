@@ -28,6 +28,7 @@ parser.add_argument(
     type=str,
     default="png"
 )
+
 args = parser.parse_args()
 
 example = Diffusion1D()
@@ -78,22 +79,31 @@ plt.rcParams.update({'font.size': 9})
 sns.set_context("paper")
 sns.set_style("white")
 
-fig, ax = plt.subplots(figsize = [5.1667/2, 5.1667/2])
-ax.plot(xs, ys_pift.T[:,0:10], "r", lw=0.5)
-ax.plot(xs, ys_true, "k--", label='exact', lw=2.0)
-ax.plot(xs, jnp.quantile(ys_pift, q = 0.5, axis = 0), "b-.", label = 'median', lw=2.0)
+plt.figure(figsize = [5.1667, 5.1667])
+# some samples
+plt.plot(xs, ys_pift.T[:,0:10], "r", lw=0.5)
+# exact solution
+plt.plot(xs, ys_true, "k--", label='exact', lw=2.0)
+# median of posterior
+plt.plot(xs, jnp.quantile(ys_pift, q = 0.5, axis = 0), "b-.", label = 'median', lw=2.0)
+# 95% predictive interval
 plt.fill_between(xs, jnp.quantile(ys_pift, q = 0.025, axis=0), jnp.quantile(ys_pift, q = 0.975, axis=0),
                  alpha = 0.5, color = 'cornflowerblue')
-ax.plot(example.a, example.yb[0], "kx", markersize = 7, markeredgewidth=2)
-ax.plot(example.b, example.yb[1], "kx", markersize = 7, markeredgewidth=2)
-ax.set_xlabel("$x$", fontsize=10.0)
-ax.set_ylabel(r"$\phi(x)$", fontsize = 10.0)
-ax.set_title(f"$\\beta={beta:1.1f}$", fontsize=10.0)
+# data points
+plt.plot(example.a, example.yb[0], "kx", markersize = 7, markeredgewidth=2)
+plt.plot(example.b, example.yb[1], "kx", markersize = 7, markeredgewidth=2)
+
 plt.ylim([-0.1,1.5])
 plt.xlim([0.0-.1,1.0+.1])
+
+plt.xlabel("$x$", fontsize=10.0)
+plt.ylabel(r"$\phi(x)$", fontsize = 10.0)
+plt.title(f"$\\beta={beta:1.1f}$", fontsize=10.0)
+
 plt.legend(loc = 'best', fontsize = 9.0)
 plt.tight_layout()
 
 out_file = f"example_01_beta={beta:1.1f}" + "." + args.figure_format
 print(f"> writing: {out_file}")
-fig.savefig(out_file)
+#fig.savefig(out_file)
+plt.savefig(out_file, dpi = 500, bbox_inches = 'tight')
