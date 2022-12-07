@@ -104,11 +104,6 @@ out_prefix = (
 
 out_opt = out_prefix + ".opt"
 
-def func(theta, fd):
-    g = log_like(jnp.array([theta]))[0]
-    print(theta, g, file=fd, flush=True)
-    return g
-
 with open(out_opt, "w") as fd:
 #    res = brentq(func, 1.0, 1e6, args=(fd,), xtol=1)
 
