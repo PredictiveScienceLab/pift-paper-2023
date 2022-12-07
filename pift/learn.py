@@ -5,7 +5,8 @@ __all__ = [
     "GradMinusLogMarginalLikelihood",
     "adam",
     "newton_raphson",
-    "stochastic_gradient_langevin_dynamics"
+    "stochastic_gradient_langevin_dynamics",
+    "print_progress"
 ]
 
 import sys

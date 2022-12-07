@@ -104,27 +104,39 @@ out_prefix = (
 
 out_opt = out_prefix + ".opt"
 
+
+def func(log_beta, fd):
+    beta = jnp.array([jnp.exp(log_beta)])
+    g = log_like(beta)[0]
+    print_progress(True, 0, beta, g, prefix="brentq", fd=fd)
+    return g
+
+max_beta = 1e5
 with open(out_opt, "w") as fd:
-#    res = brentq(func, 1.0, 1e6, args=(fd,), xtol=1)
+    try:
+        res = brentq(func, np.log(1.0), np.log(max_beta), args=(fd,), xtol=1)
+        beta_star = jnp.array([np.exp(res)])
+    except:
+        beta_star = jnp.array([max_beta])
+    # res = newton_raphson(
+    #     log_like,
+    #     theta0=jnp.array([args.beta_start]),
+    #     alpha=args.nr_alpha,
+    #     maxit=args.nr_maxit,
+    #     tol=args.nr_tol,
+    #     fd=fd
+    # )
+    #
+    # print("nr results:")
+    # print(res)
 
-    res = newton_raphson(
-        log_like,
-        theta0=jnp.array([args.beta_start]),
-        alpha=args.nr_alpha,
-        maxit=args.nr_maxit,
-        tol=args.nr_tol,
-        fd=fd
-    )
-
-    print("nr results:")
-    print(res)
-
-    beta_star = res[0]
+    #beta_star = res[0]
+    _, M = log_like(beta_star)
 
     theta_samples = stochastic_gradient_langevin_dynamics(
         log_like,
-        theta0=res[0],
-        M=res[1],
+        theta0=beta_star,
+        M=M,
         alpha=args.sgld_alpha,
         beta=args.sgld_beta,
         gamma=args.sgld_gamma,
@@ -133,5 +145,5 @@ with open(out_opt, "w") as fd:
         fd=fd
     )
 
-out_mcmc = out_prefix = ".mcmc"
+out_mcmc = out_prefix + ".mcmc"
 np.savetxt(out_mcmc, theta_samples)
