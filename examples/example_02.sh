@@ -2,8 +2,7 @@ for n in 16
 do
   for s in 1e-2
   do
-    #for gamma in 0.0 0.2 0.4 0.6 0.8 1.0
-    for gamma in 1.0
+    for gamma in 0.0 0.2 0.4 0.6 0.8 1.0
     do
       python3 examples/example_02.py \
         --beta-start=1.0 \
