@@ -183,7 +183,7 @@ def newton_raphson(
     maxit: int = 1000,
     disp: bool = True,
     max_beta: float = 10000.0,
-    beta_index: int = -1,
+    #beta_index: int = -1,
     tol: float = 1e-2,
     fd: Any = sys.stdout
 ) -> NDArray:
@@ -193,12 +193,12 @@ def newton_raphson(
         i += 1
         g, H = func(theta)
         step = H @ g
-        next_beta = theta[beta_index] - alpha * step[beta_index]
-        if next_beta >= max_beta:
-            if disp:
-                s = "*** Stopping NR because beta became too big {theta[-1]:1.3e}"
-                print(s)
-                break
+        #next_beta = theta[beta_index] - alpha * step[beta_index]
+        # if next_beta >= max_beta:
+        #     if disp:
+        #         s = "*** Stopping NR because beta became too big {theta[-1]:1.3e}"
+        #         print(s)
+        #         break
         dtheta = alpha * step
         theta = theta - dtheta
         if np.linalg.norm(g) < tol:

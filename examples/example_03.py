@@ -58,19 +58,24 @@ example = Cubic1D(
 
 num_terms = args.num_terms
 
-V = FunctionParameterization.from_basis(
+V1 = FunctionParameterization.from_basis(
+    "phi",
+    Fourier1DBasis(example.b, args.num_terms)
+)
+
+V2 = FunctionParameterization.from_basis(
     "psi",
     Fourier1DBasis(example.b, args.num_terms)
 )
 
+
 result = example.generate_experimental_data()
 data = (result["x"], result["y"])
+x_obs, f_obs = (result["x_source"], result["y_source"])
 
 #func = lambda beta, gamma: log_like(jnp.array([beta, gamma]))[0]
 
-gamma = args.gamma
-
-problem = example.make_pift_problem(V)
+problem, mu, L = example.make_pift_problem(x_obs, f_obs, V1, V2, beta=1e4, v_precision=1.0)
 
 rng_key = PRNGKey(123456)
 
@@ -92,11 +97,11 @@ out_prefix = (
 out_opt = out_prefix + ".opt"
 
 with open(out_opt, "w") as fd:
-#    res = brentq(func, 1.0, 1e6, args=(fd,), xtol=1)
+    theta0 = jnp.hstack([jnp.array([1.0, 0.5]), mu])
 
     res = newton_raphson(
         log_like,
-        theta0=jnp.array([args.beta_start]),
+        theta0=theta0,
         alpha=args.nr_alpha,
         maxit=args.nr_maxit,
         tol=args.nr_tol,
