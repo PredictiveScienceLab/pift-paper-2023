@@ -99,7 +99,7 @@ class Cubic1D(NamedTuple):
         f_obs: NDArray,
         V1: FunctionParameterization,
         V2: FunctionParameterization,
-        beta: float = 10000.0,
+        beta: float = 100.0,
         v_precision: float = 1.0,
     ) -> PiftProblem:
         phi = enforce_1d_boundary_conditions(
@@ -135,24 +135,30 @@ class Cubic1D(NamedTuple):
         mu = scipy.linalg.cho_solve((L, True), (Psi.T @ f_obs) / self.sigma_source ** 2)
 
         # TODO: Alex, verify that the prior of the source term is correct.
+            # Alex says: the formula we wrote on the board for the new prior
+            # mean and covariance are correct and match Bishop
         # First, look at the formulas above.
         # Second, plot the mean of the prediction
         # along with samples from the prediction
         # and the true source term
         # To take samples from the prior of v, you do this:
-        # for s in range(10):
+        #xs = jnp.linspace(0., 1., 100)
+        #for s in range(10):
         #     v_s = mu + scipy.linalg.cho_solve((L, True), np.random.randn((K,)))
+        #import matplotlib.pyplot as plt
+        #plt.plot(xs, q(xs))
+        #plt.plot(xs, v_s)
 
         L = jnp.array(L)
         mu = jnp.array(mu)
 
         def log_theta_prior(theta):
-            D = theta[0]
-            kappa = theta[1]
+            D = theta[0] # picking exp(1.)
+            kappa = theta[1] # picking exp(1.)
             v = theta[2:]
             r = -0.5 * jnp.sum( (L @ (v - mu)) ** 2)
             # Alex add to r the log of the prior of the other stuff
-            return r
+            return r - D - kappa
 
         xs_all = np.linspace(self.a, self.b, 10000)
         problem = make_pyro_model(

@@ -22,14 +22,14 @@ parser.add_argument(
     dest="beta_fixed",
     help="fixed beta value",
     type=float,
-    default=10.0
+    default=100.0
 )
 parser.add_argument(
     "--num-observations",
     dest="num_observations",
     help="the number of observations to use in the example",
     type=int,
-    default=10
+    default=5
 )
 parser.add_argument(
     "--sigma",
@@ -75,7 +75,7 @@ x_obs, f_obs = (result["x_source"], result["y_source"])
 
 #func = lambda beta, gamma: log_like(jnp.array([beta, gamma]))[0]
 
-problem, mu, L = example.make_pift_problem(x_obs, f_obs, V1, V2, beta=1e4, v_precision=1.0)
+problem, mu, L = example.make_pift_problem(x_obs, f_obs, V1, V2, beta=1e3, v_precision=1.0)
 
 rng_key = PRNGKey(123456)
 
@@ -99,24 +99,24 @@ out_opt = out_prefix + ".opt"
 with open(out_opt, "w") as fd:
     theta0 = jnp.hstack([jnp.array([1.0, 0.5]), mu])
 
-    res = newton_raphson(
-        log_like,
-        theta0=theta0,
-        alpha=args.nr_alpha,
-        maxit=args.nr_maxit,
-        tol=args.nr_tol,
-        fd=fd
-    )
+    #res = newton_raphson(
+    #    log_like,
+    #    theta0=theta0,
+    #    alpha=args.nr_alpha,
+    #    maxit=args.nr_maxit,
+    #    tol=args.nr_tol,
+    #    fd=fd
+    #)
+    #print(res[1])
+    #print("nr results:")
+    #print(res)
 
-    print("nr results:")
-    print(res)
-
-    beta_star = res[0]
+    #beta_star = res[0]
 
     theta_samples = stochastic_gradient_langevin_dynamics(
         log_like,
-        theta0=res[0],
-        M=res[1],
+        theta0=theta0,
+        M=jnp.eye(9),
         alpha=args.sgld_alpha,
         beta=args.sgld_beta,
         gamma=args.sgld_gamma,
