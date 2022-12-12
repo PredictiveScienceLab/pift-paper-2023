@@ -97,7 +97,7 @@ out_prefix = (
 out_opt = out_prefix + ".opt"
 
 with open(out_opt, "w") as fd:
-    theta0 = jnp.hstack([jnp.array([1.0, 0.5]), mu])
+    theta0 = jnp.hstack([jnp.array([0.1, 1.]), mu])
 
     #res = newton_raphson(
     #    log_like,
@@ -116,7 +116,7 @@ with open(out_opt, "w") as fd:
     theta_samples = stochastic_gradient_langevin_dynamics(
         log_like,
         theta0=theta0,
-        M=jnp.eye(9),
+        #M=None,
         alpha=args.sgld_alpha,
         beta=args.sgld_beta,
         gamma=args.sgld_gamma,

@@ -153,12 +153,12 @@ class Cubic1D(NamedTuple):
         mu = jnp.array(mu)
 
         def log_theta_prior(theta):
-            D = theta[0] # picking exp(1.)
-            kappa = theta[1] # picking exp(1.)
+            D = jnp.log(jnp.exp(-theta[0])*jnp.heaviside(theta[0],1.)+1e-8) # picking exp(1.)
+            kappa = jnp.log(jnp.exp(-theta[1])*jnp.heaviside(theta[1],1.)+1e-8) # picking exp(1.)
             v = theta[2:]
             r = -0.5 * jnp.sum( (L @ (v - mu)) ** 2)
             # Alex add to r the log of the prior of the other stuff
-            return r - D - kappa
+            return r - D* - kappa
 
         xs_all = np.linspace(self.a, self.b, 10000)
         problem = make_pyro_model(
