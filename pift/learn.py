@@ -13,6 +13,7 @@ import sys
 from typing import Callable, Any
 from numpy.typing import NDArray
 import numpy as np
+import jax.numpy as jnp
 from jax import random, grad, vmap, hessian, jacobian, jit
 from functools import partial
 
@@ -56,9 +57,6 @@ class GradMinusLogMarginalLikelihood:
         self.grad_hamiltonian = grad(self.hamiltonian, argnums=1)
         # Vectorize these with respect to w
         self.vgrad_hamiltonian = vmap(self.grad_hamiltonian, (0, None))
-        self.expect_grad_H = lambda ws, theta: (
-            np.mean(self.vgrad_hamiltonian(ws, theta), axis=0)
-        )
         self.log_prior = log_prior
         self.grad_log_prior = grad(log_prior)
 
@@ -76,7 +74,6 @@ class GradMinusLogMarginalLikelihood:
             grad_U_prior = np.mean(grad_H_prior, axis=0)
             grad_U = grad_U_post - grad_U_prior
             grad_minus_log_p = grad_U - self.grad_log_prior(theta)
-
             if disp:
                 sys.stdout.write(f"-> {grad_minus_log_p}\n")
                 sys.stdout.flush()
@@ -107,13 +104,22 @@ class GradMinusLogMarginalLikelihood:
                 grad2_H_post = self.vgrad2_hamiltonian(post_ws, theta)
                 grad2_U = (
                     np.cov(grad_H_prior, rowvar=False)
+                    #-
+                    #np.mean(grad2_H_prior, axis=0)
                     -
                     np.cov(grad_H_post, rowvar=False)
-                    +
-                    np.mean(grad2_H_post, axis=0)
-                    +
-                    np.mean(grad2_H_prior, axis=0)
+                    #+
+                    #np.mean(grad2_H_post, axis=0)
                 )
+                # grad2_U = (
+                #     np.cov(grad_H_prior, rowvar=False)
+                #     -
+                #     np.cov(grad_H_post, rowvar=False)
+                #     + # POTENTIAL TYPO????
+                #     np.mean(grad2_H_post, axis=0)
+                #     + # POTENTIAL TYPO????
+                #     np.mean(grad2_H_prior, axis=0)
+                # )
                 grad2_minus_log_p = grad2_U - self.grad2_log_prior(theta)
                 grad2_minus_log_p_inv = np.linalg.inv(grad2_U)
                 return grad_minus_log_p, grad2_minus_log_p_inv
@@ -193,6 +199,8 @@ def newton_raphson(
         i += 1
         g, H = func(theta)
         step = H @ g
+        print(H)
+        print(step)
         #next_beta = theta[beta_index] - alpha * step[beta_index]
         # if next_beta >= max_beta:
         #     if disp:

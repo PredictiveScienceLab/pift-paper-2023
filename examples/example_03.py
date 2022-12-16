@@ -2,6 +2,7 @@
 Example 3 of the paper
 """
 
+from jax import vmap
 import jax.numpy as jnp
 from jax.random import PRNGKey
 import numpy as np
@@ -12,6 +13,15 @@ from scipy.optimize import brentq
 from pift import *
 from problems import Cubic1D
 from options import *
+
+import matplotlib.pyplot as plt
+
+def visualize_field(vwphi, ws, xs=np.linspace(0.0, 1.0, 100), data=None):
+    ys = vwphi(xs, ws)
+    fig, ax = plt.subplots()
+    ax.plot(xs, ys.T, 'r', lw=0.1)
+    if data is not None:
+        ax.plot(data[0], data[1], 'kx')
 
 parser = make_standard_option_parser()
 add_nr_options(parser)
@@ -29,7 +39,7 @@ parser.add_argument(
     dest="num_observations",
     help="the number of observations to use in the example",
     type=int,
-    default=5
+    default=20
 )
 parser.add_argument(
     "--sigma",
@@ -68,14 +78,14 @@ V2 = FunctionParameterization.from_basis(
     Fourier1DBasis(example.b, args.num_terms)
 )
 
-
+np.random.seed(123456)
 result = example.generate_experimental_data()
 data = (result["x"], result["y"])
 x_obs, f_obs = (result["x_source"], result["y_source"])
 
 #func = lambda beta, gamma: log_like(jnp.array([beta, gamma]))[0]
 
-problem, mu, L = example.make_pift_problem(x_obs, f_obs, V1, V2, beta=1e3, v_precision=1.0)
+problem, mu, L = example.make_pift_problem(x_obs, f_obs, V1, V2, beta=1.0, v_precision=1.0)
 
 rng_key = PRNGKey(123456)
 
@@ -96,17 +106,32 @@ out_prefix = (
 
 out_opt = out_prefix + ".opt"
 
-with open(out_opt, "w") as fd:
-    theta0 = jnp.hstack([jnp.array([0.1, 1.]), mu])
 
-    #res = newton_raphson(
-    #    log_like,
-    #    theta0=theta0,
-    #    alpha=args.nr_alpha,
-    #    maxit=args.nr_maxit,
-    #    tol=args.nr_tol,
-    #    fd=fd
-    #)
+with open(out_opt, "w") as fd:
+    #theta0 = jnp.hstack([jnp.array([1.0, 1.0]), mu])
+    #theta0 = jnp.log(jnp.array([1.0, 1.0]))
+    theta0 = jnp.array([1.0, 1.0])
+    # g, Hi = log_like(theta0)
+    # print(g)
+
+    #
+    # # quit()
+    res = newton_raphson(
+       log_like,
+       theta0=theta0,
+       alpha=args.nr_alpha,
+       maxit=args.nr_maxit,
+       tol=args.nr_tol,
+       fd=fd
+    )
+
+    prior_w = log_like.prior_mcmc.mcmc.get_samples()["w"]
+    visualize_field(problem.vwphi, prior_w)
+    post_w = log_like.post_mcmc.mcmc.get_samples()["w"]
+    visualize_field(problem.vwphi, post_w, data=data)
+    plt.show()
+    quit()
+
     #print(res[1])
     #print("nr results:")
     #print(res)
@@ -116,7 +141,7 @@ with open(out_opt, "w") as fd:
     theta_samples = stochastic_gradient_langevin_dynamics(
         log_like,
         theta0=theta0,
-        #M=None,
+        #M=res[1],
         alpha=args.sgld_alpha,
         beta=args.sgld_beta,
         gamma=args.sgld_gamma,

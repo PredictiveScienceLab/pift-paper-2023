@@ -29,11 +29,11 @@ class Cubic1D(NamedTuple):
     # The number of discretization points
     n: int      = 1000
     # The ground truth source term
-    q: Callable = lambda x: jnp.cos(4*x)
+    q: Callable = lambda x: jnp.cos(4.0*x)
     # Parameter
     kappa: float = 1.0
     # Parameter
-    D: float = 0.1
+    D: float = .1
     # Left boundary
     a: float    = 0.0
     # Right boundary
@@ -43,7 +43,7 @@ class Cubic1D(NamedTuple):
     # The measurement noise
     sigma: float = 0.01
     # The mumber of observations
-    num_samples: int = 5
+    num_samples: int = 20
     # The measurement noise for the source term
     sigma_source: float = 0.01
     num_samples_source: int = 5
@@ -100,7 +100,7 @@ class Cubic1D(NamedTuple):
         V1: FunctionParameterization,
         V2: FunctionParameterization,
         beta: float = 100.0,
-        v_precision: float = 1.0,
+        v_precision: float = 0.1,
     ) -> PiftProblem:
         phi = enforce_1d_boundary_conditions(
             V1.eval,
@@ -111,20 +111,32 @@ class Cubic1D(NamedTuple):
         )
 
         gphi = grad(phi, argnums=0)
+        g2phi = grad(gphi, argnums=0)
 
         # def forcing_basis(x):
         #     tmp = jnp.pi*jnp.arange(1,4) * x
         #     return jnp.hstack([jnp.ones(()), jnp.cos(tmp), jnp.sin(tmp)])
 
-        f = V2.eval
-
+        #f = V2.eval
+        f = lambda x: jnp.cos(4 * x)
         # Theta is as follows:
         # theta = [D, kappa, v]
+        # hamiltonian_density = lambda x, w, theta: theta[0] * (
+        #     # 0.5 * theta[0] * gphi(x, w) ** 2
+        #     # + 0.25 * theta[1] * phi(x, w) ** 4
+        #     0.5 * theta[1] * gphi(x, w) ** 2
+        #     + 0.25 * theta[2] * phi(x, w) ** 4
+        #     # + phi(x, w) * f(x, theta[2:])
+        #     + phi(x, w) * f(x)
+        # )
         hamiltonian_density = lambda x, w, theta: beta * (
             0.5 * theta[0] * gphi(x, w) ** 2
-            - 0.25 * theta[1] * phi(x, w) ** 4
-            - phi(x, w) * f(x, theta[2:])
+            + 0.25 * theta[1] * phi(x, w) ** 4
+            + phi(x, w) * f(x)
         )
+        # hamiltonian_density = lambda x, w, theta: jnp.exp(theta[0]) * (
+        #     jnp.exp(theta[1]) * g2phi(x, w) - jnp.exp(theta[2]) * phi(x, w) ** 3 - f(x)
+        # ) ** 2
 
         # Calculate prior for f (after seeing the data x_obs, f_obs)
         # Design matrix
@@ -134,31 +146,38 @@ class Cubic1D(NamedTuple):
         L = scipy.linalg.cholesky(Cinv, lower=True)
         mu = scipy.linalg.cho_solve((L, True), (Psi.T @ f_obs) / self.sigma_source ** 2)
 
-        # TODO: Alex, verify that the prior of the source term is correct.
-            # Alex says: the formula we wrote on the board for the new prior
-            # mean and covariance are correct and match Bishop
-        # First, look at the formulas above.
-        # Second, plot the mean of the prediction
-        # along with samples from the prediction
-        # and the true source term
-        # To take samples from the prior of v, you do this:
-        #xs = jnp.linspace(0., 1., 100)
-        #for s in range(10):
-        #     v_s = mu + scipy.linalg.cho_solve((L, True), np.random.randn((K,)))
-        #import matplotlib.pyplot as plt
-        #plt.plot(xs, q(xs))
-        #plt.plot(xs, v_s)
+        # # Verify that the predictions for the source term look okay
+        # import matplotlib.pyplot as plt
+        # xs = np.linspace(self.a, self.b, 100)
+        # fig, ax = plt.subplots()
+        # ax.plot(xs, self.q(xs))
+        # pq = V2.veval(xs, mu)
+        # ax.plot(xs, pq, 'r--')
+        # ax.plot(x_obs, f_obs, 'kx')
+        # S = 10
+        # for _ in range(S):
+        #     w = mu + scipy.linalg.cho_solve((L, True), np.random.randn(K))
+        #     qS = V2.veval(xs, w)
+        #     ax.plot(xs, qS, 'r', lw=0.1)
+        # plt.show()
+        # quit()
 
         L = jnp.array(L)
         mu = jnp.array(mu)
 
+
         def log_theta_prior(theta):
-            D = jnp.log(jnp.exp(-theta[0])*jnp.heaviside(theta[0],1.)+1e-8) # picking exp(1.)
-            kappa = jnp.log(jnp.exp(-theta[1])*jnp.heaviside(theta[1],1.)+1e-8) # picking exp(1.)
+            return 0.0
+            #return -jnp.sum(jnp.log(theta))
+            #D = jnp.log(jnp.exp(-theta[0])*jnp.heaviside(theta[0],1.)+1e-8) # picking exp(1.)
+            #kappa = jnp.log(jnp.exp(-theta[1])*jnp.heaviside(theta[1],1.)+1e-8) # picking exp(1.)
+            #return 0.0
             v = theta[2:]
-            r = -0.5 * jnp.sum( (L @ (v - mu)) ** 2)
+            r = -0.5 * jnp.sum( (L.T @ (mu - v)) ** 2)
+            return r
+            #return r - jnp.log(theta[0]) - jnp.log(theta[1])
             # Alex add to r the log of the prior of the other stuff
-            return r - D* - kappa
+            #return r - D - kappa
 
         xs_all = np.linspace(self.a, self.b, 10000)
         problem = make_pyro_model(
@@ -167,6 +186,6 @@ class Cubic1D(NamedTuple):
             xs_all,
             log_theta_prior,
             weight_mean=jnp.zeros((V1.num_params,)),
-            weight_scale=1.0 * jnp.ones((V1.num_params,))
+            weight_scale=100.0 * jnp.ones((V1.num_params,))
         )
         return problem, mu, L

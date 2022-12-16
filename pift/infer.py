@@ -57,7 +57,7 @@ def make_pyro_model(
     )
 
     hamiltonian = lambda xs, w, theta: (
-        jnp.mean(v_hamiltonian_density(xs, w, theta))
+        jnp.mean(v_hamiltonian_density(xs, w, theta)) / 1.0
     )
 
     unormalized_log_field_prior = lambda xs, w, theta: -hamiltonian(xs, w, theta)
@@ -79,7 +79,7 @@ def make_pyro_model(
 
             # Subsample
             with numpyro.plate("batched_space", len(xs_all), mini_batch):
-                xs = numpyro.subsample(xs_all, event_dim=0)
+               xs = numpyro.subsample(xs_all, event_dim=0)
 
             w = numpyro.sample(
                 "w",
@@ -144,6 +144,7 @@ class MCMCSampler:
     def sample(self, **kwargs) -> None:
         rng_key, self.rng_key = random.split(self.rng_key)
         self.mcmc = MCMC(HMCECS(NUTS(self.pyro_model)), **self.mcmc_kwargs)
+        #self.mcmc = MCMC(NUTS(self.pyro_model), **self.mcmc_kwargs)
         self.mcmc.run(
             rng_key=rng_key,
             **kwargs

@@ -101,7 +101,6 @@ class FunctionParameterization:
         obj.basis = basis
         return obj
 
-
 def enforce_1d_boundary_conditions(
     psi: Callable,
     a: float,
