@@ -92,10 +92,10 @@ public:
 
 /* This is a function that is constrained on the boundary.
  */
-template <typename T>
+template <typename T, typename FA>
 class ConstrainedFunctionApproximation {
 public:
-  const FunctionApproximation<T>& phi;
+  const FA& phi;
   const int dim;
   const T a;
   const T b;
@@ -103,7 +103,7 @@ public:
   const T yb;
 
   ConstrainedFunctionApproximation(
-    const FunctionApproximation<T>& phi,
+    const FA& phi,
     const T& a,
     const T& ya,
     const T& b,
@@ -159,4 +159,14 @@ public:
               [&xmabmx](T v) {return xmabmx * v;});
   }
 };
+
+template <typename T, typename FA>
+inline ConstrainedFunctionApproximation<T, FA>
+make_constrained_function_approximation(
+    const FA& phi,
+    const T& a, const T& ya,
+    const T& b, const T& yb
+) {
+  return ConstrainedFunctionApproximation<T, FA>(phi, a, ya, b, yb);
+}
 #endif // PIFT_FUNCTIONS_HPP

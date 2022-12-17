@@ -17,16 +17,16 @@
 #include "io.hpp"
 #include "utils.hpp"
 #include "functions.hpp"
-#include "opt.hpp"
+#include "sgld.hpp"
 
 using namespace std;
 
 
-template <typename T>
+template <typename T, typename FA>
 class Hamiltonian {
 public:
   // A function approximation
-  const ConstrainedFunctionApproximation<T>& phi;
+  const FA& phi;
   // The number of physical parameters
   const int num_params;
   // The number of dimensions of the function approximator
@@ -51,7 +51,7 @@ public:
   // A function that samples numbers uniformly between a and b.
   uniform_real_distribution<T>* unif;
 
-  Hamiltonian(const ConstrainedFunctionApproximation<T>& phi, const int& N) :
+  Hamiltonian(const FA& phi, const int& N) :
   phi(phi),
   dim(phi.dim),
   num_params(3),
@@ -134,6 +134,8 @@ public:
     return h;
   }
 
+  // Unbiased estimator of grad_w(H) at fixed w and theta.
+  // Expectation is over spatial points.
   template <typename R>
   T unbiased_estimator_grad_w(
       const T* w,
@@ -152,27 +154,31 @@ public:
     return h;
   }
 
-//  template <typename R>
-//  T unbiased_estimator_grad_theta(
-//      const T* w,
-//      const T* theta,
-//      R& rng,
-//      const int N,
-//      T* grad_theta
-//  ) {
-//    fill(grad_theta, grad_theta + num_params, 0.0);
-//    T h = 0.0;
-//    for(int n=0; n<N_x_theta; n++) {
-//      const T x = (*unif)(rng);
-//      h += add_grad_theta(x, w, theta, grad_theta);
-//    }
-//  }
+  // Unbiased estimator of grad_theta(H) at fixed w and theta.
+  // Expectation is over spatial points.
+  // TODO: Allow the user to select different number of spatial
+  // points N for estimating the expectation.
+  template <typename R>
+  T unbiased_estimator_grad_theta(
+      const T* w,
+      const T* theta,
+      R& rng,
+      T* grad_theta
+  ) {
+    fill(grad_theta, grad_theta + num_params, 0.0);
+    T h = 0.0;
+    for(int n=0; n<N; n++) {
+      const T x = (*unif)(rng);
+      h += add_grad_theta(x, w, theta, grad_theta);
+    }
+    return h;
+  }
 };
 
-template <typename T>
+template <typename T, typename FA>
 class GaussianLikelihood {
 public:
-  const ConstrainedFunctionApproximation<T>& phi;
+  const FA& phi;
   const int dim;
   const T sigma;
   const T sigma2;
@@ -184,7 +190,7 @@ public:
   uniform_int_distribution<int>* unif_int;
 
   GaussianLikelihood(
-    const ConstrainedFunctionApproximation<T>& phi,
+    const FA& phi,
     const T* x_obs,
     const T* y_obs,
     const int& num_obs,
@@ -250,15 +256,15 @@ public:
   }
 };
 
-template <typename T>
+template <typename T, typename H, typename L>
 class FullHamiltonian {
 public:
   const int dim;
-  Hamiltonian<T>* h;
-  GaussianLikelihood<T>* l;
+  H* h;
+  L* l;
   T* grad_phi;
 
-  FullHamiltonian(Hamiltonian<T>& h, GaussianLikelihood<T>& l) :
+  FullHamiltonian(H& h, L& l) :
   dim(h.dim)
   {
     this->h = &h;
@@ -285,16 +291,22 @@ public:
   }
 };
 
+// A class representing an unbiased estimator of the gradient of
+// Hamiltonian with resepect to w at a fixed theta.
 template <typename T, typename H, typename R>
 class UnbiasedEstimatorOfGradWAtFixedTheta {
   public:
+    // The Hamiltonian
     H& h;
-    const T* theta;
+    // The fixed theta
+    T* theta;
+    // A random number generator
     R& rng;
+    // The dimension of w
     const int dim;
 
     UnbiasedEstimatorOfGradWAtFixedTheta(
-        H& h, const T* theta, R& rng
+        H& h, T* theta, R& rng
     ) :
       h(h), theta(theta), rng(rng), dim(h.dim)
     {}
@@ -313,48 +325,119 @@ UnbiasedEstimatorOfGradWAtFixedTheta<T, H, R> make_unbiased_estimator_w(
   return UnbiasedEstimatorOfGradWAtFixedTheta<T, H, R>(h, theta, rng);
 }
 
-template <typename T, typename PRH, typename PSH, typename R>
+
+// A class representing an unbiased estimato of the gradient of the
+// expectation of the Hamiltonian with respect to theta.
+// The expectation is over w and it is estimated using samples from SGLD
+template <typename T, typename H, typename HA, typename R>
 class UnbiasedEstimatorOfGradTheta {
-  public:
-    // A prior Hamiltonian
-    PRH& prior_h;
-    // A posterior Hamiltonian
-    PSH& post_h;
-    // A random number generator
-    R& rng;
-    // Set to the prior_h.num_param
-    // Assumed the same as post_h.num_param
-    const int num_param;
-    // SGLD parameters for prior
-    SGLDParams sgld_params_prior&;
-    // For posterior
-    SGLDParams sgld_params_post&;
-    // Unbiased estimator of grad_w for prior
+public:
+  // The Hamiltonian to sample from
+  H& h;
+  // The Hamiltonian the gradient of which we need to take
+  HA& ha;
+  // The random number generator
+  R& rng;
+  // The dimension of w
+  const int dim;
+  // The number of parameters
+  const int num_params;
+  // The number of different chains
+  const int num_chains;
+  // Number of warmup steps
+  const int num_warmup;
+  // Number of total steps
+  const int num_samples;
+  // Number of thinning steps
+  const int num_thinning;
+  // Number of sampling bursts = num_samples / num_thinning
+  const int num_bursts;
+  // The parameters of SGLD
+  const SGLDParams<T>& sgld_params;
+  // Unbiased estimator of grad_w (H) so that we can sample
+  UnbiasedEstimatorOfGradWAtFixedTheta<T, H, R>& ue_grad_w;
+  // Standard deviation used to initialize the ws
+  const T init_w_sigma;
+  // Whether or not to reinitialize the samples of w
+  const bool reinitialize_ws;
+  // Space we need for storing grad_w_H
+  T* grad_w_H;
+  T* ws;
+  T* tmp_grad_theta;
 
+  UnbiasedEstimatorOfGradTheta(
+      H& h, HA& ha, R& rng,
+      SGLDParams<T>& sgld_params,
+      const int& num_chains,
+      const int& num_warmup, const int& num_samples, const int& num_thinning,
+      const T& init_w_sigma=1.0,
+      const bool& reinitialize_ws=false
+  ) :
+    h(h), ha(ha), rng(rng), dim(h.dim), num_params(h.num_params),
+    num_chains(num_chains),
+    num_warmup(num_warmup), num_samples(num_samples), num_thinning(num_thinning),
+    init_w_sigma(init_w_sigma),
+    reinitialize_ws(reinitialize_ws),
+    sgld_params(sgld_params),
+    ue_grad_w(h, NULL, rng),
+    num_bursts(num_samples / num_thinning)
+  {
+    grad_w_H = new T[dim];
+    ws = new T[num_chains * dim];
+    tmp_grad_theta = new T[num_params];
+  }
 
-    UnbiasedEstimatorOfGradTheta(
-        PRH& prior_h, PSH& post_h, R& rng,
-        SGLDParams& sgld_params_prior,
-        SGLDParams& sgld_params_post
-    ) :
-      prior_h(prior_h), post_h(post_h), rng(rng),
-      num_param(prior_h.num_param),
-      sgld_params_prior(sgld_params_prior),
-      sgld_params_post(sgld_params_post)
-    {}
+  ~UnbiasedEstimatorOfGradTheta() {
+    delete grad_w_H;
+    delete ws;
+    delete tmp_grad_theta;
+  }
 
+  inline void initialize_chains() {
+    normal_distribution<T> norm(0, init_w_sigma);
+    R rng = this->rng;
+    generate(ws, ws + num_chains * dim, [&norm, &rng]() {return norm(rng);});
+  }
+
+  T operator()(const T* theta, T* grad_theta) {
+    if (reinitialize_ws)
+      initialize_chains();
+    T h = 0.0;
+    fill(grad_theta, grad_theta + num_params, 0.0);
+    // Make sure the unbiased estimator sees the right theta
+    ue_grad_w.theta = theta;
+    // TODO: Exploit parallelization opportunities
+    // Loop over chains
+    for(int c=0; c<num_chains; c++) {
+      const T* w = ws + c * dim;
+      // Loop over bursts
+      for(int b=0; b<num_bursts; b++) {
+        // Sample w num_thinning times
+        sgld(ue_grad_w, w, rng, num_thinning, grad_w_H, sgld_params);
+        // Now w contains the sample
+        // Get the gradient with respect to theta
+        h += ha.unbiased_estimator_grad_theta(w, theta, rng, tmp_grad_theta);
+        for(int i=0; i<num_params; i++)
+          grad_theta[i] += tmp_grad_theta[i];
+      }
+    }
+    // Divide with the total number of samples
+    scale(grad_theta, 1.0 / (num_chains * num_bursts));
+    return h;
+  }
 };
 
-template <typename T, typename R>
-void unit_test(Hamiltonian<T>& H, R& rng) {
+
+template <typename T, typename H, typename R>
+void unit_test(H& h, R& rng) {
   const int N = 100;
-  const int dim = H.phi.dim;
+  const int dim = h.dim;
   T x[N];
   T w[dim];
   normal_distribution<T> norm(0, 1);
 
   // Some points to evaluate things on
-  linspace(H.a, H.b, N, x);
+  linspace(h.a, h.b, N, x);
   savetxt(x, N, "src/unit_test_x.csv");
 
   // Some random weights
@@ -371,7 +454,7 @@ void unit_test(Hamiltonian<T>& H, R& rng) {
   T f_prime[N];
   T grad_f_prime[N * dim];
   for(int n=0; n<N; n++)
-    H.phi.phi.eval_grads(
+    h.phi.phi.eval_grads(
       x[n], w,
       f[n], grad_f + n * dim,
       f_prime[n], grad_f_prime + n * dim
@@ -383,7 +466,7 @@ void unit_test(Hamiltonian<T>& H, R& rng) {
 
   // Evaluate the constrained parameterization and its gradients
   for(int n=0; n<N; n++)
-    H.phi.eval_grads(
+    h.phi.eval_grads(
       x[n], w,
       f[n], grad_f + n * dim,
       f_prime[n], grad_f_prime + n * dim
@@ -397,7 +480,7 @@ void unit_test(Hamiltonian<T>& H, R& rng) {
   T grad_w_H[N * dim];
   fill(grad_w_H, grad_w_H + N * dim, 0.0);
   for(int n=0; n<N; n++)
-    f[n] = H.add_grad_w(
+    f[n] = h.add_grad_w(
       x[n], w,
       theta,
       grad_f + n * dim
@@ -409,7 +492,7 @@ void unit_test(Hamiltonian<T>& H, R& rng) {
 
 template <typename T, typename H, typename R>
 void unit_test_sample_w(
-    H& h, R& rng,
+    H& h, R& rng, const int num_samples,
     const SGLDParams<T>& sgld_params
 ) {
   F theta[] = {10000.0, 0.1, 1.0};
@@ -419,7 +502,7 @@ void unit_test_sample_w(
 
   auto ue_grad_w = make_unbiased_estimator_w(h, theta, rng);
 
-  sgld(ue_grad_w, w, rng, sgld_params);
+  sgld(ue_grad_w, w, rng, num_samples, sgld_params);
 }
 
 
@@ -429,11 +512,17 @@ int main(int argc, char* argv[]) {
     exit(1);
   }
 
+  using FA = FunctionApproximation<F>;
+  using CFA = ConstrainedFunctionApproximation<F, FA>;
+  using H = Hamiltonian<F, CFA>;
+  using G = GaussianLikelihood<F, CFA>;
+  using FH = FullHamiltonian<F, H, G>;
+
   const int N = stoi(argv[1]);
   const F alpha = STOF(argv[2]);
   const F beta = STOF(argv[3]);
   const F gamma = STOF(argv[4]);
-  const int maxit = stoi(argv[5]);
+  const int num_samples = stoi(argv[5]);
   const string out_file = argv[6];
   const F sigma = 0.01;
   const int M = 1;
@@ -441,21 +530,20 @@ int main(int argc, char* argv[]) {
   //random_device rand_dev;
   mt19937 rng;
 
-  FunctionApproximation<F> psi(4, 1.0);
-  ConstrainedFunctionApproximation<F> phi(psi, 0.0, 0.0, 1.0, 0.0);
-  Hamiltonian<F> h(phi, N);
+  FA psi(4, 1.0);
+  CFA phi(psi, 0.0, 0.0, 1.0, 0.0);
+  
+  H h(phi, N);
 
-  unit_test(h, rng);
+  // unit_test(h, rng);
 
   SGLDParams<F> sgld_params;
   sgld_params.alpha = alpha;
   sgld_params.beta = beta;
   sgld_params.gamma = gamma;
-  sgld_params.maxit = maxit;
   sgld_params.save_to_file = true;
   sgld_params.out_file = out_file + "_prior.csv";
-
-  unit_test_sample_w(h, rng, sgld_params);
+  unit_test_sample_w(h, rng, num_samples, sgld_params);
 
   // Read observations
   string x_file("src/x_obs.csv");
@@ -464,16 +552,16 @@ int main(int argc, char* argv[]) {
   auto y_obs = loadtxtvec<F>(y_file);
 
   // Make the likelihood
-  GaussianLikelihood<F> l(
+  G l(
     phi,
     x_obs.data(), y_obs.data(), x_obs.size(),
     sigma,
     M
   );
 
-  // Make the full Hamiltonian
-  FullHamiltonian<F> fh(h, l);
+  //// Make the full Hamiltonian
+  FH fh(h, l);
 
   sgld_params.out_file = out_file + "_post.csv";
-  unit_test_sample_w(fh, rng, sgld_params);
+  unit_test_sample_w(fh, rng, num_samples, sgld_params);
 }

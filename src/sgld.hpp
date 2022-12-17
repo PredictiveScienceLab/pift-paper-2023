@@ -1,4 +1,4 @@
-/* Some functions related to optimization.
+/* Implementation of Stochastic Gradient Langevin Dynamics.
  *
  * Author:
  *  Ilias Bilionis
@@ -25,7 +25,6 @@ struct SGLDParams {
     alpha(1e-3),
     beta(0.0),
     gamma(0.6),
-    maxit(1000),
     save_to_file(false),
     out_file("sgld_deafult_out.csv"),
     save_freq(10),
@@ -36,7 +35,6 @@ struct SGLDParams {
   T alpha;
   T beta;
   T gamma;
-  int maxit;
   bool save_to_file;
   string out_file;
   int save_freq;
@@ -44,23 +42,37 @@ struct SGLDParams {
   int disp_freq;
 };
 
+// SGLD implementation.
+// It allocates its own memory.
+template <typename T, typename UE, typename R>
+inline void sgld(UE& ue_func,
+          T* w,
+          R& rng,
+          const int num_samples,
+          const SGLDParams<T>& params = SGLDParams<T>()
+) {
+  T grad_w_H[ue_func.dim];
+  sgld(ue_func, w, rng, num_samples, grad_w_H, params);
+}
 
-// Implementation of Stochastic Gradient Lagevin Dynamics
+// SGLD implementation that requires providing 
+// memory space grad_w.
 template <typename T, typename UE, typename R>
 void sgld(UE& ue_func,
           T* w,
           R& rng,
+          const int num_samples,
+          T* grad_w_H,
           const SGLDParams<T>& params = SGLDParams<T>()
 ) {
   const int& dim = ue_func.dim;
-  T grad_w_H[dim];
   normal_distribution<T> norm(0, 1);
   ofstream of;
 #ifndef DISABLE_SGLD_SAVE
   if (params.save_to_file)
     of.open(params.out_file);
 #endif
-  for(int it=0; it<params.maxit; it++) {
+  for(int it=0; it<num_samples; it++) {
     const T epsilon = params.alpha / pow((params.beta + it + 1), params.gamma);
     const T sqrt_2_epsilon = sqrt(2.0 * epsilon);
     const T h_val = ue_func(w, grad_w_H);
