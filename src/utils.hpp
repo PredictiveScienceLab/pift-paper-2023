@@ -27,4 +27,3 @@ inline void scale(T* x, const int& N, const T& a) {
   scale<T>(x, N, a, x);
 }
 
-

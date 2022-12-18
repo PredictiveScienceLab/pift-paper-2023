@@ -41,6 +41,21 @@ public:
     return s;
   }
 
+  void eval_and_prime(const T& x, const T* w, T& f, T& f_prime) const {
+    f = w[0];
+    f_prime = 0.0;
+    for(int i=1; i<num_terms; i++) {
+      const T omega = M_PI / L * i;
+      const T omega_x = omega * x;
+      const T cos_omega_x = cos(omega_x);
+      const T sin_omega_x = sin(omega_x);
+      const T omega_cos_omega_x = omega * cos_omega_x;
+      const T omega_sin_omega_x = omega * sin_omega_x;
+      f += w[i] * cos_omega_x + w[num_terms + i -1] * sin_omega_x;
+      f_prime += (-w[i] * omega_sin_omega_x + w[num_terms + i - 1] * omega_cos_omega_x);
+    }
+  }
+
   // Evaluate the gradient of f with respect to w
   T eval_grad(
     const T& x, const T* w,
@@ -122,6 +137,16 @@ public:
     const T bmx = b - x;
     return bmx * ya + xma * yb + xma * bmx * phi.f(x, w);
   }
+
+  void eval_and_prime(const T& x, const T* w, T& f, T& f_prime) const {
+    const T xma = x - a;
+    const T bmx = b - x;
+    const T xmabmx = xma * bmx;
+    const T bmxmxma = bmx - xma;
+    phi.eval_and_prime(x, w, f, f_prime);
+    f_prime = yb - ya + bmxmxma * f + xmabmx * f_prime;
+    f = bmx * ya + xma * yb + xmabmx * f;
+  }  
 
   T eval_grad(
     const T& x, const T* w,
