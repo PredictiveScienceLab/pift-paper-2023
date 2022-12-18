@@ -48,18 +48,20 @@ public:
   // Temporary space for dim variables
   T* grad_phi;
   T* grad_phi_prime;
+  T beta;
   // A function that samples numbers uniformly between a and b.
   uniform_real_distribution<T>* unif;
 
   Hamiltonian(const FA& phi, const int& N) :
   phi(phi),
   dim(phi.dim),
-  num_params(3),
+  num_params(2),
   a(phi.a),
   b(phi.b),
   volume(phi.b - phi.a),
   N(N)
   {
+    beta = 1000.0;
     grad_phi = new T[phi.dim];
     grad_phi_prime = new T[phi.dim];
     unif = new uniform_real_distribution<T>(a, b);
@@ -79,9 +81,10 @@ public:
     const T& x, const T& phi,
     const T& phi_prime, const T* theta
   ) const {
-      return theta[0] * (
-        0.5 * theta[1] * pow(phi_prime, 2)
-        + 0.25 * theta[2] * pow(phi, 4)
+      // return theta[0] * (
+      return beta * (
+        0.5 * theta[0] * pow(phi_prime, 2)
+        + 0.25 * theta[1] * pow(phi, 4)
         + phi * source_term(x, theta)
       );
   }
@@ -99,26 +102,31 @@ public:
     const T tmp1 = 0.5 * phi_prime_2;
     const T tmp2 = 0.25 * phi_4;
     const T tmp3 = theta[1] * tmp1 + theta[2] * tmp2;
-    grad_theta[0] += tmp3;
-    grad_theta[1] += theta[0] * tmp1; 
-    grad_theta[2] += theta[0] * tmp2;
+    //grad_theta[0] += tmp3;
+    //grad_theta[1] += theta[0] * tmp1; 
+    //grad_theta[2] += theta[0] * tmp2;
+    grad_theta[0] += beta * tmp1; 
+    grad_theta[1] += beta * tmp2;
     // TODO: This needs to be modified if the source term has
     // parameters
-    return theta[0] * tmp3;
+    //return theta[0] * tmp3;
+    return beta * tmp3;
   }
 
   inline T dphi(
     const T& x, const T& phi,
     const T& phi_prime, const T* theta
   ) const {
-    return theta[0] * (theta[2] * pow(phi, 3) + source_term(x, theta));
+    //return theta[0] * (theta[2] * pow(phi, 3) + source_term(x, theta));
+    return beta * (theta[1] * pow(phi, 3) + source_term(x, theta));
   }
 
   inline T dphi_prime(
     const T&x, const T& phi,
     const T& phi_prime, const T* theta
   ) const {
-    return theta[0] * theta[1] * phi_prime;
+    //return theta[0] * theta[1] * phi_prime;
+    return beta * theta[0] * phi_prime;
   }
 
   T add_grad_w(
@@ -173,6 +181,13 @@ public:
       const T x = (*unif)(rng);
       h += add_grad_theta(x, w, theta, grad_theta);
     }
+    // prior on theta is p(theta) = 1/theta
+    // log p(theta) = - log(theta)
+    // nabla log p(theta) = - 1 / theta
+    // -nabla log p(theta) = 1 / theta
+    // So, we need -nabla log p(theta) = -nabla (- log theta) = 1 / theta 
+    for(int i; i<num_params; i++)
+      grad_theta[i] = 1.0 / theta[i];
     return h;
   }
 };
@@ -331,18 +346,19 @@ UnbiasedEstimatorOfGradWAtFixedTheta<T, H, R> make_unbiased_estimator_w(
 template <typename T>
 struct UEThetaParams {
   UEThetaParams() :
-    num_chains(10),
+    num_chains(1),
     num_init_warmup(10000),
-    num_per_it_warmup(1000),
-    num_bursts(100),
-    num_thinning(100),
+    num_per_it_warmup(1),
+    num_bursts(1),
+    num_thinning(1),
     init_w_sigma(1.0),
-    reinitialize_ws(true),
+    reinitialize_ws(false),
     save_to_file(false),
     out_file("ue_theta.csv"),
     save_freq(10),
     disp(true),
-    disp_freq(100)
+    disp_freq(100),
+    sgld_params(SGLDParams<T>())
   {}
   // The number of chains
   int num_chains;
@@ -358,9 +374,19 @@ struct UEThetaParams {
   T init_w_sigma;
   // Whether or not to reinitialize the ws on every iteration
   bool reinitialize_ws;
+  // Whether or not to save to file the results
+  bool save_to_file;
+  // How often to write on the file
+  int save_freq;
+  // The file to write
+  string out_file;
+  // Whether or not to display something on the screen
+  bool disp;
+  // The display frequency
+  int disp_freq;
   // The parameters used in SGLD
-  SGLDParams& sgld_params; 
-}
+  SGLDParams<T> sgld_params; 
+};
 
 
 // A class representing an unbiased estimato of the gradient of the
@@ -380,13 +406,9 @@ public:
   // The number of parameters
   const int num_params;
   // The parameters structure
-  UEThetaParams& params;
+  UEThetaParams<T>& params;
   // Unbiased estimator of grad_w (H) so that we can sample
   UnbiasedEstimatorOfGradWAtFixedTheta<T, H, R>* ue_grad_w;
-  // Standard deviation used to initialize the ws
-  const T init_w_sigma;
-  // Whether or not to reinitialize the samples of w
-  const bool reinitialize_ws;
   // Space we need for storing grad_w_H
   T* grad_w_H;
   T* ws;
@@ -394,24 +416,16 @@ public:
 
   UnbiasedEstimatorOfGradTheta(
       H& h, HA& ha, R& rng,
-      SGLDParams<T>& sgld_params,
-      const int& num_chains,
-      const int& num_warmup, const int& num_samples, const int& num_thinning,
-      const T& init_w_sigma=0.1,
-      const bool& reinitialize_ws=false
+      UEThetaParams<T>& params
   ) :
     h(h), ha(ha), rng(rng), dim(h.dim), num_params(ha.num_params),
-    num_chains(num_chains),
-    num_warmup(num_warmup), num_samples(num_samples), num_thinning(num_thinning),
-    init_w_sigma(init_w_sigma),
-    reinitialize_ws(reinitialize_ws),
-    sgld_params(sgld_params),
-    num_bursts(num_samples / num_thinning)
+    params(params)
   {
     grad_w_H = new T[dim];
-    ws = new T[num_chains * dim];
+    ws = new T[params.num_chains * dim];
     tmp_grad_theta = new T[num_params];
     ue_grad_w = new UnbiasedEstimatorOfGradWAtFixedTheta<T, H, R>(h, NULL, rng);
+    initialize_chains();
   }
 
   ~UnbiasedEstimatorOfGradTheta() {
@@ -422,13 +436,21 @@ public:
   }
 
   inline void initialize_chains() {
-    normal_distribution<T> norm(0, init_w_sigma);
+    normal_distribution<T> norm(0, params.init_w_sigma);
     R rng = this->rng;
-    generate(ws, ws + num_chains * dim, [&norm, &rng]() {return norm(rng);});
+    generate(ws, ws + params.num_chains * dim, [&norm, &rng]() {return norm(rng);});
+  }
+
+  inline void warmup(const T* theta) {
+    ue_grad_w->theta = theta;
+    for(int c=0; c<params.num_chains; c++) {
+      T* w = ws + c * dim;
+      sgld(*ue_grad_w, w, rng, params.num_init_warmup, grad_w_H, params.sgld_params);
+    }
   }
 
   T operator()(const T* theta, T* grad_theta) {
-    if (reinitialize_ws)
+    if (params.reinitialize_ws)
       initialize_chains();
     T h = 0.0;
     fill(grad_theta, grad_theta + num_params, 0.0);
@@ -436,14 +458,14 @@ public:
     ue_grad_w->theta = theta;
     // TODO: Exploit parallelization opportunities
     // Loop over chains
-    for(int c=0; c<num_chains; c++) {
+    for(int c=0; c<params.num_chains; c++) {
       T* w = ws + c * dim;
       // Do the warmup
-      sgld(*ue_grad_w, w, rng, num_warmup, grad_w_H, sgld_params);
+      sgld(*ue_grad_w, w, rng, params.num_per_it_warmup, grad_w_H, params.sgld_params);
       // Loop over bursts
-      for(int b=0; b<num_bursts; b++) {
+      for(int b=0; b<params.num_bursts; b++) {
         // Sample w num_thinning times
-        sgld(*ue_grad_w, w, rng, num_thinning, grad_w_H, sgld_params);
+        sgld(*ue_grad_w, w, rng, params.num_thinning, grad_w_H, params.sgld_params);
         // Now w contains the sample
         // Get the gradient with respect to theta
         h += ha.unbiased_estimator_grad_theta(w, theta, rng, tmp_grad_theta);
@@ -452,8 +474,9 @@ public:
       }
     }
     // Divide with the total number of samples
-    const T ratio = T(1.0) / (num_chains * num_bursts);
-    scale(grad_theta, num_params, T(1.0) / (num_chains * num_bursts));
+    const T lambda = T(1.0) / (params.num_chains * params.num_bursts);
+    scale(grad_theta, num_params, lambda);
+    h *= lambda;
     return h;
   }
 };
@@ -463,12 +486,33 @@ class UnbiasedEstimatorGradThetaMinusLogPosterior {
 public:
   UnbiasedEstimatorOfGradTheta<T,H,H,R>* ue_prior;
   UnbiasedEstimatorOfGradTheta<T,FH,H,R>* ue_post;
-  UnbiasedEstimatorGradThetaMinusLogPosterior(H& h, FH& fh, R& rng) :
+  T* grad_theta_prior;
+  int dim;
+  UnbiasedEstimatorGradThetaMinusLogPosterior(
+      H& h, FH& fh, R& rng,
+      UEThetaParams<T>& prior_params,
+      UEThetaParams<T>& post_params
+  ) : dim(h.num_params)
   {
-    ue_prior = new UnbiasedEstimatorOfGradTheta<T,H,H,R>(h,h,rng);
+    ue_prior = new UnbiasedEstimatorOfGradTheta<T,H,H,R>(h,h,rng, prior_params);
+    ue_post = new UnbiasedEstimatorOfGradTheta<T,FH,H,R>(fh,h,rng, post_params);
+    grad_theta_prior = new T[dim];
+  }
+
+  ~UnbiasedEstimatorGradThetaMinusLogPosterior() {
+    delete ue_prior;
+    delete ue_post;
+    delete grad_theta_prior;
+  }
+
+  T operator()(const T* theta, T* grad_theta) {
+    const T h_prior = (*ue_prior)(theta, grad_theta_prior);
+    const T h_post = (*ue_post)(theta, grad_theta);
+    for(int i=0; i<dim; i++)
+      grad_theta[i] -= grad_theta_prior[i];
+    return h_post - h_prior;
   }
 };
-
 
 
 template <typename T, typename H, typename R>
@@ -538,7 +582,7 @@ void unit_test_sample_w(
     H& h, R& rng, const int num_samples,
     const SGLDParams<T>& sgld_params
 ) {
-  F theta[] = {10000.0, 0.1, 1.5};
+  F theta[] = {10000.0, 0.1, 1.0};
   F w[h.dim];
   fill(w, w + h.dim, 0.0);
   F grad_w_H[h.dim];
@@ -571,6 +615,7 @@ int main(int argc, char* argv[]) {
   using UEPR = UnbiasedEstimatorOfGradTheta<F, H, H, R>;
   // An unbiased estimator of the grad_theta H, expectation over the posterior
   using UEPS = UnbiasedEstimatorOfGradTheta<F, FH,H, R>; 
+  using UEGTheta = UnbiasedEstimatorGradThetaMinusLogPosterior<F, H, FH, R>;
 
   const int N = stoi(argv[1]);
   const F alpha = STOF(argv[2]);
@@ -620,20 +665,34 @@ int main(int argc, char* argv[]) {
   //unit_test_sample_w(fh, rng, num_samples, sgld_params);
 
   // Test the unbiased estimator of grad_theta that samples from the prior
-  UEPR uepr(h, h, rng, sgld_params, 10, 100, 1, 1);
-  UEPS ueps(fh, h, rng, sgld_params, 10, 100, 1, 1);
-  sgld_params.save_to_file = false;
-  sgld_params.disp = false;
-  F theta[] = {10000.0, 0.1, 1.0};
+  UEThetaParams<F> prior_params;
+  UEThetaParams<F> post_params;
+  UEPR uepr(h, h, rng, prior_params);
+  prior_params.num_init_warmup = 100000;
+  prior_params.num_bursts = 1;
+  prior_params.num_per_it_warmup = 1;
+  prior_params.num_thinning = 1;
+  UEPS ueps(fh, h, rng, post_params);
+  post_params.num_init_warmup = 100000;
+  post_params.num_bursts = 1;
+  prior_params.num_per_it_warmup = 1;
+  post_params.num_thinning = 1;
+  prior_params.sgld_params.save_to_file = false;
+  prior_params.sgld_params.disp = false;
+  post_params.sgld_params.save_to_file = false;
+  post_params.sgld_params.disp = false;
+  UEGTheta ue_grad_theta(h, fh, rng, prior_params, post_params);
+
+  //F theta[] = {10.0, 0.01, 1.0};
+  F theta[] = {1.0, 1.0};
   F grad_theta[h.num_params];
-  F grad_theta_post[h.num_params];
-  for(int i=0; i<10000; i++) {
-    uepr(theta, grad_theta);
-    //cout_vec(grad_theta, h.num_params, cout);
-    ueps(theta, grad_theta_post);
-    //cout_vec(grad_theta_post, h.num_params, cout);
-    for(int i=0; i<h.num_params; i++)
-      grad_theta_post[i] -= grad_theta[i];
-    cout_vec(grad_theta_post, h.num_params, cout);
-  }
+
+  SGLDParams<F> sgld_params_theta;
+  sgld_params_theta.alpha = 1e-4;
+  sgld_params_theta.disp_freq = 100000;
+  sgld_params_theta.save_to_file = true;
+  sgld_params_theta.out_file = "src/theta.csv";
+  sgld_params_theta.save_freq = 10000;
+  sgld(ue_grad_theta, theta, rng, 100000000, sgld_params_theta); 
 }
+

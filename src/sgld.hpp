@@ -22,9 +22,9 @@ template <typename T>
 struct SGLDParams {
 
   SGLDParams() :
-    alpha(1e-3),
+    alpha(1e-6),
     beta(0.0),
-    gamma(0.6),
+    gamma(0.51),
     save_to_file(false),
     out_file("sgld_deafult_out.csv"),
     save_freq(10),
