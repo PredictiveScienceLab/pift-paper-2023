@@ -12,6 +12,7 @@
 #define PIFT_HAMILTONIAN_HPP
 
 #include <vector>
+#include <algorithm>
 
 using namespace std;
 
@@ -21,7 +22,7 @@ private:
   const int num_params;
 
 public:
-  Hamiltonian(const int& num_params) : num_params(num_params),
+  Hamiltonian(const int& num_params) : num_params(num_params)
   {}
 
   inline int get_num_params() const { return num_params; }
@@ -35,7 +36,7 @@ public:
   //  theta        --  The physical parameters.
   // Returns:
   //  The value of the hamiltonian density
-  virtual inline T density(
+  virtual inline T operator()(
       const T* x, const T* prolong_phi, const T* theta
   ) const = 0;
 
@@ -48,7 +49,7 @@ public:
   //  The valua of the hamiltonian density
   //  out -- This is where we write the gradient of the Hamiltonian with
   //         respect to prolong_phi.
-  virtual inline T grad_phi_prolong(
+  virtual inline T operator()(
       const T* x, const T* prolong_phi, const T* theta,
       T* out
   ) const = 0;
@@ -73,13 +74,20 @@ public:
 //  D  -- A spatial/time domain sampler
 template <typename T, typename H, typename FA, typename D>
 class UEGradHAtFixedTheta {
-  private:
+  protected:
     H& h;
-    FA& fa;
+    FA& phi;
     D& domain;
     const T* theta;
     const int num_collocation;
+    const int dim_x;
+    const int dim_w;
+    const int prolong_size;
+    const T scale_ratio;
     T* prolong_phi;
+    T* grad_w_prolong_phi;
+    T* grad_prolong_phi_H;
+    T* x;
 
   public:
 
@@ -91,44 +99,63 @@ class UEGradHAtFixedTheta {
     //  num_collocation -- The number of collocation points to sample.
     //  theta   -- The parameters to keep fixed.
     UEGradHAtFixedTheta(
-        H& h, FA& fa, D& domain, const int& num_collocation, const T* theta
+        H& h, FA& phi, D& domain, const int& num_collocation, const T* theta
     ) :
       h(h),
-      fa(fa),
+      phi(phi),
       domain(domain),
+      dim_x(phi.get_dim_x()),
+      dim_w(phi.get_dim_w()),
+      prolong_size(phi.get_prolong_size()),
       num_collocation(num_collocation),
+      scale_ratio(domain.get_volume() / num_collocation),
       theta(theta)
     {
-      prolong_phi = new T[h.num_params];
+      prolong_phi = new T[prolong_size];
+      grad_w_prolong_phi = new T[phi.get_grad_w_prolong_size()];
+      grad_prolong_phi_H = new T[prolong_size];
+      fill(
+          grad_prolong_phi_H,
+          grad_prolong_phi_H + prolong_size,
+          0.0
+      );
+      x = new T[dim_x];
     }
 
     ~UEGradHAtFixedTheta() {
       delete prolong_phi;
+      delete grad_w_prolong_phi;
+      delete grad_prolong_phi_H;
+      delete x;
     }
 
     inline int get_num_collocation() const { return num_collocation; }
-  T add_grad_w(
-    const T& x, const T* w,
-    const T* theta,
-    T* grad_w_H
-  ) {
-    T phi_val, phi_prime_val;
-    phi.eval_grads(x, w, phi_val, grad_phi, phi_prime_val, grad_phi_prime);
-    const T h = density(x, phi_val, phi_prime_val, theta);
-    const T dh_dphi = dphi(x, phi_val, phi_prime_val, theta);
-    const T dh_dphi_prime = dphi_prime(x, phi_val, phi_prime_val, theta);
-    for(int i=0; i<dim; i++)
-      grad_w_H[i] += dh_dphi * grad_phi[i] + dh_dphi_prime * grad_phi_prime[i];
-    return h;
-  }
 
-    inline T add_grad_w(const T* x, const T* w, T* out) {
-      fa(x, w, prolong_phi);
+    // Adds the gradient of the Hamiltonian density with respect to w to out
+    // Returns the Hamiltonian density at x.
+    inline T add_grad(const T* x, const T* w, T* out) {
+      phi(x, w, prolong_phi, grad_w_prolong_phi);
+      const T h_x = h(x, prolong_phi, theta, grad_prolong_phi_H);
+      for(int i=0; i<dim_w; i++)
+        for(int j=0; j<prolong_size; j++)
+         out[i] += grad_prolong_phi_H[j] * grad_w_prolong_phi[dim_w * j + i]; 
+      return h_x;
     }
 
+    // Implements an unbiased estimator of the Hamiltonian
+    // Returns the estimator.
+    // In out, it writes the gradient of the estimator with respect to w
     inline T operator()(const T* w, T* out) {
-      
+      T s = 0.0;
+      fill(out, out + dim_w, 0.0);
+      for(int i=0; i<num_collocation; i++) {
+        domain.sample(x);
+        s += add_grad(x, w, out);
+      }
+      scale(out, dim_w, scale_ratio, out);
+      return s * scale_ratio;
     }
+
 };
 
 #endif // PIFT_HAMILTONIAN_HPP

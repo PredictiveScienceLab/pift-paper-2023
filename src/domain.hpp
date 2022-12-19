@@ -61,5 +61,4 @@ class UniformRectangularDomain {
       }
     }
 };
-
 #endif // PIFT_DOMAIN_HPP

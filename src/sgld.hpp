@@ -47,13 +47,14 @@ struct SGLDParams {
 template <typename T, typename UE, typename R>
 inline void sgld(UE& ue_func,
           T* w,
+          const int& dim,
           R& rng,
           const int num_samples,
           const SGLDParams<T>& params = SGLDParams<T>()
 ) {
-  T grad_w_H[ue_func.dim];
+  T grad_w_H[dim];
   normal_distribution<T> norm(0, 1);
-  sgld(ue_func, w, rng, num_samples, grad_w_H, norm, params);
+  sgld(ue_func, w, dim, rng, num_samples, grad_w_H, norm, params);
 }
 
 // SGLD implementation that requires providing 
@@ -61,13 +62,13 @@ inline void sgld(UE& ue_func,
 template <typename T, typename UE, typename R, typename D>
 void sgld(UE& ue_func,
           T* w,
+          const int& dim,
           R& rng,
           const int num_samples,
           T* grad_w_H,
           D& norm,
           const SGLDParams<T>& params = SGLDParams<T>()
 ) {
-  const int& dim = ue_func.dim;
   //normal_distribution<T> norm(0, 1);
   ofstream of;
 #ifndef DISABLE_SGLD_SAVE
