@@ -413,6 +413,7 @@ public:
   T* grad_w_H;
   T* ws;
   T* tmp_grad_theta;
+  normal_distribution<T>* norm;
 
   UnbiasedEstimatorOfGradTheta(
       H& h, HA& ha, R& rng,
@@ -425,6 +426,7 @@ public:
     ws = new T[params.num_chains * dim];
     tmp_grad_theta = new T[num_params];
     ue_grad_w = new UnbiasedEstimatorOfGradWAtFixedTheta<T, H, R>(h, NULL, rng);
+    norm = new normal_distribution<T>(0, 1);
     initialize_chains();
   }
 
@@ -433,6 +435,7 @@ public:
     delete ws;
     delete tmp_grad_theta;
     delete ue_grad_w;
+    delete norm;
   }
 
   inline void initialize_chains() {
@@ -445,7 +448,7 @@ public:
     ue_grad_w->theta = theta;
     for(int c=0; c<params.num_chains; c++) {
       T* w = ws + c * dim;
-      sgld(*ue_grad_w, w, rng, params.num_init_warmup, grad_w_H, params.sgld_params);
+      sgld(*ue_grad_w, w, rng, params.num_init_warmup, grad_w_H, *norm, params.sgld_params);
     }
   }
 
@@ -461,11 +464,11 @@ public:
     for(int c=0; c<params.num_chains; c++) {
       T* w = ws + c * dim;
       // Do the warmup
-      sgld(*ue_grad_w, w, rng, params.num_per_it_warmup, grad_w_H, params.sgld_params);
+      sgld(*ue_grad_w, w, rng, params.num_per_it_warmup, grad_w_H, *norm, params.sgld_params);
       // Loop over bursts
       for(int b=0; b<params.num_bursts; b++) {
         // Sample w num_thinning times
-        sgld(*ue_grad_w, w, rng, params.num_thinning, grad_w_H, params.sgld_params);
+        sgld(*ue_grad_w, w, rng, params.num_thinning, grad_w_H, *norm, params.sgld_params);
         // Now w contains the sample
         // Get the gradient with respect to theta
         h += ha.unbiased_estimator_grad_theta(w, theta, rng, tmp_grad_theta);
@@ -693,6 +696,7 @@ int main(int argc, char* argv[]) {
   sgld_params_theta.save_to_file = true;
   sgld_params_theta.out_file = "src/theta.csv";
   sgld_params_theta.save_freq = 10000;
+  normal_distribution<F> norm(0,1);
   sgld(ue_grad_theta, theta, rng, 100000000, sgld_params_theta); 
 }
 

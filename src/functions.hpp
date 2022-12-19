@@ -40,7 +40,7 @@ public:
     }
     return s;
   }
-
+  
   void eval_and_prime(const T& x, const T* w, T& f, T& f_prime) const {
     f = w[0];
     f_prime = 0.0;
@@ -102,7 +102,6 @@ public:
       grad_f_prime[num_terms + i - 1] = omega_cos_omega_x;
     }
   }
-
 };
 
 /* This is a function that is constrained on the boundary.
