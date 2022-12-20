@@ -146,13 +146,13 @@ class Constrained1DField : public ParameterizedField<T> {
        phi(x, w, prolong, grad_w_prolong);
        prolong[1] = yb() - ya() + bmxmxma * prolong[0] + xmabmx * prolong[1];
        prolong[0] = bmx * ya() + xma * yb() + xmabmx * prolong[0];
-       transform(grad_w_prolong + dim_w, grad_w_prolong + 2 * dim_w,
+       std::transform(grad_w_prolong + dim_w, grad_w_prolong + 2 * dim_w,
                  grad_w_prolong,
                  grad_w_prolong + dim_w,
                  [&bmxmxma, &xmabmx](T v1, T v2) {
                    return bmxmxma * v2 + xmabmx * v1;
                   });
-       transform(grad_w_prolong, grad_w_prolong + dim_w,
+       std::transform(grad_w_prolong, grad_w_prolong + dim_w,
                  grad_w_prolong,
                  [&xmabmx](T v) {return xmabmx * v;});
      }
@@ -164,7 +164,7 @@ class Constrained1DField : public ParameterizedField<T> {
       const T bmxmxma = bmx - xma;
       T f = phi.eval_grad(x, w, grad_w);
       f = bmx * ya() + xma * yb() + xmabmx * f;
-      transform(grad_w, grad_w + dim_w,
+      std::transform(grad_w, grad_w + dim_w,
                 grad_w,
                 [&xmabmx](T v) {return xmabmx * v;});
       return f;

@@ -1,25 +1,30 @@
-/* Implementation of a fourier series.
- *
- * Author:
- *  Ilias Bilionis
- *
- * Date:
- *  12/19/2022
- *
- */
+// Implementation of a fourier series.
+//
+// Author:
+//  Ilias Bilionis
+//
+// Date:
+//  12/19/2022
 
 #ifndef PIFT_FOURIER_HPP
 #define PIFT_FOURIER_HPP
 
-#include "field.hpp"
-#include "domain.hpp"
-#include "io.hpp"
-
 #include <cmath>
 #include <vector>
 
-using namespace std;
+#include "field.hpp"
 
+namespace pift {
+
+// A class representing a 1D field parameterized by a Fourier basis.
+// Example
+//
+// Assume that domain is a UniformedRectangularDomain<float>
+//
+// using Domain = UniformedRectangularDomain<float>
+// 
+// phi =  Fourier1DField<float, Domain>(domain, num_terms);
+//
 template<typename T, typename D>
 class Fourier1DField : public ParameterizedField<T> {
   protected:
@@ -49,7 +54,7 @@ class Fourier1DField : public ParameterizedField<T> {
       const T dx = 2.0 * M_PI / L() * (x[0] - a());
       for(int i=1; i<num_terms; i++) {
         const T tmp = dx * i;
-        s += w[i] * cos(tmp) + w[num_terms + i - 1] * sin(tmp);
+        s += w[i] * std::cos(tmp) + w[num_terms + i - 1] * std::sin(tmp);
       }
       return s;
     }
@@ -62,8 +67,8 @@ class Fourier1DField : public ParameterizedField<T> {
       for(int i=1; i<num_terms; i++) {
         const T omega = tmp1 * i;
         const T omega_x = omega * dx;
-        const T cos_omega_x = cos(omega_x);
-        const T sin_omega_x = sin(omega_x);
+        const T cos_omega_x = std::cos(omega_x);
+        const T sin_omega_x = std::sin(omega_x);
         const T omega_cos_omega_x = omega * cos_omega_x;
         const T omega_sin_omega_x = omega * sin_omega_x;
         prolong[0] += w[i] * cos_omega_x + w[num_terms + i -1] * sin_omega_x;
@@ -81,8 +86,8 @@ class Fourier1DField : public ParameterizedField<T> {
       for(int i=1; i<num_terms; i++) {
         const T omega = tmp1 * i;
         const T omega_x = omega * dx;
-        const T cos_omega_x = cos(omega_x);
-        const T sin_omega_x = sin(omega_x);
+        const T cos_omega_x = std::cos(omega_x);
+        const T sin_omega_x = std::sin(omega_x);
         const T omega_cos_omega_x = omega * cos_omega_x;
         const T omega_sin_omega_x = omega * sin_omega_x;
         f += w[i] * cos_omega_x + w[num_terms + i -1] * sin_omega_x;
@@ -106,8 +111,8 @@ class Fourier1DField : public ParameterizedField<T> {
       for(int i=1; i<num_terms; i++) {
         const T omega = tmp1 * i;
         const T omega_x = omega * dx;
-        const T cos_omega_x = cos(omega_x);
-        const T sin_omega_x = sin(omega_x);
+        const T cos_omega_x = std::cos(omega_x);
+        const T sin_omega_x = std::sin(omega_x);
         const T omega_cos_omega_x = omega * cos_omega_x;
         const T omega_sin_omega_x = omega * sin_omega_x;
         prolong[0] += w[i] * cos_omega_x + w[num_terms + i -1] * sin_omega_x;
@@ -120,5 +125,7 @@ class Fourier1DField : public ParameterizedField<T> {
       }
     }
  
-};
+}; // Fourier1DField
+
+} // namespace pift
 #endif // PIFT_FOURIER_HPP

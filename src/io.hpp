@@ -1,12 +1,10 @@
-/* Some functions related to input output.
- *
- * Author:
- *  Ilias Bilionis
- *
- * Date:
- * 12/16/2022
- *
- */
+// Some functions related to input output.
+//
+// Author:
+//  Ilias Bilionis
+//
+// Date:
+// 12/16/2022
 
 #ifndef PIFT_IO_HPP
 #define PIFT_IO_HPP
@@ -16,66 +14,84 @@
 #include <fstream>
 
 
-using namespace std;
+namespace pift {
 
-
+// Send a vectot to a stream
 template <typename T, typename S>
 void cout_vec(
   const T* v,
   const int n,
   S& out,
-  const string& prefix=""
+  const std::string& prefix=""
 ) {
   out << prefix;
   for(int i=0; i<n; i++)
     out << v[i] << " ";
-  out << endl;
+  out << std::endl;
 }
 
 template <typename T>
-inline void cout_vec(const T* v, const int n, const string& prefix="") {    
-  cout_vec(v, n, cout, prefix);
+inline void cout_vec(
+    const T* v, const int n, const std::string& prefix=""
+) {    
+  cout_vec(v, n, std::cout, prefix);
 }
 
 template <typename T, typename S>
-inline void cout_vec(const vector<T>& x, S& out, const string& prefix="") {
+inline void cout_vec(
+    const std::vector<T>& x, S& out, const std::string& prefix=""
+) {
   cout_vec(x.data(), x.size(), out, prefix);
 }
 
 template <typename T>
-inline void cout_vec(const vector<T>& x, const string& prefix) {
-  cout_vec(x, cout, prefix);
+inline void cout_vec(const std::vector<T>& x, const std::string& prefix) {
+  cout_vec(x, std::cout, prefix);
 }
 
-// Saves a vector to a file
+// Saves a std::vector to a file
 template <typename T>
-void savetxt(const T* x, const int& N, const string& filename) {
-  ofstream of;
+void savetxt(
+    const T* x, const int& n, const std::string& filename,
+    const bool& disp=true
+) {
+  if(disp) {
+    std::cout << "> writing " << n << " vector on " << filename;
+    std::cout << std::endl;
+  }
+  std::ofstream of;
   of.open(filename);
-  for(int i=0; i<N; i++)
+  for(int i=0; i<n; i++)
     of << x[i] << " ";
-  of << endl;
+  of << std::endl;
   of.close();
 }
 
 // Saves a matrix to a file
 template <typename T>
-void savetxt(const T* x, const int& N, const int& M, const string& filename) {
-  ofstream of(filename);
-  for(int i=0; i<N; i++) {
-    for(int j=0; j<M; j++)
-      of << x[i * M + j] << " ";
-    of << endl;
+void savetxt(
+    const T* x, const int& n, const int& m, const std::string& filename,
+    const bool& disp=true
+) {
+  if(disp) {
+    std::cout << "> writing " << n << "x" << m << " matrix on " << filename;
+    std::cout << std::endl;
+  }
+  std::ofstream of(filename);
+  for(int i=0; i<n; i++) {
+    for(int j=0; j<m; j++)
+      of << x[i * m + j] << " ";
+    of << std::endl;
   }
   of.close();
 }
 
-// Reads a vector from a file
+// Reads a std::vector from a file
 template <typename T>
-vector<T> loadtxtvec(const string& filename) {
-  ifstream iff(filename);
-  string line;
-  vector<T> result;
+std::vector<T> loadtxtvec(const std::string& filename) {
+  std::ifstream iff(filename);
+  std::string line;
+  std::vector<T> result;
   while(getline(iff, line)) {
     const T x = static_cast<T>(stod(line));
     result.push_back(x);
@@ -83,4 +99,6 @@ vector<T> loadtxtvec(const string& filename) {
   iff.close();
   return result;
 }
+
+} // namespace pift
 #endif // PIFT_IO_HPP
