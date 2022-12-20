@@ -6,6 +6,7 @@
 // Date:
 //  12/19/2022
 
+#include <iostream>
 #include <iomanip>
 
 #include "domain.hpp"
@@ -23,7 +24,7 @@ int main(int argc, char* argv[]) {
   std::cout.precision(3);
 
   // 1D interval test. Using [-1, 3].
-  std::cout << "1D domain test" << endl;
+  std::cout << "1D domain test" << std::endl;
   F bounds[2] = {-1.0, 3.0};
   URD domain_1d(bounds, 1, rng);
   F x[1];
