@@ -36,10 +36,10 @@ int main(int argc, char* argv[]) {
   Domain domain(bounds, 1, rng);
   Field psi(domain, num_terms);
 
-  const F bndry_values[2] = {0.0, 0.0};
+  const F bndry_values[2] = {1.0, 1.0/10.0};
   CField phi(psi, domain, bndry_values);
 
-  F beta = 100.0;
+  F beta = 10'000.0;
   H h(beta);
 
   int num_collocation = 10;
@@ -70,15 +70,19 @@ int main(int argc, char* argv[]) {
 
   // Now let's estimate the parameters using sgld
   SGLDParams<F> sgld_params;
-  sgld_params.alpha = 1e-5;
+  sgld_params.alpha = 0.1/beta;
   sgld_params.beta = 0.0;
   sgld_params.gamma = 0.51;
-  sgld_params.save_to_file = true;
   sgld_params.out_file = "src/foo_prior.csv";
-  sgld_params.save_freq = 10000;
+  sgld_params.save_freq = 10'000;
   sgld_params.disp = true;
-  sgld_params.disp_freq = 10000;
-  const int num_samples = 50000000;
+  sgld_params.disp_freq = 100'000;
+  const int num_warmup = 10'000'000;
+  const int num_samples = 10'000'000;
+  sgld_params.save_to_file = false;
+  sgld(eu_h, w, phi.get_dim_w(), rng, num_warmup, sgld_params);
+  sgld_params.init_it = num_warmup;
+  sgld_params.save_to_file = true;
   sgld(eu_h, w, phi.get_dim_w(), rng, num_samples, sgld_params);
 
   return 0;

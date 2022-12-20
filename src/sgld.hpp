@@ -25,6 +25,7 @@ struct SGLDParams {
     alpha(1e-6),
     beta(0.0),
     gamma(0.51),
+    init_it(0),
     save_to_file(false),
     out_file("sgld_deafult_out.csv"),
     save_freq(10),
@@ -35,6 +36,7 @@ struct SGLDParams {
   T alpha;
   T beta;
   T gamma;
+  int init_it;
   bool save_to_file;
   string out_file;
   int save_freq;
@@ -75,7 +77,8 @@ void sgld(UE& ue_func,
   if (params.save_to_file)
     of.open(params.out_file);
 #endif
-  for(int it=0; it<num_samples; it++) {
+  const int max_it = num_samples + params.init_it;
+  for(int it=params.init_it; it<max_it; it++) {
     const T epsilon = params.alpha / pow((params.beta + it + 1), params.gamma);
     const T sqrt_2_epsilon = sqrt(2.0 * epsilon);
     const T h_val = ue_func(w, grad_w_H);
