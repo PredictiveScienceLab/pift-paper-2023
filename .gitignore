@@ -1,3 +1,9 @@
+a.out
+*.csv
+*.swp
+*.swo
+*.o
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

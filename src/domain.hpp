@@ -1,12 +1,12 @@
-/* Implements a uniform domain class.
- *
- * Author:
- *  Ilias Bilionis
- *
- * Date:
- *  12/19/2022
- *
- */
+// Implements a uniform domain class.
+//
+// Author:
+//  Ilias Bilionis
+//
+// Date:
+//  12/19/2022
+//
+//
 
 #ifndef PIFT_DOMAIN_HPP
 #define PIFT_DOMAIN_HPP
@@ -14,15 +14,15 @@
 #include <random>
 #include <vector>
 
-using namespace std;
+namespace pift {
 
 template<typename T, typename R>
 class UniformRectangularDomain {
   protected:
-    vector<T> bounds;
+    std::vector<T> bounds;
     T volume;
     const int dim;
-    uniform_real_distribution<T>* unif;
+    std::uniform_real_distribution<T>* unif;
     R& rng;
 
     inline T calculate_volume() const {
@@ -41,7 +41,7 @@ class UniformRectangularDomain {
     {
       this->bounds.assign(bounds, bounds + 2 * dim);
       volume = calculate_volume();
-      unif = new uniform_real_distribution<T>(0, 1);
+      unif = new std::uniform_real_distribution<T>(0, 1);
     }
 
     ~UniformRectangularDomain() {
@@ -61,4 +61,6 @@ class UniformRectangularDomain {
       }
     }
 };
+
+} // namespace pift
 #endif // PIFT_DOMAIN_HPP
