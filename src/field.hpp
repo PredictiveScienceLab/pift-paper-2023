@@ -1,12 +1,10 @@
-/* Some generic template classes for fields.
- *
- * Author:
- *  Ilias Bilionis
- *
- * Date:
- *  12/19/2022
- *
- */
+// Some generic template classes for fields.
+//
+// Author:
+//  Ilias Bilionis
+//
+// Date:
+//  12/19/2022
 
 #ifndef PIFT_FIELD_HPP
 #define PIFT_FIELD_HPP
@@ -16,8 +14,10 @@
 #include <cmath>
 #include <cassert>
 
-using namespace std;
+namespace pift {
 
+// A class representing a parameterized field.
+// This is an abstract class.
 template<typename T>
 class ParameterizedField {
   protected:
@@ -41,7 +41,7 @@ class ParameterizedField {
         if (dim_x == 1)
           this->prolong_size = dim_x * (1 + max_deriv);
         else {
-          this->prolong_size = (1 - pow(dim_x, max_deriv)) / (1 - dim_x);
+          this->prolong_size = (1 - std::pow(dim_x, max_deriv)) / (1 - dim_x);
         }
       } else
         this->prolong_size = prolong_size;
@@ -65,14 +65,33 @@ class ParameterizedField {
     ) const = 0;
     // Evaluates the field and its gradient with respect to w
     virtual T eval_grad(const T* x, const T* w, T* grad_w) const = 0;
-};
+}; // ParameterizedField
 
+
+// A class representing a parameterized 1D field that is constrained at the
+// boundary.
+//
+// Example:
+//
+// Suppose phi is a ParameterizedField<float> with dim_x == 1.
+// Also suppose that domain is a UniformRectangularDomain<float> with 1
+// dimension.
+//
+//// Some definitions to simplify the templates:
+//  using Domain = UniformedRectangularDomain<float>
+//  using Field = ParameterizedField<float>
+//  using CField = Constrained1DField<float, Field, Domain>;
+//
+//// The values on the boundary
+/// float boundary_values[2] = {0.0, 1.0};
+//  psi = CField(phi, domain, boundary_values);
+//
 template<typename T, typename PF, typename D>
 class Constrained1DField : public ParameterizedField<T> {
    protected:
      const PF& phi;
      const D& domain;
-     vector<T> values;
+     std::vector<T> values;
      int dim_w;
      int dim_x;
  
@@ -150,6 +169,7 @@ class Constrained1DField : public ParameterizedField<T> {
                 [&xmabmx](T v) {return xmabmx * v;});
       return f;
     }
-};
+}; // Constrained1DField
 
+} // namespace pift
 #endif // PIFT_FIELD_HPP
