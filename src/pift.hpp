@@ -14,3 +14,4 @@
 #include "fourier.hpp"
 #include "hamiltonian.hpp"
 #include "sgld.hpp"
+#include "likelihood.hpp"
