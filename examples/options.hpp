@@ -106,6 +106,13 @@ struct SGLDConfig {
   }
 }; // SGLDConfig
 
+struct PostProcessConfig {
+  std::vector<int> num_points_per_dim;
+  PostProcessConfig(const YAML::Node& yaml) :
+    num_points_per_dim(yaml["num_points_per_dim"].as<std::vector<int>>())
+  {}
+}; // PostProcessConfig
+
 // A structure representing the configuration file
 template<typename T>
 struct Configuration {
@@ -113,12 +120,14 @@ struct Configuration {
   DomainConfig<T> domain;
   FieldConfig<T> field;
   SGLDConfig<T> sgld;
+  PostProcessConfig postprocess;
 
   Configuration(const YAML::Node& yaml) :
     output(yaml["output"]),
     domain(yaml["domain"]),
     field(yaml["field"]),
-    sgld(yaml["sgld"])
+    sgld(yaml["sgld"]),
+    postprocess(yaml["postprocess"])
   {}
 }; // Configuration
 #endif // EXAMPLES_OPTIONS

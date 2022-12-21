@@ -48,4 +48,5 @@ sgld:
 # <PREFIX>_<BETA>_field.csv which contains the field values on that mesh.
 postprocess:
   # We will write to a file <PREFIX>_<BETA>_field.csv the v
-  num_points_per_dim: 100
+  num_points_per_dim:
+    - 100
