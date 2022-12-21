@@ -5,7 +5,8 @@ output:
   prefix: example_01
 # The physical domain
 domain: 
-  - [0.0, 1.0]
+  bounds:
+    - [0.0, 1.0]
 # Parameterization details
 field:
   # The number of Fourier terms to use
@@ -21,12 +22,7 @@ sgld:
   #   
   #   alpha_t = alpha / (beta + t) ** gamma
   #
-  # We call alpha the base learning rate. The base learning rate in this
-  # problem should be adjusted to beta. This is because beta multiplies the
-  # gradient that drives SGLD. So, bigger beta increases the learning rate.
-  # To keep the learning rate independent of beta, we control this:
-  alpha_times_beta: 0.1
-  # The other two parameters are:
+  alpha: 0.1
   beta: 0.1
   gamma: 0.51 
   # The standard deviation with which to initialize the weights
