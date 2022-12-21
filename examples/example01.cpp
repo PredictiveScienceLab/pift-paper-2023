@@ -40,7 +40,7 @@ int main(int argc, char* argv[]) {
   sprintf(parsed_beta, "beta=%.2e", beta);
 
   // Open the configuration file to read the rest of the parameters
-  YAML::Node config = YAML::LoadFile("examples/example01.yml"); 
+  YAML::Node config = YAML::LoadFile("example01.yml"); 
 
   // The output prefix
   std::string prefix = config["output"]["prefix"].as<std::string>();
