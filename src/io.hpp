@@ -12,7 +12,7 @@
 #include <iostream>
 #include <string>
 #include <fstream>
-
+#include <sstream>
 
 namespace pift {
 
@@ -93,14 +93,34 @@ std::vector<T> loadtxtvec(const std::string& filename) {
   std::string line;
   std::vector<T> result;
   while(getline(iff, line)) {
-    const T x = static_cast<T>(stod(line));
+    const T x = static_cast<T>(std::stod(line));
     result.push_back(x);
   }
   iff.close();
   return result;
 }
 
-
+// Reads a matrix from a file
+template<typename T>
+std::vector<std::vector<T>> loadtxtmat(
+    const std::string& filename,
+    const char& delimiter=' '
+) {
+  std::ifstream iff(filename);
+  std::string line;
+  std::vector<std::vector<T>> result;
+  while(getline(iff, line)) {
+    std::vector<T> row;
+    std::stringstream s(line);
+    std::string value;
+    while(getline(s, value, delimiter)) {
+      const T x = static_cast<T>(std::stod(value));
+      row.push_back(x);
+    }
+    result.push_back(row);
+  }
+  return result;
+}
 
 } // namespace pift
 #endif // PIFT_IO_HPP

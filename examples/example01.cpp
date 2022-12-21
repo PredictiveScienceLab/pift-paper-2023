@@ -25,7 +25,6 @@ using FField = pift::Fourier1DField<F, Domain>;
 using CFField = pift::Constrained1DField<F, FField, Domain>;
 using H = Example1Hamiltonian<F>;
 using UEGradWH = pift::UEGradHAtFixedTheta<F, H, CFField, Domain>;
-using VectorOfVectors = std::vector<std::vector<F>>;
 
 int main(int argc, char* argv[]) {
   if(argc != 3) {
@@ -96,13 +95,19 @@ int main(int argc, char* argv[]) {
   sgld_params.out_file = samples_out_file;
   sgld(eu_h, w, phi.get_dim_w(), rng, config.sgld.num_samples, sgld_params);
 
-  // Post process the results
+  // Postprocess the results
   const int n = config.postprocess.num_points_per_dim[0];
   F x[n];
   pift::linspace(domain.a(0), domain.b(0), n, x);
-  x_file = prefix + "_x.csv";
-  pift::savetxt(prefix + "_x.csv");
-
+  std::string x_file = prefix + "_x.csv";
+  pift::savetxt(x, n, prefix + "_x.csv");
+  auto ws = pift::loadtxtmat<F>(samples_out_file);  
+  F prolong_phi[ws.size() * n * phi.get_prolong_size()];
+  for(int i=0; i<ws.size(); i++)
+    for(int j=0; j<n; j++)
+      phi(x + j, ws[i].data(), prolong_phi + (2 * n) * i + 2 * j);
+  std::string phi_file = prefix + "_phi.csv";
+  pift::savetxt(prolong_phi, ws.size(), 2 * n, phi_file);
 
   // We are done
   std::cout << "*** Done ***" << std::endl;
@@ -112,6 +117,7 @@ int main(int argc, char* argv[]) {
   if(config.sgld.save_samples)
     std::cout << "\t- " << samples_out_file << std::endl;
   std::cout << "\t- " << x_file << std::endl;
+  std::cout << "\t- " << phi_file << std::endl;
 
   return 0;
 } // main
