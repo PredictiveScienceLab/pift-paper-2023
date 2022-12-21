@@ -109,7 +109,7 @@ public:
 // This unbiased estimator only works with a Gaussian likelihood
 // TODO: Generalize
 template<typename T, typename R>
-class UEGradLAtFixedTheta
+class UEGradWLAtFixedTheta
   protected:
     GaussianLikelihood<T>& l;
     const T* theta;

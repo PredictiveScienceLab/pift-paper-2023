@@ -15,3 +15,4 @@
 #include "hamiltonian.hpp"
 #include "sgld.hpp"
 #include "likelihood.hpp"
+#include "posterior.hpp"
