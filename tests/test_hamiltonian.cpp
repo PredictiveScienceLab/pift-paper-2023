@@ -1,12 +1,11 @@
-/* Unitests for the Hamiltonian template classes.
- *
- * Author:
- *  Ilias Bilionis
- *
- * Date:
- *  12/19/2022
- *
- */
+// Unitests for the Hamiltonian template classes.
+//
+// Author:
+//  Ilias Bilionis
+//
+// Date:
+//  12/19/2022
+//
 
 #include "domain.hpp"
 #include "fourier.hpp"
