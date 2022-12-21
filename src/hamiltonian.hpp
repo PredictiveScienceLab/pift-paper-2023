@@ -1,24 +1,24 @@
-/* Template classes related to Hamiltonians.
- *
- * Author:
- *  Ilias Bilionis
- *
- * Date:
- *  12/16/2022
- *
- */
+// Template classes related to Hamiltonians.
+//
+// Author:
+//  Ilias Bilionis
+//
+// Date:
+//  12/16/2022
+//
+//
 
 #ifndef PIFT_HAMILTONIAN_HPP
 #define PIFT_HAMILTONIAN_HPP
 
+namespace pift {
+
 #include <vector>
 #include <algorithm>
 
-using namespace std;
-
 template<typename T>
 class Hamiltonian {
-private:
+protected:
   const int num_params;
 
 public:
@@ -62,7 +62,7 @@ public:
       const T* theta,
       T* out
   ) const = 0;
-};
+}; // Hamiltonian
 
 // A class representing an unbiased estimator of the gradient of
 // Hamiltonian with resepect to w at a fixed theta.
@@ -72,7 +72,7 @@ public:
 //  H  -- A Hamiltonian.
 //  FA -- A function approximation
 //  D  -- A spatial/time domain sampler
-template <typename T, typename H, typename FA, typename D>
+template<typename T, typename H, typename FA, typename D>
 class UEGradHAtFixedTheta {
   protected:
     H& h;
@@ -90,7 +90,6 @@ class UEGradHAtFixedTheta {
     T* x;
 
   public:
-
     // Initialize the object
     // Parameters:
     //  h       -- A Hamiltonian
@@ -114,7 +113,7 @@ class UEGradHAtFixedTheta {
       prolong_phi = new T[prolong_size];
       grad_w_prolong_phi = new T[phi.get_grad_w_prolong_size()];
       grad_prolong_phi_H = new T[prolong_size];
-      fill(
+      std::fill(
           grad_prolong_phi_H,
           grad_prolong_phi_H + prolong_size,
           0.0
@@ -147,7 +146,7 @@ class UEGradHAtFixedTheta {
     // In out, it writes the gradient of the estimator with respect to w
     inline T operator()(const T* w, T* out) {
       T s = 0.0;
-      fill(out, out + dim_w, 0.0);
+      std::fill(out, out + dim_w, 0.0);
       for(int i=0; i<num_collocation; i++) {
         domain.sample(x);
         s += add_grad(x, w, out);
@@ -157,5 +156,5 @@ class UEGradHAtFixedTheta {
     }
 
 };
-
+} // namespace pift
 #endif // PIFT_HAMILTONIAN_HPP
