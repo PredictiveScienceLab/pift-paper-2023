@@ -110,7 +110,10 @@ struct PostProcessConfig {
   std::vector<int> num_points_per_dim;
   PostProcessConfig(const YAML::Node& yaml) :
     num_points_per_dim(yaml["num_points_per_dim"].as<std::vector<int>>())
-  {}
+  {
+    for(int i=0; i<num_points_per_dim.size(); i++)
+      assert(num_points_per_dim[i] > 0);
+  }
 }; // PostProcessConfig
 
 // A structure representing the configuration file
@@ -128,6 +131,8 @@ struct Configuration {
     field(yaml["field"]),
     sgld(yaml["sgld"]),
     postprocess(yaml["postprocess"])
-  {}
+  {
+    assert(domain.bounds.size() == postprocess.num_points_per_dim.size());
+  }
 }; // Configuration
 #endif // EXAMPLES_OPTIONS

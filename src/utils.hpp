@@ -32,7 +32,6 @@ inline void scale(T* x, const int& n, const T& a) {
   scale<T>(x, n, a, x);
 }
 
-
 } // namespace pift
 
 #endif // PIFT_UTILS_HPP

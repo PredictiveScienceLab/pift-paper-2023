@@ -17,7 +17,7 @@
 namespace pift {
 
 // Send a vectot to a stream
-template <typename T, typename S>
+template<typename T, typename S>
 void cout_vec(
   const T* v,
   const int n,
@@ -30,27 +30,27 @@ void cout_vec(
   out << std::endl;
 }
 
-template <typename T>
+template<typename T>
 inline void cout_vec(
     const T* v, const int n, const std::string& prefix=""
 ) {    
   cout_vec(v, n, std::cout, prefix);
 }
 
-template <typename T, typename S>
+template<typename T, typename S>
 inline void cout_vec(
     const std::vector<T>& x, S& out, const std::string& prefix=""
 ) {
   cout_vec(x.data(), x.size(), out, prefix);
 }
 
-template <typename T>
+template<typename T>
 inline void cout_vec(const std::vector<T>& x, const std::string& prefix) {
   cout_vec(x, std::cout, prefix);
 }
 
 // Saves a std::vector to a file
-template <typename T>
+template<typename T>
 void savetxt(
     const T* x, const int& n, const std::string& filename,
     const bool& disp=true
@@ -68,7 +68,7 @@ void savetxt(
 }
 
 // Saves a matrix to a file
-template <typename T>
+template<typename T>
 void savetxt(
     const T* x, const int& n, const int& m, const std::string& filename,
     const bool& disp=true
@@ -87,7 +87,7 @@ void savetxt(
 }
 
 // Reads a std::vector from a file
-template <typename T>
+template<typename T>
 std::vector<T> loadtxtvec(const std::string& filename) {
   std::ifstream iff(filename);
   std::string line;
@@ -99,6 +99,8 @@ std::vector<T> loadtxtvec(const std::string& filename) {
   iff.close();
   return result;
 }
+
+
 
 } // namespace pift
 #endif // PIFT_IO_HPP

@@ -96,8 +96,13 @@ int main(int argc, char* argv[]) {
   sgld_params.out_file = samples_out_file;
   sgld(eu_h, w, phi.get_dim_w(), rng, config.sgld.num_samples, sgld_params);
 
-  // TODO: Post process the results. Save the field values on
-  // a mesh for each one of the production samples
+  // Post process the results
+  const int n = config.postprocess.num_points_per_dim[0];
+  F x[n];
+  pift::linspace(domain.a(0), domain.b(0), n, x);
+  x_file = prefix + "_x.csv";
+  pift::savetxt(prefix + "_x.csv");
+
 
   // We are done
   std::cout << "*** Done ***" << std::endl;
@@ -106,6 +111,7 @@ int main(int argc, char* argv[]) {
     std::cout << "\t- " << warmup_out_file << std::endl;
   if(config.sgld.save_samples)
     std::cout << "\t- " << samples_out_file << std::endl;
+  std::cout << "\t- " << x_file << std::endl;
 
   return 0;
 } // main
