@@ -42,13 +42,13 @@ int main(int argc, char* argv[]) {
   const int n = 100;
   F x[n];
   pift::linspace(domain.a(0), domain.b(0), n, x);
-  pift::savetxt(x, n, "src/unit_test_x.csv");
+  pift::savetxt(x, n, "tests/unit_test_x.csv");
 
   // Some random weights
   F w[phi.get_dim_w()];
   std::normal_distribution<F> norm(0, 1);
   std::generate(w, w + psi.get_dim_w(), [&norm, &rng]() {return norm(rng);});
-  pift::savetxt(w, psi.get_dim_w(), "src/unit_test_w.csv");
+  pift::savetxt(w, psi.get_dim_w(), "tests/unit_test_w.csv");
 
   // Evaluate the parameterization and its gradients, aka the prolongation.
   F prolong[psi.get_prolong_size() * n];
@@ -61,9 +61,9 @@ int main(int argc, char* argv[]) {
         grad_w_prolong + psi.get_grad_w_prolong_size() * i
     );
   }
-  pift::savetxt(prolong, n, psi.get_prolong_size(), "src/unit_test_psi.csv");
+  pift::savetxt(prolong, n, psi.get_prolong_size(), "tests/unit_test_psi.csv");
   pift::savetxt(grad_w_prolong, n, psi.get_grad_w_prolong_size(),
-      "src/unit_test_grad_w_psi.csv");
+      "tests/unit_test_grad_w_psi.csv");
 
   // Evaluate the constrained parameterization and its gradients
   for(int i=0; i<n; i++) {
@@ -74,9 +74,9 @@ int main(int argc, char* argv[]) {
         grad_w_prolong + phi.get_grad_w_prolong_size() * i
     );
   }
-  pift::savetxt(prolong, n, psi.get_prolong_size(), "src/unit_test_phi.csv");
+  pift::savetxt(prolong, n, psi.get_prolong_size(), "tests/unit_test_phi.csv");
   pift::savetxt(grad_w_prolong, n, phi.get_grad_w_prolong_size(),
-      "src/unit_test_grad_w_phi.csv");
+      "tests/unit_test_grad_w_phi.csv");
 
   return 0;
 }

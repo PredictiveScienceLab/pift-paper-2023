@@ -56,7 +56,7 @@ int main(int argc, char* argv[]) {
   const int n = 100;
   F x[n];
   pift::linspace(phi.a(), phi.b(), n, x);
-  pift::savetxt(x, n, "src/unit_test_x.csv");
+  pift::savetxt(x, n, "tests/unit_test_x.csv");
 
   // Some random weights to get us started
   F w[phi.get_dim_w()];
@@ -64,7 +64,7 @@ int main(int argc, char* argv[]) {
 
   // Some random weights
   std::generate(w, w + psi.get_dim_w(), [&norm, &rng]() {return norm(rng);});
-  pift::savetxt(w, psi.get_dim_w(), "src/unit_test_w.csv");
+  pift::savetxt(w, psi.get_dim_w(), "tests/unit_test_w.csv");
 
   // Evaluate the Hamiltonian on these points
   F h_vals[n];
@@ -73,15 +73,15 @@ int main(int argc, char* argv[]) {
   for(int i=0; i<n; i++)
     h_vals[i] = eu_h.add_grad(x + i, w, grad_w_h + phi.get_dim_w() * i);
 
-  pift::savetxt(h_vals, n, "src/unit_test_H.csv");
-  pift::savetxt(grad_w_h, n, phi.get_dim_w(), "src/unit_test_grad_w_H.csv");
+  pift::savetxt(h_vals, n, "tests/unit_test_H.csv");
+  pift::savetxt(grad_w_h, n, phi.get_dim_w(), "tests/unit_test_grad_w_H.csv");
 
   // Now let's estimate the parameters using sgld
   pift::SGLDParams<F> sgld_params;
   sgld_params.alpha = 0.1/beta;
   sgld_params.beta = 0.0;
   sgld_params.gamma = 0.51;
-  sgld_params.out_file = "src/foo_prior.csv";
+  sgld_params.out_file = "tests/unit_test_field_prior.csv";
   sgld_params.save_freq = 10'000;
   sgld_params.disp = true;
   sgld_params.disp_freq = 100'000;
