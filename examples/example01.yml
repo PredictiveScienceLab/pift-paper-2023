@@ -2,7 +2,7 @@
 # Some parameters the control the output
 output:
   # The output files will have the following prefix
-  prefix: example_01
+  prefix: example01
 # The physical domain
 domain: 
   bounds:
@@ -22,7 +22,7 @@ sgld:
   #   
   #   alpha_t = alpha / (beta + t) ** gamma
   #
-  alpha: 0.1
+  alpha: 0.01
   beta: 0.1
   gamma: 0.51 
   # The standard deviation with which to initialize the weights
@@ -37,11 +37,11 @@ sgld:
   # Whether or not to display the progress in the screen
   disp: true
   # The display frequency
-  disp_freq: 100000
+  disp_freq: 1000000
   # The number of warmup steps
-  num_warmup: 10000000
+  num_warmup: 100000000
   # The number of production samples
-  num_samples: 10000000
+  num_samples: 100000000
 # Postprocessing details
 # Postprocessing produces two files. The first is <PREFIX>_<BETA>_x.csv
 # containing the mesh on which we evaluate the field and

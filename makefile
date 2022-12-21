@@ -16,8 +16,8 @@ CXXFLAGS=-O3 -ffast-math -std=c++20 -I./src -I./examples \
 # Link options
 LDFLAGS=-L$(YAMLCPP)/lib -lyaml-cpp
 
-all: tests/test_domain tests/test_fields tests/test_hamiltonian \
-		 examples/example01
+all:test_domain test_fields test_hamiltonian \
+		 example01
 
 clean:
 	$(RM) tests/*.o examples/*.o
@@ -32,7 +32,7 @@ test_fields: test_fields.o
 	$(CXX) -o tests/test_fields tests/test_fields.o
 
 test_fields.o: tests/test_fields.cpp
-	$(CXX) -c tests/test_fields.cpp $(CXXFLAGS)
+	$(CXX) -c tests/test_fields.cpp $(CXXFLAGS) -o tests/test_fields.o
 
 test_hamiltonian: test_hamiltonian.o
 	$(CXX) -o tests/test_hamiltonian tests/test_hamiltonian.o
@@ -43,5 +43,5 @@ test_hamiltonian.o: tests/test_hamiltonian.cpp
 example01: example01.o
 	$(CXX) -o examples/example01 examples/example01.o $(LDFLAGS)
 
-example01.o: example01.cpp
-	$(CXX) -c examples/example01.cpp $(CXXFLAGS) -o examples01.o
+example01.o: examples/example01.cpp
+	$(CXX) -c examples/example01.cpp $(CXXFLAGS) -o examples/example01.o

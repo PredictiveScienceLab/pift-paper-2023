@@ -45,7 +45,7 @@ inline void cout_vec(
 }
 
 template<typename T>
-inline void cout_vec(const std::vector<T>& x, const std::string& prefix) {
+inline void cout_vec(const std::vector<T>& x, const std::string& prefix="") {
   cout_vec(x, std::cout, prefix);
 }
 

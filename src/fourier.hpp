@@ -51,7 +51,7 @@ class Fourier1DField : public ParameterizedField<T> {
     // w -- The weight vector of size dim
     T operator()(const T* x, const T* w) const {
       T s = w[0];
-      const T dx = 2.0 * M_PI / L() * (x[0] - a());
+      const T dx = M_PI / L() * (x[0] - a());
       for(int i=1; i<num_terms; i++) {
         const T tmp = dx * i;
         s += w[i] * std::cos(tmp) + w[num_terms + i - 1] * std::sin(tmp);

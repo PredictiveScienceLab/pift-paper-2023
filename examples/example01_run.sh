@@ -26,8 +26,18 @@ fi
 for beta in 0.001 0.01 0.1 1.0 10.0 100.0 1000.0 10000.0 100000.0 1000000.0
 do
   ./example01 $beta example01.yml
+  if [ $? -ne 0 ]; then
+    echo "*** FAILED ***"
+    exit 2
+  fi
+  python3 example01_plot.py $beta example01.yml
+  if [ $? -ne 0 ]; then
+    echo "*** FAILED ***"
+    exit 2
+  fi
 done
 
 # Move all datafiles in example01_resulsts
 mkdir example01_results
 mv example01*.csv example01_results/
+mv example01*.png example01_results/
