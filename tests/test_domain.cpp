@@ -9,7 +9,7 @@
 #include <iostream>
 #include <iomanip>
 
-#include "domain.hpp"
+#include "pift.hpp"
 
 // The type of floating point numbers
 using F = float;

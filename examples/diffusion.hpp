@@ -1,24 +1,22 @@
-/* Diffusion Hamiltonian. This is example 1 of the paper.
- *
- * Author:
- *  Ilias Bilionis
- *
- * Date:
- *  12/19/2022
- *
- */
+// Diffusion Hamiltonian. This is example 1 of the paper.
+//
+// Author:
+//  Ilias Bilionis
+//
+// Date:
+//  12/19/2022
+//
+
 
 #ifndef PIFT_DIFFUSION_HPP
 #define PIFT_DIFFUSION_HPP
 
-#include "hamiltonian.hpp"
-
 #include <cmath>
 
-using namespace std;
+#include "pift.hpp"
 
 template<typename T>
-class Example1Hamiltonian : public Hamiltonian<T> {
+class Example1Hamiltonian : public pift::Hamiltonian<T> {
   private:
     // The inverse temperature
     const T beta;
@@ -28,13 +26,13 @@ class Example1Hamiltonian : public Hamiltonian<T> {
 
   public:
     Example1Hamiltonian(const T& beta, const T& kappa=0.25) : 
-      Hamiltonian<T>(0), beta(beta), kappa(kappa)
+      pift::Hamiltonian<T>(0), beta(beta), kappa(kappa)
   {}
 
     // The source term
     inline T q(const T* x) const
     {
-      return exp(-x[0]);
+      return std::exp(-x[0]);
     }
 
     inline T operator()(const T* x, const T* prolong_phi, const T* theta) const 
@@ -65,6 +63,6 @@ class Example1Hamiltonian : public Hamiltonian<T> {
     ) const {
       return this->operator()(x, prolong_phi, theta);
     }
-};
+}; // Example1Hamiltonian
 
 #endif // PIFT_DIFFUSION_HPP

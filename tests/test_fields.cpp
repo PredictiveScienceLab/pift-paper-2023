@@ -10,11 +10,7 @@
 
 #include <random>
 
-#include "domain.hpp"
-#include "fourier.hpp"
-#include "utils.hpp"
-#include "io.hpp"
-
+#include "pift.hpp"
 
 int main(int argc, char* argv[]) {
 

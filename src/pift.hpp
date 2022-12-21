@@ -12,4 +12,5 @@
 #include "domain.hpp"
 #include "field.hpp"
 #include "fourier.hpp"
+#include "hamiltonian.hpp"
 #include "sgld.hpp"
