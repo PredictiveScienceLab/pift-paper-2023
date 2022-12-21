@@ -114,6 +114,15 @@ class Constrained1DField : public ParameterizedField<T> {
        assert(dim_x == 1);
        this->values.assign(values, values + 2);
      }
+
+     Constrained1DField(
+         const PF& phi,
+         const D& domain,
+         const std::vector<T> values
+     ) : Constrained1DField<T, PF, D>(phi, domain, values.data())
+     {
+       assert(values.size() == 2);
+     }
  
      inline T a() const { return domain.a(0); }
      inline T ya() const { return values[0]; }

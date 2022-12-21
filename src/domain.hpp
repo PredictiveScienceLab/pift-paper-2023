@@ -32,6 +32,11 @@ class UniformRectangularDomain {
       return v;
     }
 
+    inline void init() {
+      volume = calculate_volume();
+      unif = new std::uniform_real_distribution<T>(0, 1);
+    }
+
   public:
     // The bounds of the box x_(i=1)^d [a_i, b_i] written in a 1D pointer as
     // [a_1, b_1, a_2, b_2, ..., a_d, b_d]
@@ -40,8 +45,20 @@ class UniformRectangularDomain {
       rng(rng)
     {
       this->bounds.assign(bounds, bounds + 2 * dim);
-      volume = calculate_volume();
-      unif = new std::uniform_real_distribution<T>(0, 1);
+      init();
+    }
+
+    UniformRectangularDomain(
+        const std::vector<std::vector<T>>& bounds, R& rng
+    ) : dim(bounds.size()), rng(rng)
+    {
+      this->bounds.resize(2 * dim);
+      for(int i=0; i<dim; i++) {
+        assert(bounds[i].size() == 2);
+        this->bounds[2 * i] = bounds[i][0];
+        this->bounds[2 * i + 1] = bounds[i][1];
+        init();
+      }
     }
 
     ~UniformRectangularDomain() {
