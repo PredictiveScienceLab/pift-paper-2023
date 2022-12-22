@@ -77,6 +77,11 @@ class UniformRectangularDomain {
         x[i] = (bi - ai) * (*unif)(rng) + ai;
       }
     }
+
+    inline void sample(T* xs, const int& n) {
+      for(int i=0; i<n; i++)
+        sample(xs + i);
+    }
 };
 
 } // namespace pift

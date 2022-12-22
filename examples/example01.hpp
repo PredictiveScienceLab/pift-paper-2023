@@ -12,6 +12,7 @@
 #define PIFT_EXAMPLE01_HPP
 
 #include <cmath>
+#include <vector>
 
 #include "pift.hpp"
 
@@ -63,6 +64,22 @@ class Example01Hamiltonian : public pift::Hamiltonian<T> {
     ) const {
       return this->operator()(x, prolong_phi, theta);
     }
-}; // Example01Hamiltonian
 
+    // Return the solution as a function
+    inline auto get_solution(const T* bndry_values) {
+      std::vector<T> scratch;
+      scratch.assign(bndry_values, bndry_values + 2);
+      scratch.push_back(1.0 / kappa);
+      scratch.push_back(std::exp(-1.0));
+      return [s=scratch](const T& x) {
+        const T ya = s[0];
+        const T yb = s[1];
+        const T ikappa = s[2];
+        const T exp_m_1 = s[3];
+        const T c2 = ya - ikappa;
+        const T c1 = yb - c2 - ikappa * exp_m_1;
+        return ikappa * std::exp(-x) + c1 * x + c2;
+      };
+    }
+}; // Example01Hamiltonian
 #endif // PIFT_EXAMPLE01_HPP

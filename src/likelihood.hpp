@@ -25,6 +25,7 @@ class GaussianLikelihood {
 protected:
   const int num_params;
   const FA& phi;
+  const int dim_x;
   const int dim_w;
   const T sigma;
   const T sigma2;
@@ -43,6 +44,7 @@ public:
   ) :
     num_params(0),
     phi(phi),
+    dim_x(phi.get_dim_x()),
     dim_w(phi.get_dim_w()),
     sigma(sigma),
     sigma2(std::pow(sigma, 2)),
@@ -87,7 +89,7 @@ public:
     const T* theta,
     T* out
   ) {
-    const T phi_n = phi.eval_grad(x_obs[n], w, grad_phi);
+    const T phi_n = phi.eval_grad(x_obs + n * dim_x, w, grad_phi);
     const T std_err = (phi_n - y_obs[n]) / sigma2;
     // grad_w_minus_log_like = d_minus_log_like_d_phi * grad_w_phi
     for(int i=0; i<dim_w; i++)
