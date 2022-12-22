@@ -38,7 +38,7 @@ int main(int argc, char* argv[]) {
 
   // Read beta from the command line
   const F beta = static_cast<F>(std::stod(argv[1]));
-  assert(beta >= 0.0);
+  assert(beta > 0.0);
   char parsed_beta[256];
   snprintf(parsed_beta, 256, "beta=%.2e", beta);
 

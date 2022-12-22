@@ -131,6 +131,7 @@ class UEGradHAtFixedTheta {
       delete x;
     }
 
+    inline FA& get_phi() const { return phi; }
     inline int get_num_collocation() const { return num_collocation; }
 
     // Adds the gradient of the Hamiltonian density with respect to w to out

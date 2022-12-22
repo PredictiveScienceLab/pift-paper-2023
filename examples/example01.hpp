@@ -76,9 +76,9 @@ class Example01Hamiltonian : public pift::Hamiltonian<T> {
         const T yb = s[1];
         const T ikappa = s[2];
         const T exp_m_1 = s[3];
-        const T c2 = ya - ikappa;
-        const T c1 = yb - c2 - ikappa * exp_m_1;
-        return ikappa * std::exp(-x) + c1 * x + c2;
+        const T c2 = ya + ikappa;
+        const T c1 = yb - c2 + ikappa * exp_m_1;
+        return -ikappa * std::exp(-x) + c1 * x + c2;
       };
     }
 }; // Example01Hamiltonian

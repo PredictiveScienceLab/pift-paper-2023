@@ -21,17 +21,31 @@ class UEGradWPostAtFixedTheta {
 protected:
   UEH& prior;
   UEL& likelihood;
+  const int dim_w;
+  T* tmp;
+  std::uniform_int_distribution<int>* unif_int;
 
 public:
   UEGradWPostAtFixedTheta(UEH& prior, UEL& likelihood) : 
-    prior(prior), likelihood(likelihood)
-  {}
+    prior(prior), likelihood(likelihood),
+    dim_w(likelihood.get_dim_w())
+  {
+    tmp = new T[dim_w];
+  }
+
+  ~UEGradWPostAtFixedTheta() {
+    delete tmp;
+  }
 
   inline UEH& get_prior() { return prior; }
   inline UEL& get_likelihood() { return likelihood; }
 
   inline T operator()(const T* w, T* out) {
-    return prior(w, out) + likelihood(w, out);
+    const T p = prior(w, out);
+    const T l = likelihood(w, tmp);
+    for(int i=0; i<dim_w; i++)
+      out[i] += tmp[i];
+    return p + l;
   }
 }; // UEGradWPostAtFixedTheta
 

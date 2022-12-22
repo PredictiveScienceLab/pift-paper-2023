@@ -10,6 +10,7 @@
 #ifndef PIFT_LIKELIHOOD_HPP
 #define PIFT_LIKELIHOOD_HPP
 
+#include <random>
 #include <algorithm>
 #include <cmath>
 
@@ -69,8 +70,7 @@ public:
 
   // The minus log likelihood of one observation
   inline T operator()(const int& n, const T* w, const T* theta) const {
-    return 0.5 * (std::log(2.0 * M_PI * sigma) +
-                  std::pow((phi->eval(x_obs[n], w) - y_obs[n]) / sigma, 2));
+    return 0.5 * std::pow((phi->eval(x_obs[n], w) - y_obs[n]) / sigma, 2);
   }
 
   // The minus log likelihood of all observations
@@ -94,8 +94,7 @@ public:
     // grad_w_minus_log_like = d_minus_log_like_d_phi * grad_w_phi
     for(int i=0; i<dim_w; i++)
       out[i] += std_err * grad_phi[i];
-    return 0.5 * (std::log(2.0 * M_PI * sigma) +
-                  std::pow(std_err, 2));
+    return 0.5 * std::pow(std_err, 2);
   }
 
   // Computes the minus of the log likelihood of all observations
@@ -119,7 +118,7 @@ class UEGradWLAtFixedTheta {
     const T scale_ratio;
     const int dim_w;
     R& rng;
-    uniform_int_distribution<int>* unif_int;
+    std::uniform_int_distribution<int>* unif_int;
 
   public:
     UEGradWLAtFixedTheta(
@@ -130,12 +129,14 @@ class UEGradWLAtFixedTheta {
       dim_w(l.get_dim_w()),
       scale_ratio(static_cast<T>(l.get_num_obs()) / static_cast<T>(batch_size))
     {
-      unif_int = new uniform_int_distribution<int>(0, l.get_num_obs() - 1);
+      unif_int = new std::uniform_int_distribution<int>(0, l.get_num_obs() - 1);
     }
 
     ~UEGradWLAtFixedTheta() {
       delete unif_int;
     }
+
+    inline int get_dim_w() const { return dim_w; }
 
     inline T operator()(const T* w, T* out) {
       std::fill(out, out + dim_w, 0.0);
@@ -148,6 +149,8 @@ class UEGradWLAtFixedTheta {
       pift::scale(out, dim_w, scale_ratio);
       return s;
     }
+
+    inline R& get_rng() const { return rng; }
 }; // UEGradLAtFixedTheta
 } // namespace pift
 #endif // PIFT_LIKELIHOOD_HPP
