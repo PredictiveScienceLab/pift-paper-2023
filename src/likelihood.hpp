@@ -6,6 +6,11 @@
 // Date:
 //  12/21/2022
 //
+// TODO:
+//  - Develop the concept of measurement operator.
+//  - Design abstract Likelihood class.
+//  - Allow likelihood to have parameters.
+//
 
 #ifndef PIFT_LIKELIHOOD_HPP
 #define PIFT_LIKELIHOOD_HPP
@@ -20,7 +25,7 @@ namespace pift {
 
 // The following class works only for pointwise observations of a scalar field
 // Also it cannot have parameters of its own.
-// TODO: Generalize to measurement operators.
+//
 template<typename T, typename FA>
 class GaussianLikelihood {
 protected:

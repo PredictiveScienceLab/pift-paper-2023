@@ -6,6 +6,10 @@
 // Date:
 //  12/21/2022
 //
+//  TODO:
+//    - Develop prior for the field weights.
+//    - Develop prior for the physical parameters.
+//
 
 #ifndef PIFT_POSTERIOR_HPP
 #define PIFT_POSTERIOR_HPP

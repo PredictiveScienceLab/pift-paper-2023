@@ -5,6 +5,13 @@
 //
 // Date:
 //  12/19/2022
+//
+//  TODO:
+//    - Develop abstractions to deal with multi-dimensional fields.
+//    - Develop template class for tensor product of fields.
+//    - Develop template class for constraining 2D and 3D things at an 
+//      arbitrary boundary.
+//    - Develop fields with parameterized boundary.
 
 #ifndef PIFT_FIELD_HPP
 #define PIFT_FIELD_HPP
@@ -179,6 +186,5 @@ class Constrained1DField : public ParameterizedField<T> {
       return f;
     }
 }; // Constrained1DField
-
 } // namespace pift
 #endif // PIFT_FIELD_HPP

@@ -6,9 +6,10 @@
 // Date:
 //  12/16/2022
 //
-// TODO: This design of the Hamiltonian does redundant computations when the
-// parameters stay fixed. A better design could have been to allow the user
-// to set_theta which would trigger some computations.
+// TODO:
+//    - This design of the Hamiltonian does redundant computations when the
+//      parameters stay fixed. A better design could have been to allow the
+//      user to set_theta which would trigger some computations.
 //
 
 #ifndef PIFT_HAMILTONIAN_HPP
