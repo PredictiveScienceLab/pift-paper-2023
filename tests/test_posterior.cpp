@@ -26,7 +26,7 @@ using H = Example01Hamiltonian<F>;
 using L = pift::GaussianLikelihood<F, CFField>;
 using UEGradWH = pift::UEGradHAtFixedTheta<F, H, CFField, Domain>;
 using UEGradWL = pift::UEGradWLAtFixedTheta<F, L, RNG>;
-using UEGradP = pift::UEGradWPostAtFixedTheta<F, UEGradWH, UEGradWL>;
+using UEGradWP = pift::UEGradWPostAtFixedTheta<F, UEGradWH, UEGradWL>;
 
 int main(int argc, char* argv[]) {
   if(argc != 3) {
@@ -94,7 +94,7 @@ int main(int argc, char* argv[]) {
   UEGradWL eu_l(l, nullptr, batch_size, rng);
 
   // An unbiased estimator of minus log the posterior
-  UEGradP eu_p(eu_h, eu_l);
+  UEGradWP eu_p(eu_h, eu_l);
 
   // Some random weights to get us started
   F w[phi.get_dim_w()];

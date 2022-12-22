@@ -82,7 +82,7 @@ class UEGradHAtFixedTheta {
     H& h;
     FA& phi;
     D& domain;
-    const T* theta;
+    T* theta;
     const int num_collocation;
     const int dim_x;
     const int dim_w;
@@ -132,6 +132,7 @@ class UEGradHAtFixedTheta {
       delete x;
     }
 
+    inline void set_theta(const T* theta) { this->theta = theta; }
     inline FA& get_phi() const { return phi; }
     inline int get_num_collocation() const { return num_collocation; }
 

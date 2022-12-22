@@ -118,7 +118,7 @@ template<typename T, typename L, typename R>
 class UEGradWLAtFixedTheta {
   protected:
     L& l;
-    const T* theta;
+    T* theta;
     const int batch_size;
     const T scale_ratio;
     const int dim_w;
@@ -141,6 +141,7 @@ class UEGradWLAtFixedTheta {
       delete unif_int;
     }
 
+    inline void set_theta(const T* theta) { this->theta = theta; }
     inline int get_dim_w() const { return dim_w; }
 
     inline T operator()(const T* w, T* out) {
