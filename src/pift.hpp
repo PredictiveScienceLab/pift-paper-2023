@@ -7,6 +7,9 @@
 //  12/20/2022
 //
 
+#ifndef PIFT_PIFT_HPP
+#define PIFT_PIFT_HPP
+
 #include "io.hpp"
 #include "utils.hpp"
 #include "domain.hpp"
@@ -16,3 +19,5 @@
 #include "sgld.hpp"
 #include "likelihood.hpp"
 #include "posterior.hpp"
+
+#endif // PIFT_PIFT_HPP
