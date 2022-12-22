@@ -105,14 +105,14 @@ int main(int argc, char* argv[]) {
   std::string warmup_out_file = prefix + "_warmup.csv";
   std::string samples_out_file = prefix + "_samples.csv";
   pift::SGLDParams<F> sgld_params;
-  sgld_params.alpha = 1e-4/beta;
+  sgld_params.alpha = 1e-2/beta;
   sgld_params.beta = 0.0;
   sgld_params.gamma = 0.51;
   sgld_params.save_freq = 10'000;
   sgld_params.disp = true;
   sgld_params.disp_freq = 1'000'000;
-  const int num_warmup = 100'000'000;
-  const int num_samples = 100'000'000;
+  const int num_warmup = 20'000'000;
+  const int num_samples = 20'000'000;
   sgld_params.save_to_file = true;
   sgld_params.out_file = warmup_out_file;
   sgld(eu_p, w, phi.get_dim_w(), rng, num_warmup, sgld_params);
