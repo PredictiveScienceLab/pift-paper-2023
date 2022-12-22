@@ -39,16 +39,16 @@ public:
     const int& num_obs,
     const T* x_obs,
     const T* y_obs,
-    const T& sigma,
+    const T& sigma
   ) :
-  num_params(0),
-  phi(phi),
-  dim_w(phi.get_dim_w()),
-  sigma(sigma),
-  sigma2(std::pow(sigma, 2)),
-  num_obs(num_obs),
-  x_obs(x_obs),
-  y_obs(y_obs)
+    num_params(0),
+    phi(phi),
+    dim_w(phi.get_dim_w()),
+    sigma(sigma),
+    sigma2(std::pow(sigma, 2)),
+    num_obs(num_obs),
+    x_obs(x_obs),
+    y_obs(y_obs)
   {
     grad_phi = new T[dim_w];
   }
@@ -90,7 +90,7 @@ public:
     const T phi_n = phi.eval_grad(x_obs[n], w, grad_phi);
     const T std_err = (phi_n - y_obs[n]) / sigma2;
     // grad_w_minus_log_like = d_minus_log_like_d_phi * grad_w_phi
-    for(int i=0; i<dim; i++)
+    for(int i=0; i<dim_w; i++)
       out[i] += std_err * grad_phi[i];
     return 0.5 * (std::log(2.0 * M_PI * sigma) +
                   std::pow(std_err, 2));
@@ -108,10 +108,10 @@ public:
 
 // This unbiased estimator only works with a Gaussian likelihood
 // TODO: Generalize
-template<typename T, typename R>
-class UEGradWLAtFixedTheta
+template<typename T, typename L, typename R>
+class UEGradWLAtFixedTheta {
   protected:
-    GaussianLikelihood<T>& l;
+    L& l;
     const T* theta;
     const int batch_size;
     const T scale_ratio;
@@ -120,18 +120,18 @@ class UEGradWLAtFixedTheta
     uniform_int_distribution<int>* unif_int;
 
   public:
-    UEGradLAtFixedTheta(
-        GaussianLikelihood<T>& l, const T* theta, const int& batch_size, R& rng
+    UEGradWLAtFixedTheta(
+        L& l, const T* theta, const int& batch_size, R& rng
     ) :
       l(l), theta(theta), batch_size(batch_size),
       rng(rng),
       dim_w(l.get_dim_w()),
-      scale_ratio(static_cast<T>(num_obs) / static_cast<T>(batch_size))
+      scale_ratio(static_cast<T>(l.get_num_obs()) / static_cast<T>(batch_size))
     {
-      unif_int = new uniform_int_distribution<int>(0, num_obs - 1);
+      unif_int = new uniform_int_distribution<int>(0, l.get_num_obs() - 1);
     }
 
-    ~UEGradHAtFixedTheta() {
+    ~UEGradWLAtFixedTheta() {
       delete unif_int;
     }
 

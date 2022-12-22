@@ -14,7 +14,8 @@
 #include <yaml-cpp/yaml.h>
 
 #include "pift.hpp"
-#include "diffusion.hpp"
+// This is where you can find the Hamiltonian of the example:
+#include "example01.hpp"
 
 #include "options.hpp"
 #include "postprocessing.hpp"
@@ -25,7 +26,7 @@ using F = float;
 using Domain = pift::UniformRectangularDomain<F, RNG>;
 using FField = pift::Fourier1DField<F, Domain>;
 using CFField = pift::Constrained1DField<F, FField, Domain>;
-using H = Example1Hamiltonian<F>;
+using H = Example01Hamiltonian<F>;
 using UEGradWH = pift::UEGradHAtFixedTheta<F, H, CFField, Domain>;
 
 int main(int argc, char* argv[]) {

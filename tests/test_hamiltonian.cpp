@@ -10,7 +10,7 @@
 #include <random>
 
 #include "pift.hpp"
-#include "diffusion.hpp"
+#include "example01.hpp"
 
 
 int main(int argc, char* argv[]) {
@@ -21,7 +21,7 @@ int main(int argc, char* argv[]) {
   using Domain = pift::UniformRectangularDomain<F, RNG>;
   using FField = pift::Fourier1DField<F, Domain>;
   using CFField = pift::Constrained1DField<F, FField, Domain>;
-  using H = Example1Hamiltonian<F>;
+  using H = Example01Hamiltonian<F>;
   using UEGradWH = pift::UEGradHAtFixedTheta<F, H, CFField, Domain>;
 
   // A random number generator

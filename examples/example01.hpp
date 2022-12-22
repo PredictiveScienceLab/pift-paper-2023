@@ -8,15 +8,15 @@
 //
 
 
-#ifndef PIFT_DIFFUSION_HPP
-#define PIFT_DIFFUSION_HPP
+#ifndef PIFT_EXAMPLE01_HPP
+#define PIFT_EXAMPLE01_HPP
 
 #include <cmath>
 
 #include "pift.hpp"
 
 template<typename T>
-class Example1Hamiltonian : public pift::Hamiltonian<T> {
+class Example01Hamiltonian : public pift::Hamiltonian<T> {
   private:
     // The inverse temperature
     const T beta;
@@ -25,7 +25,7 @@ class Example1Hamiltonian : public pift::Hamiltonian<T> {
     const T kappa;
 
   public:
-    Example1Hamiltonian(const T& beta, const T& kappa=0.25) : 
+    Example01Hamiltonian(const T& beta, const T& kappa=0.25) : 
       pift::Hamiltonian<T>(0), beta(beta), kappa(kappa)
   {}
 
@@ -63,6 +63,6 @@ class Example1Hamiltonian : public pift::Hamiltonian<T> {
     ) const {
       return this->operator()(x, prolong_phi, theta);
     }
-}; // Example1Hamiltonian
+}; // Example01Hamiltonian
 
-#endif // PIFT_DIFFUSION_HPP
+#endif // PIFT_EXAMPLE01_HPP
