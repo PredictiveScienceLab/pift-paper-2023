@@ -68,8 +68,16 @@ public:
   ) const = 0;
 }; // Hamiltonian
 
-// A class representing an unbiased estimator of the gradient of
-// Hamiltonian with resepect to w at a fixed theta.
+// An unbiased estimator of the spatial integral of grad w of the Hamiltonian
+// density.
+//
+// The mathematical formula is:
+// \[
+//  \int_{\Omega} dx \nabla_w h(x, \text{Pr}[\phi](x;w),\dots,\theta) \approx
+//    \frac{1}{N}\sum_{i=1}^N 
+//      \nabla_w h(x_i, \text{Pr}[\phi](x_i;w),\theta),
+// \]
+// where \(x_i\) are uniformly and independently sampled from \(\Omega\).
 // 
 // Template arguments:
 //  T  -- The type of floating point numbers.
@@ -132,6 +140,7 @@ class UEGradHAtFixedTheta {
       delete x;
     }
 
+    // TODO: Think if we need to keep this
     inline void set_theta(const T* theta) { this->theta = theta; }
     inline FA& get_phi() const { return phi; }
     inline int get_num_collocation() const { return num_collocation; }
@@ -160,7 +169,81 @@ class UEGradHAtFixedTheta {
       scale(out, dim_w, scale_ratio, out);
       return s * scale_ratio;
     }
-
 };
+
+// An unbiased estimator of the spatial integral of grad theta of the
+// Hamiltonian.
+//
+// The formula is:
+// \[
+// \int_{\Omega}dx \nabla_{\theta} h(x,\text{Pr}[\phi](x,w),\theta) \approx
+//  \frac{1}{N}\sum_{i=1}^N \nabla_{\theta}(x_i,\text{Pr}[\phi](x_i,w),\theta)
+// \]
+template<typename T, typename H, typename FA, typename D>
+class UEIntegralGradThetaH {
+  protected:
+    H& h;
+    FA& phi;
+    D& domain;
+    const int num_collocation;
+    const int dim_x;
+    const int dim_w;
+    const int prolong_size;
+    const T scale_ratio;
+    T* prolong_phi;
+    T* x;
+
+  public:
+    // Initialize the object
+    // Parameters:
+    //  h       -- A Hamiltonian
+    //  fa      -- A function approximation.
+    //  domain  -- A spatial/time domain.
+    //  num_collocation -- The number of collocation points to sample.
+    UEGradThetaH(
+        H& h, FA& phi, D& domain, const int& num_collocation
+    ) :
+      h(h),
+      phi(phi),
+      domain(domain),
+      dim_x(phi.get_dim_x()),
+      dim_w(phi.get_dim_w()),
+      prolong_size(phi.get_prolong_size()),
+      num_collocation(num_collocation),
+      scale_ratio(domain.get_volume() / num_collocation)
+    {
+      prolong_phi = new T[prolong_size];
+      x = new T[dim_x];
+    }
+
+    ~UEGradHAtFixedTheta() {
+      delete prolong_phi;
+      delete x;
+    }
+
+    inline FA& get_phi() const { return phi; }
+    inline int get_num_collocation() const { return num_collocation; }
+
+    // Adds the gradient of the Hamiltonian density with respect to w to out
+    // Returns the Hamiltonian density at x.
+    inline T add_grad(const T* x, const T* w, const T* theta, T* out) {
+      phi(x, w, prolong_phi);
+      return h.add_grad_theta(x, prolong_phi, theta, out);
+    }
+
+    // Returns the estimator.
+    // In out, it writes the gradient of the estimator with respect to w
+    inline T operator()(const T* w, const T* theta, T* out) {
+      T s = 0.0;
+      std::fill(out, out + dim_w, 0.0);
+      for(int i=0; i<num_collocation; i++) {
+        domain.sample(x);
+        s += add_grad(x, w, theta, out);
+      }
+      scale(out, dim_w, scale_ratio, out);
+      return s * scale_ratio;
+    }
+}; 
+
 } // namespace pift
 #endif // PIFT_HAMILTONIAN_HPP

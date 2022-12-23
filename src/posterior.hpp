@@ -105,36 +105,54 @@ struct UEThetaParams {
   {}
 }; // UEThetaParams
 
-// A class representing an unbiased estimator of the gradient of the
-// expectation of the Hamiltonian with respect to theta.
-// The expectation is over the posterior of w conditional on the data and on
-// theta.
-template <typename T, typename UEH, typename H, typename R>
-class UEGradWThetaHF {
+// A class representing an unbiased estimator of the expectation of the
+// gradient of a function. 
+// The expectation is w with a distribution implied by a Hamiltonian.
+// 
+// Mathematically, it is:
+// \[
+//    \mathbb{E}\left[
+//     \int_{\Omega}dx\nabla_{\theta}f(x;w),\theta)
+//    \right] \approx
+//      \frac{1}{N}\sum_{i=1}^N\nabla_{\theta}f(x;w_i),
+// \]
+// where the \(w_i\)'s are iid sampled from the distribution implied by
+// `ue_grad_w_h` (the unbiased estimator of the gradient of a Hamiltonian).
+//
+template <typename T,
+         typename UEGradWH,
+         typename UEGradThetaF, typename R>
+class UEGradThetaHF {
 protected:
-  UEH& ue_h;
-  H& h;
+  UEGradWH& ue_grad_w_h;
+  UEGradThetaF& ue_grad_theta_f;
   R& rng;
   const int dim_w;
   const int num_params;
+  const T scale_ratio;
   UEThetaParams<T>& params;
-  T* grad_w_H;
   T* ws;
   T* tmp_grad_theta;
   std::normal_distribution<T>* norm;
 
 public:
   UnbiasedEstimatorOfGradTheta(
-      UEH& ue_h, H& h, R& rng,
+      UEGradWH& ue_grad_w_h,
+      UEGradThetaF& ue_grad_theta_f,
+      R& rng,
       UEThetaParams<T>& params
   ) :
-    ue_h(h), h(h), rng(rng), params(params)
-    dim_w(h.get_dim_w()), num_params(h.get_num_params())
+    ue_grad_w_h(ue_grad_w_h),
+    ue_grad_theta_f(ue_grad_theta_f),
+    rng(rng),
+    params(params)
+    dim_w(h.get_dim_w()), num_params(h.get_num_params()),
+    scale_ratio(1.0 / num_collocation)      
   {
     grad_w_H = new T[dim_w];
     ws = new T[params.num_chains * dim_w];
     tmp_grad_theta = new T[num_params];
-    norm = new normal_distribution<T>(0, 1);
+    norm = new std::normal_distribution<T>(0, 1);
     initialize_chains();
   }
 
@@ -165,16 +183,14 @@ public:
   }
 
   T operator()(const T* theta, T* grad_theta) {
+    T result = 0.0;
+    std::fill(grad_theta, grad_theta + num_params, 0.0);
 #ifndef PIFT_THETA_DO_NOT_REINITIALIZE_WS
     if (params.reinitialize_ws)
       initialize_chains();
-#endif
-    T h = 0.0;
-    fill(grad_theta, grad_theta + num_params, 0.0);
     ue_h.set_theta(theta);
     // We keep track of init_it so that we update the 
     // learning rate correctly
-#ifndef PIFT_THETA_DO_NOT_UPDATE_INIT_IT
     const int init_it = params.sgld_params.init_it;
 #endif
     for(int c=0; c<params.num_chains; c++) {
@@ -195,19 +211,14 @@ public:
 #ifndef PIFT_THETA_DO_NOT_UPDATE_INIT_IT
         params.sgld_params.init_it += params.num_thinning;
 #endif
-        // Now w contains the sample
         // Get the gradient with respect to theta
-        h += ha.unbiased_estimator_grad_theta(w, theta, rng, tmp_grad_theta);
+        result += f(w, theta, tmp_grad_theta);
         for(int i=0; i<num_params; i++)
           grad_theta[i] += tmp_grad_theta[i];
       }
-      // TODO: scale h
-      return h;
     }
-    // Divide with the total number of samples
-    const T lambda = T(1.0) / (params.num_chains * params.num_bursts);
-    scale(grad_theta, num_params, lambda);
-    h *= lambda;
+    scale(grad_theta, num_params, scale_ratio);
+    h *= scale_ratio;
     return h;
   }
 }; 
