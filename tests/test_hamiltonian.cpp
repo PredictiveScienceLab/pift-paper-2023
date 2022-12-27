@@ -22,7 +22,7 @@ int main(int argc, char* argv[]) {
   using FField = pift::Fourier1DField<F, Domain>;
   using CFField = pift::Constrained1DField<F, FField, Domain>;
   using H = Example01Hamiltonian<F>;
-  using UEGradWH = pift::UEGradHAtFixedTheta<F, H, CFField, Domain>;
+  using UEGradWH = pift::UEIntegralGradWH<F, H, CFField, Domain>;
 
   // A random number generator
   RNG rng;

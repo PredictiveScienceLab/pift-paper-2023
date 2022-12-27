@@ -20,6 +20,9 @@ namespace pift {
 #include <vector>
 #include <algorithm>
 
+// An abstract class representing a Hamiltonian. It does not really do
+// anything. It just defines the interface that any actual Hamiltonian must
+// adhere to.
 template<typename T>
 class Hamiltonian {
 protected:
@@ -85,7 +88,7 @@ public:
 //  FA -- A function approximation
 //  D  -- A spatial/time domain sampler
 template<typename T, typename H, typename FA, typename D>
-class UEGradHAtFixedTheta {
+class UEIntegralGradWH {
   protected:
     H& h;
     FA& phi;
@@ -109,8 +112,8 @@ class UEGradHAtFixedTheta {
     //  domain  -- A spatial/time domain.
     //  num_collocation -- The number of collocation points to sample.
     //  theta   -- The parameters to keep fixed.
-    UEGradHAtFixedTheta(
-        H& h, FA& phi, D& domain, const int& num_collocation, const T* theta
+    UEIntegralGradWH(
+        H& h, FA& phi, D& domain, const int& num_collocation, T* theta
     ) :
       h(h),
       phi(phi),
@@ -133,7 +136,7 @@ class UEGradHAtFixedTheta {
       x = new T[dim_x];
     }
 
-    ~UEGradHAtFixedTheta() {
+    ~UEIntegralGradWH() {
       delete prolong_phi;
       delete grad_w_prolong_phi;
       delete grad_prolong_phi_H;
@@ -169,7 +172,7 @@ class UEGradHAtFixedTheta {
       scale(out, dim_w, scale_ratio, out);
       return s * scale_ratio;
     }
-};
+}; // UEIntegralGradWH
 
 // An unbiased estimator of the spatial integral of grad theta of the
 // Hamiltonian.
@@ -200,7 +203,7 @@ class UEIntegralGradThetaH {
     //  fa      -- A function approximation.
     //  domain  -- A spatial/time domain.
     //  num_collocation -- The number of collocation points to sample.
-    UEGradThetaH(
+    UEIntegralGradThetaH(
         H& h, FA& phi, D& domain, const int& num_collocation
     ) :
       h(h),
@@ -216,13 +219,16 @@ class UEIntegralGradThetaH {
       x = new T[dim_x];
     }
 
-    ~UEGradHAtFixedTheta() {
+    ~UEIntegralGradThetaH() {
       delete prolong_phi;
       delete x;
     }
 
     inline FA& get_phi() const { return phi; }
     inline int get_num_collocation() const { return num_collocation; }
+    inline int get_dim_w() const { return dim_w; }
+    inline int get_dim_x() const { return dim_x; }
+    inline int get_num_params() const { return h.get_num_params(); }
 
     // Adds the gradient of the Hamiltonian density with respect to w to out
     // Returns the Hamiltonian density at x.
@@ -243,7 +249,7 @@ class UEIntegralGradThetaH {
       scale(out, dim_w, scale_ratio, out);
       return s * scale_ratio;
     }
-}; 
+}; // UEIntegralGradThetaH
 
 } // namespace pift
 #endif // PIFT_HAMILTONIAN_HPP

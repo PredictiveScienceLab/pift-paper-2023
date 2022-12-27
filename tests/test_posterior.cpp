@@ -24,9 +24,9 @@ using FField = pift::Fourier1DField<F, Domain>;
 using CFField = pift::Constrained1DField<F, FField, Domain>;
 using H = Example01Hamiltonian<F>;
 using L = pift::GaussianLikelihood<F, CFField>;
-using UEGradWH = pift::UEGradHAtFixedTheta<F, H, CFField, Domain>;
-using UEGradWL = pift::UEGradWLAtFixedTheta<F, L, RNG>;
-using UEGradWP = pift::UEGradWPostAtFixedTheta<F, UEGradWH, UEGradWL>;
+using UEGradWH = pift::UEIntegralGradWH<F, H, CFField, Domain>;
+using UEGradWL = pift::UEGradWL<F, L, RNG>;
+using UEGradWP = pift::UEGradWPost<F, UEGradWH, UEGradWL>;
 
 int main(int argc, char* argv[]) {
   if(argc != 3) {
@@ -54,7 +54,7 @@ int main(int argc, char* argv[]) {
   Domain domain(bounds, 1, rng);
 
   // The Fourier parameterization for the field
-  const int num_terms = 8;
+  const int num_terms = 4;
   FField psi(domain, num_terms);
 
   // Constrain the field to satisfy the boundary conditions

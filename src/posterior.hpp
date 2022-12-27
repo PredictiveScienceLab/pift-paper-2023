@@ -22,7 +22,7 @@ namespace pift {
 // An unbiased estimator for minus log posterior of w conditional on the
 // data on theta.
 template<typename T, typename UEH, typename UEL>
-class UEGradWPostAtFixedTheta {
+class UEGradWPost {
 protected:
   UEH& prior;
   UEL& likelihood;
@@ -31,14 +31,14 @@ protected:
   std::uniform_int_distribution<int>* unif_int;
 
 public:
-  UEGradWPostAtFixedTheta(UEH& prior, UEL& likelihood) : 
+  UEGradWPost(UEH& prior, UEL& likelihood) : 
     prior(prior), likelihood(likelihood),
     dim_w(likelihood.get_dim_w())
   {
     tmp = new T[dim_w];
   }
 
-  ~UEGradWPostAtFixedTheta() {
+  ~UEGradWPost() {
     delete tmp;
   }
 
@@ -56,7 +56,7 @@ public:
       out[i] += tmp[i];
     return p + l;
   }
-}; // UEGradWPostAtFixedTheta
+}; // UEGradWPost
 
 // The parameters that control the behavior of UEGradWThetaHF.
 template <typename T>
@@ -132,11 +132,12 @@ protected:
   const T scale_ratio;
   UEThetaParams<T>& params;
   T* ws;
+  T* grad_w_H;
   T* tmp_grad_theta;
   std::normal_distribution<T>* norm;
 
 public:
-  UnbiasedEstimatorOfGradTheta(
+  UEGradThetaHF(
       UEGradWH& ue_grad_w_h,
       UEGradThetaF& ue_grad_theta_f,
       R& rng,
@@ -145,9 +146,10 @@ public:
     ue_grad_w_h(ue_grad_w_h),
     ue_grad_theta_f(ue_grad_theta_f),
     rng(rng),
-    params(params)
-    dim_w(h.get_dim_w()), num_params(h.get_num_params()),
-    scale_ratio(1.0 / num_collocation)      
+    params(params),
+    dim_w(ue_grad_theta_f.get_dim_w()),
+    num_params(ue_grad_theta_f.get_num_params()),
+    scale_ratio(1.0 / ue_grad_theta_f.get_num_collocation())      
   {
     grad_w_H = new T[dim_w];
     ws = new T[params.num_chains * dim_w];
@@ -156,13 +158,14 @@ public:
     initialize_chains();
   }
 
-  ~UnbiasedEstimatorOfGradTheta() {
+  ~UEGradThetaHF() {
     delete grad_w_H;
     delete ws;
     delete tmp_grad_theta;
-    delete ue_grad_w;
     delete norm;
   }
+
+  inline int get_num_params() const { return num_params; }
 
   inline void initialize_chains() {
     std::normal_distribution<T> norm(0, params.init_w_sigma);
@@ -171,11 +174,11 @@ public:
   }
 
   inline void warmup(const T* theta) {
-    ue_h.set_theta(theta);
+    ue_grad_w_h.set_theta(theta);
     params.sgld_params.init_it = 0;
     for(int c=0; c<params.num_chains; c++) {
       T* w = ws + c * dim_w;
-      sgld(ue_h, w, rng,
+      sgld(ue_grad_w_h, w, dim_w, rng,
            params.num_init_warmup,
            grad_w_H, *norm, params.sgld_params);
     }
@@ -188,7 +191,7 @@ public:
 #ifndef PIFT_THETA_DO_NOT_REINITIALIZE_WS
     if (params.reinitialize_ws)
       initialize_chains();
-    ue_h.set_theta(theta);
+    ue_grad_w_h.set_theta(theta);
     // We keep track of init_it so that we update the 
     // learning rate correctly
     const int init_it = params.sgld_params.init_it;
@@ -197,7 +200,7 @@ public:
       T* w = ws + c * dim_w;
       // Per iteration warmup
       params.sgld_params.init_it = init_it;
-      sgld(ue_h, w, rng,
+      sgld(ue_grad_w_h, w, dim_w, rng,
            params.num_per_it_warmup,
            grad_w_H, *norm, params.sgld_params);
 #ifndef PIFT_THETA_DO_NOT_UPDATE_INIT_IT
@@ -205,7 +208,7 @@ public:
 #endif
       for(int b=0; b<params.num_bursts; b++) {
         // Sample w num_thinning times
-        sgld(ue_h, w, rng,
+        sgld(ue_grad_w_h, w, dim_w, rng,
              params.num_thinning,
              grad_w_H, *norm, params.sgld_params);
 #ifndef PIFT_THETA_DO_NOT_UPDATE_INIT_IT
@@ -218,41 +221,41 @@ public:
       }
     }
     scale(grad_theta, num_params, scale_ratio);
-    h *= scale_ratio;
-    return h;
+    result *= scale_ratio;
+    return result;
   }
 }; 
 
-// An unbiased estimator of the log posterior of theta conditional on
+// An unbiased estimator of minus the log posterior of theta conditional on
 // the data
 template <typename T, typename UEGradThetaPrior, typename UEGradThetaPost>
 class UEGradThetaMinusPost {
 public:
-  UnbiasedEstimatorOfGradTheta<T,H,H,R>* ue_prior;
-  UnbiasedEstimatorOfGradTheta<T,FH,H,R>* ue_post;
-  T* grad_theta_prior;
-  int dim;
-  UnbiasedEstimatorGradThetaMinusLogPosterior(
-      H& h, FH& fh, R& rng,
-      UEThetaParams<T>& prior_params,
-      UEThetaParams<T>& post_params
-  ) : dim(h.num_params)
+  UEGradThetaPrior& ue_prior;
+  UEGradThetaPost& ue_post;
+  T* grad_theta_prior; // Do I need this?
+  int num_params; // Do I need this?
+  UEGradThetaMinusPost(
+      UEGradThetaPrior& ue_prior,
+      UEGradThetaPost& ue_post
+  ) : ue_prior(ue_prior), ue_post(ue_post),
+      num_params(ue_prior.get_num_params())
   {
-    ue_prior = new UnbiasedEstimatorOfGradTheta<T,H,H,R>(h,h,rng, prior_params);
-    ue_post = new UnbiasedEstimatorOfGradTheta<T,FH,H,R>(fh,h,rng, post_params);
-    grad_theta_prior = new T[dim];
+    grad_theta_prior = new T[num_params];
   }
 
-  ~UnbiasedEstimatorGradThetaMinusLogPosterior() {
+  ~UEGradThetaMinusPost() {
     delete ue_prior;
     delete ue_post;
     delete grad_theta_prior;
   }
 
+  inline int get_num_params() const { return num_params; }
+
   T operator()(const T* theta, T* grad_theta) {
-    const T h_prior = (*ue_prior)(theta, grad_theta_prior);
-    const T h_post = (*ue_post)(theta, grad_theta);
-    for(int i=0; i<dim; i++)
+    const T h_prior = ue_prior(theta, grad_theta_prior);
+    const T h_post = ue_post(theta, grad_theta);
+    for(int i=0; i<num_params; i++)
       grad_theta[i] -= grad_theta_prior[i];
     return h_post - h_prior;
   }

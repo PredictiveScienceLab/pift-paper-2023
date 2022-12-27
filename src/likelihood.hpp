@@ -115,7 +115,7 @@ public:
 // This unbiased estimator only works with a Gaussian likelihood
 // TODO: Generalize
 template<typename T, typename L, typename R>
-class UEGradWLAtFixedTheta {
+class UEGradWL {
   protected:
     L& l;
     T* theta;
@@ -126,8 +126,8 @@ class UEGradWLAtFixedTheta {
     std::uniform_int_distribution<int>* unif_int;
 
   public:
-    UEGradWLAtFixedTheta(
-        L& l, const T* theta, const int& batch_size, R& rng
+    UEGradWL(
+        L& l, T* theta, const int& batch_size, R& rng
     ) :
       l(l), theta(theta), batch_size(batch_size),
       rng(rng),
@@ -137,7 +137,7 @@ class UEGradWLAtFixedTheta {
       unif_int = new std::uniform_int_distribution<int>(0, l.get_num_obs() - 1);
     }
 
-    ~UEGradWLAtFixedTheta() {
+    ~UEGradWL() {
       delete unif_int;
     }
 
@@ -157,6 +157,6 @@ class UEGradWLAtFixedTheta {
     }
 
     inline R& get_rng() const { return rng; }
-}; // UEGradLAtFixedTheta
+}; // UEGradWL
 } // namespace pift
 #endif // PIFT_LIKELIHOOD_HPP
