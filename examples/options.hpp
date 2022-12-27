@@ -56,11 +56,9 @@ struct FieldConfig {
 
 template<typename T>
 struct SGLDConfig {
-  int num_collocation;
   T alpha;
   T beta;
   T gamma;
-  T sigma_w;
   bool save_warmup;
   bool save_samples;
   int save_freq;
@@ -69,11 +67,9 @@ struct SGLDConfig {
   int num_warmup;
   int num_samples;
   SGLDConfig(const YAML::Node& yaml) :
-    num_collocation(yaml["num_collocation"].as<int>()),
     alpha(yaml["alpha"].as<T>()),
     beta(yaml["alpha"].as<T>()),
     gamma(yaml["gamma"].as<T>()),
-    sigma_w(yaml["sigma_w"].as<T>()),
     save_warmup(yaml["save_warmup"].as<bool>()),
     save_samples(yaml["save_samples"].as<bool>()),
     save_freq(yaml["save_freq"].as<int>()),
@@ -82,11 +78,9 @@ struct SGLDConfig {
     num_warmup(yaml["num_warmup"].as<int>()),
     num_samples(yaml["num_samples"].as<int>())
   {
-    assert(num_collocation >= 1);
     assert(alpha > 0.0);
     assert(beta >= 0.0);
     assert(gamma > 0.5 && gamma <= 1.0);
-    assert(sigma_w >= 0.0);
     assert(save_freq >= 1);
     assert(disp_freq >= 1);
     assert(num_warmup >= 0);
@@ -116,23 +110,29 @@ struct PostProcessConfig {
   }
 }; // PostProcessConfig
 
-// A structure representing the configuration file
+// A structure representing the configuration file for example 1
 template<typename T>
-struct Configuration {
+struct Configuration01 {
   OutputConfig output;
   DomainConfig<T> domain;
   FieldConfig<T> field;
+  int num_collocation;
+  T sigma_w;
   SGLDConfig<T> sgld;
   PostProcessConfig postprocess;
 
-  Configuration(const YAML::Node& yaml) :
+  Configuration01(const YAML::Node& yaml) :
     output(yaml["output"]),
     domain(yaml["domain"]),
     field(yaml["field"]),
+    num_collocation(yaml["num_collocation"].as<int>()),
+    sigma_w(yaml["sigma_w"].as<T>()),
     sgld(yaml["sgld"]),
     postprocess(yaml["postprocess"])
   {
     assert(domain.bounds.size() == postprocess.num_points_per_dim.size());
+    assert(num_collocation >= 1);
+    assert(sigma_w >= 0.0);
   }
-}; // Configuration
+}; // Configuration01
 #endif // EXAMPLES_OPTIONS

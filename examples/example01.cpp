@@ -52,7 +52,7 @@ int main(int argc, char* argv[]) {
   }
     
   YAML::Node yaml = YAML::LoadFile(config_file); 
-  Configuration<F> config(yaml);
+  Configuration01<F> config(yaml);
 
   // The output prefix
   std::string prefix = config.output.prefix + "_" + std::string(parsed_beta);
@@ -80,11 +80,11 @@ int main(int argc, char* argv[]) {
 
   // An unbiased estimator of the gradient of the Hamiltonian with respect
   // to w
-  UEGradWH eu_h(h, phi, domain, config.sgld.num_collocation, nullptr);
+  UEGradWH eu_h(h, phi, domain, config.num_collocation, nullptr);
 
   // Initialize the w's
   F w[phi.get_dim_w()];
-  std::normal_distribution<F> norm(0, config.sgld.sigma_w);
+  std::normal_distribution<F> norm(0, config.sigma_w);
   std::generate(w, w + psi.get_dim_w(), [&norm, &rng]() {return norm(rng);});
 
   // Do the warmup

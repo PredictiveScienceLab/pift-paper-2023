@@ -13,11 +13,13 @@ field:
   num_terms: 4
   # The values at the boundary
   boundary_values: [1.0, 0.1]
+# This is the number of points used to construct and unbiased estimator of
+# the Hamiltonian
+num_collocation: 1
+# The standard deviation with which to initialize the weights
+sigma_w: 1.0
 # Sampling details
 sgld:
-  # This is the number of points used to construct and unbiased estimator of
-  # the Hamiltonian
-  num_collocation: 1
   # The learning rate of SGLD is given by the formula:
   #   
   #   alpha_t = alpha / (beta + t) ** gamma
@@ -25,8 +27,6 @@ sgld:
   alpha: 0.01
   beta: 0.1
   gamma: 0.51 
-  # The standard deviation with which to initialize the weights
-  sigma_w: 1.0
   # Whether or not to save the sampled w's. The w's will be saved in a
   # file called <PREFIX>_<BETA>_warmup.csv
   save_warmup: true
