@@ -16,9 +16,10 @@ CXXFLAGS=-O3 -ffast-math -std=c++20 -I./src -I./examples \
 # Link options
 LDFLAGS=-L$(YAMLCPP)/lib -lyaml-cpp
 
-all: test_domain test_fields test_hamiltonian test_posterior \
-		 test_free \
-		 example01
+# all: test_domain test_fields test_hamiltonian test_posterior \
+# 		 test_free \
+# 		 example01 example02
+all: example02
 
 clean:
 	$(RM) tests/*.o examples/*.o

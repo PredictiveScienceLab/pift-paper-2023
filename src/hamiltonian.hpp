@@ -144,7 +144,7 @@ class UEIntegralGradWH {
     }
 
     // TODO: Think if we need to keep this
-    inline void set_theta(const T* theta) { this->theta = theta; }
+    inline void set_theta(T* theta) { this->theta = theta; }
     inline FA& get_phi() const { return phi; }
     inline int get_num_collocation() const { return num_collocation; }
 

@@ -75,16 +75,6 @@ struct UEThetaParams {
   T init_w_sigma;
   // Whether or not to reinitialize the ws on every iteration
   bool reinitialize_ws;
-  // Whether or not to save to file the results
-  bool save_to_file;
-  // How often to write on the file
-  int save_freq;
-  // The file to write
-  string out_file;
-  // Whether or not to display something on the screen
-  bool disp;
-  // The display frequency
-  int disp_freq;
   // The parameters used in SGLD
   SGLDParams<T> sgld_params; 
 
@@ -96,11 +86,6 @@ struct UEThetaParams {
     num_thinning(1),
     init_w_sigma(1.0),
     reinitialize_ws(false),
-    save_to_file(false),
-    out_file("ue_theta.csv"),
-    save_freq(10),
-    disp(true),
-    disp_freq(100),
     sgld_params(SGLDParams<T>())
   {}
 }; // UEThetaParams
@@ -149,7 +134,7 @@ public:
     params(params),
     dim_w(ue_grad_theta_f.get_dim_w()),
     num_params(ue_grad_theta_f.get_num_params()),
-    scale_ratio(1.0 / ue_grad_theta_f.get_num_collocation())      
+    scale_ratio(1.0 / (params.num_bursts * params.num_chains))      
   {
     grad_w_H = new T[dim_w];
     ws = new T[params.num_chains * dim_w];
@@ -165,15 +150,15 @@ public:
     delete norm;
   }
 
+  inline T get_scale_ratio() const { return scale_ratio; }
   inline int get_num_params() const { return num_params; }
 
   inline void initialize_chains() {
-    std::normal_distribution<T> norm(0, params.init_w_sigma);
-    std::generate(ws, ws + params.num_chains * dim_w,
-        [&norm, r=this->rng]() {return norm(r);});
+    for(int i=0; i<params.num_chains * dim_w; i++)
+      ws[i] = params.init_w_sigma * (*norm)(rng);
   }
 
-  inline void warmup(const T* theta) {
+  inline void warmup(T* theta) {
     ue_grad_w_h.set_theta(theta);
     params.sgld_params.init_it = 0;
     for(int c=0; c<params.num_chains; c++) {
@@ -185,21 +170,20 @@ public:
     params.sgld_params.init_it = params.num_init_warmup;
   }
 
-  T operator()(const T* theta, T* grad_theta) {
+  T operator()(T* theta, T* grad_theta) {
     T result = 0.0;
     std::fill(grad_theta, grad_theta + num_params, 0.0);
 #ifndef PIFT_THETA_DO_NOT_REINITIALIZE_WS
     if (params.reinitialize_ws)
       initialize_chains();
     ue_grad_w_h.set_theta(theta);
-    // We keep track of init_it so that we update the 
-    // learning rate correctly
     const int init_it = params.sgld_params.init_it;
 #endif
     for(int c=0; c<params.num_chains; c++) {
       T* w = ws + c * dim_w;
-      // Per iteration warmup
+#ifndef PIFT_THETA_DO_NOT_REINITIALIZE_WS
       params.sgld_params.init_it = init_it;
+#endif
       sgld(ue_grad_w_h, w, dim_w, rng,
            params.num_per_it_warmup,
            grad_w_H, *norm, params.sgld_params);
@@ -215,11 +199,11 @@ public:
         params.sgld_params.init_it += params.num_thinning;
 #endif
         // Get the gradient with respect to theta
-        result += f(w, theta, tmp_grad_theta);
+        result += ue_grad_theta_f(w, theta, tmp_grad_theta);
         for(int i=0; i<num_params; i++)
           grad_theta[i] += tmp_grad_theta[i];
-      }
-    }
+      } // end for over bursts
+    } // end for over chains
     scale(grad_theta, num_params, scale_ratio);
     result *= scale_ratio;
     return result;
@@ -229,13 +213,13 @@ public:
 // An unbiased estimator of minus the log posterior of theta conditional on
 // the data
 template <typename T, typename UEGradThetaPrior, typename UEGradThetaPost>
-class UEGradThetaMinusPost {
+class UEGradThetaMinusLogPost {
 public:
   UEGradThetaPrior& ue_prior;
   UEGradThetaPost& ue_post;
   T* grad_theta_prior; // Do I need this?
   int num_params; // Do I need this?
-  UEGradThetaMinusPost(
+  UEGradThetaMinusLogPost(
       UEGradThetaPrior& ue_prior,
       UEGradThetaPost& ue_post
   ) : ue_prior(ue_prior), ue_post(ue_post),
@@ -244,7 +228,7 @@ public:
     grad_theta_prior = new T[num_params];
   }
 
-  ~UEGradThetaMinusPost() {
+  ~UEGradThetaMinusLogPost() {
     delete ue_prior;
     delete ue_post;
     delete grad_theta_prior;
@@ -259,8 +243,7 @@ public:
       grad_theta[i] -= grad_theta_prior[i];
     return h_post - h_prior;
   }
-};
-
+}; // UEGradThetaMinusLogPost
 
 } // namespace pift
 #endif // PIFT_POSTERIOR_HPP

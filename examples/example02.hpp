@@ -30,14 +30,14 @@ class Example02Hamiltonian : public pift::Hamiltonian<T> {
     const T gamma;
 
   public:
-    Example02Hamiltonian(const T gamma=1.0, const T& D=0.1, const T& kappa=1.0) : 
+    Example02Hamiltonian(const T& gamma=1.0, const T& D=0.1, const T& kappa=1.0) : 
       pift::Hamiltonian<T>(1), gamma(gamma), D(D), kappa(kappa)
     {}
 
     // The source term
     inline T f(const T* x) const
     {
-      return gamma * std::cos(4.0 * x) + (1.0 - gamma) * std::exp(-x);
+      return gamma * std::cos(4.0f * x[0]) + (1.0f - gamma) * std::exp(-x[0]);
     }
 
     inline T operator()(const T* x, const T* prolong_phi, const T* theta) const 
@@ -59,7 +59,7 @@ class Example02Hamiltonian : public pift::Hamiltonian<T> {
       const T phi = prolong_phi[0];
       const T phi_prime = prolong_phi[1];
       const T f_x = f(x);
-      const T tmp1 = kappa * pow(phi, 3)
+      const T tmp1 = kappa * pow(phi, 3);
       out[0] = beta * (tmp1 + f_x);
       out[1] = beta * D * phi_prime;
       return 0.5 * out[1] * phi_prime + (0.25 * tmp1 + f_x) * phi;

@@ -16,8 +16,8 @@ field:
 # Sampling details for the parameters
 parameters:
     # How to initialize the parameters
-    init_mean: 0.0
-    init_std: 0.1
+    init_mean: [0.0]
+    init_std: [1.0]
     # The SGLD options for parameter sampling
     sgld:
       # num_collocation is irrelevant
@@ -36,39 +36,39 @@ parameters:
     # and posterior expectations over w of the gradient of the Hamiltonian
     # with respect to the parameters.
     # Unbiased estimator of the prior expectation over w
-    ue_prior:
+    prior:
       # Number of different w chains to sample
-      num_chains: 1
+      num_chains: 100
       # The warmup to do at the beginning
-      num_init_warmup: 1000000
+      num_init_warmup: 1000
       # The number of distinct w samples you wish to obtain
-      num_bursts: 1
+      num_bursts: 10000
       # Whether or not to reinitialize the ws at each iteration of theta
       # sampling. If false, then each chain is continued from the last w
       # sample.
       reinitialize_ws: false
       # How many collocation points to use to take spatial integrals
       num_collocation: 1
+      # The standard deviation for initializing the ws
+      sigma_w: 0.1
       sgld:
         # The learning rate parameters
         alpha: 0.01
         beta: 0.1
         gamma: 0.51 
-        # The standard deviation for initializing the ws
-        sigma_w: 0.1
         save_warmup: false
         save_samples: false
         save_freq: 10000
         disp: true
-        disp_freq: 1000000
+        disp_freq: 1000
         # The warmup to do on w at each iteration of theta sampling
-        num_warmup: 1
+        num_warmup: 1000
         # The number of production samples to take after completing the 
         # warmup period. Only the last of these is used for the unbiased
         # estimator of the gradient of the Hamiltonian with respect to theta. 
-        num_samples: 1
+        num_samples: 10
     # Unbiased estimator of the posterior expectation over w
-    ue_post:
+    post:
       # Number of different w chains to sample
       num_chains: 1
       # The warmup to do at the beginning
@@ -81,6 +81,8 @@ parameters:
       reinitialize_ws: false
       # How many collocation points to use to take spatial integrals
       num_collocation: 1
+      # The standard deviation for initializing the ws
+      sigma_w: 0.1
       # The batch size used in the unbiased estimator for the likelihood
       batch_size: 1
       sgld:
@@ -88,8 +90,6 @@ parameters:
         alpha: 0.01
         beta: 0.1
         gamma: 0.51 
-        # The standard deviation for initializing the ws
-        sigma_w: 0.1
         save_warmup: false
         save_samples: false
         save_freq: 10000

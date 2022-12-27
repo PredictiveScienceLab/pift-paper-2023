@@ -100,6 +100,78 @@ struct SGLDConfig {
   }
 }; // SGLDConfig
 
+template<typename T>
+struct PriorConfig {
+  int num_chains;
+  int num_init_warmup;
+  int num_bursts;
+  bool reinitialize_ws;
+  int num_collocation;
+  T sigma_w;
+  SGLDConfig<T> sgld;
+
+  PriorConfig(const YAML::Node& yaml) :
+    num_chains(yaml["num_chains"].as<int>()),
+    num_init_warmup(yaml["num_init_warmup"].as<int>()),
+    num_bursts(yaml["num_bursts"].as<int>()),
+    reinitialize_ws(yaml["reinitialize_ws"].as<bool>()),
+    num_collocation(yaml["num_collocation"].as<int>()),
+    sigma_w(yaml["sigma_w"].as<T>()),
+    sgld(yaml["sgld"])
+  {
+    assert(num_chains >= 1);
+    assert(num_init_warmup >= 0);
+    assert(num_bursts >= 1);
+    assert(num_collocation >= 1);
+  }
+
+  pift::UEThetaParams<T> get_theta_params() const {
+    pift::UEThetaParams<T> theta_params;
+    theta_params.num_chains = num_chains;
+    theta_params.num_init_warmup = num_init_warmup;
+    theta_params.num_per_it_warmup = sgld.num_warmup;
+    theta_params.num_bursts = num_bursts;
+    theta_params.num_thinning = sgld.num_samples;
+    theta_params.init_w_sigma = sigma_w;
+    theta_params.reinitialize_ws = reinitialize_ws;
+    theta_params.sgld_params = sgld.get_sgld_params();
+    return theta_params;
+  }
+}; // PriorConfig
+
+template<typename T>
+struct PostConfig : public PriorConfig<T> {
+  int batch_size;
+
+  PostConfig(const YAML::Node& yaml) :
+    PriorConfig<T>(yaml),
+    batch_size(yaml["batch_size"].as<int>())
+  {
+    assert(batch_size >= 1);
+  }
+}; // PostConfig
+
+template<typename T>
+struct ParamsConfig {
+  std::vector<T> init_mean;
+  std::vector<T> init_std;
+  SGLDConfig<T> sgld;
+  PriorConfig<T> prior;
+  PostConfig<T> post;
+
+  ParamsConfig(const YAML::Node& yaml) :
+    init_mean(yaml["init_mean"].as<std::vector<T>>()),
+    init_std(yaml["init_std"].as<std::vector<T>>()),
+    sgld(yaml["sgld"]),
+    prior(yaml["prior"]),
+    post(yaml["post"])
+  {
+    assert(init_mean.size() == init_std.size());
+    for(int i=0; i<init_std.size(); i++)
+      assert(init_std[i] >= 0.0);
+  }
+}; // ParamsConfig
+
 struct PostProcessConfig {
   std::vector<int> num_points_per_dim;
   PostProcessConfig(const YAML::Node& yaml) :
@@ -135,4 +207,26 @@ struct Configuration01 {
     assert(sigma_w >= 0.0);
   }
 }; // Configuration01
+
+// A structure representing the configuration file for example 2
+template<typename T>
+struct Configuration02 {
+  OutputConfig output;
+  DomainConfig<T> domain;
+  FieldConfig<T> field;
+  ParamsConfig<T> parameters;
+  PostProcessConfig postprocess;
+
+  Configuration02(const YAML::Node& yaml) :
+    output(yaml["output"]),
+    domain(yaml["domain"]),
+    field(yaml["field"]),
+    parameters(yaml["parameters"]),
+    postprocess(yaml["postprocess"])
+  {
+    assert(domain.bounds.size() == postprocess.num_points_per_dim.size());
+  }
+}; // Configuration02
+
+
 #endif // EXAMPLES_OPTIONS
