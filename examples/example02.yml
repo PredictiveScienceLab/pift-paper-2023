@@ -1,0 +1,52 @@
+# Example 1 - Configuration file
+# Some parameters the control the output
+output:
+  # The output files will have the following prefix
+  prefix: example01
+# The physical domain
+domain: 
+  bounds:
+    - [0.0, 1.0]
+# Parameterization details
+field:
+  # The number of Fourier terms to use
+  num_terms: 4
+  # The values at the boundary
+  boundary_values: [1.0, 0.1]
+# Sampling details
+sgld:
+  # This is the number of points used to construct and unbiased estimator of
+  # the Hamiltonian
+  num_collocation: 1
+  # The learning rate of SGLD is given by the formula:
+  #   
+  #   alpha_t = alpha / (beta + t) ** gamma
+  #
+  alpha: 0.01
+  beta: 0.1
+  gamma: 0.51 
+  # The standard deviation with which to initialize the weights
+  sigma_w: 1.0
+  # Whether or not to save the sampled w's. The w's will be saved in a
+  # file called <PREFIX>_<BETA>_warmup.csv
+  save_warmup: true
+  # The samples will be saved in <PREFIX>_<BETA>_samples.csv
+  save_samples: true
+  # How often to save the samples
+  save_freq: 10000
+  # Whether or not to display the progress in the screen
+  disp: true
+  # The display frequency
+  disp_freq: 1000000
+  # The number of warmup steps
+  num_warmup: 100000000
+  # The number of production samples
+  num_samples: 100000000
+# Postprocessing details
+# Postprocessing produces two files. The first is <PREFIX>_<BETA>_x.csv
+# containing the mesh on which we evaluate the field and
+# <PREFIX>_<BETA>_field.csv which contains the field values on that mesh.
+postprocess:
+  # We will write to a file <PREFIX>_<BETA>_field.csv the v
+  num_points_per_dim:
+    - 100

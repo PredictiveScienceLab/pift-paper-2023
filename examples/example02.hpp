@@ -25,16 +25,19 @@ class Example02Hamiltonian : public pift::Hamiltonian<T> {
 
     // The non-linear parameter
     const T kappa;
+    
+    // The parameter controlling how run the physics are
+    const T gamma;
 
   public:
-    Example02Hamiltonian(const T& D=0.1, const T& kappa=1.0) : 
-      pift::Hamiltonian<T>(1), D(D), kappa(kappa)
+    Example02Hamiltonian(const T gamma=1.0, const T& D=0.1, const T& kappa=1.0) : 
+      pift::Hamiltonian<T>(1), gamma(gamma), D(D), kappa(kappa)
     {}
 
     // The source term
     inline T f(const T* x) const
     {
-      return std::cos(4.0 * x);
+      return gamma * std::cos(4.0 * x) + (1.0 - gamma) * std::exp(-x);
     }
 
     inline T operator()(const T* x, const T* prolong_phi, const T* theta) const 

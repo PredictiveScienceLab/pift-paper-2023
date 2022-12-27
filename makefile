@@ -58,3 +58,9 @@ example01: example01.o
 
 example01.o: examples/example01.cpp
 	$(CXX) -c examples/example01.cpp $(CXXFLAGS) -o examples/example01.o
+
+example02: example02.o
+	$(CXX) -o examples/example02 examples/example02.o $(LDFLAGS)
+
+example02.o: examples/example02.cpp
+	$(CXX) -c examples/example02.cpp $(CXXFLAGS) -o examples/example02.o
