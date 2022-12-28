@@ -92,7 +92,7 @@ int main(int argc, char* argv[]) {
   UEGradThetaH ue_int_grad_theta_H(h, phi, domain,
       config.parameters.prior.num_collocation);
 
-  // Unbiased estimator used to take expectations over prior
+  // Unbiased estimator used to take expectations over posterior
   UEGradWH ue_grad_w_h(
       h,
       phi,
@@ -100,33 +100,37 @@ int main(int argc, char* argv[]) {
       config.parameters.prior.num_collocation,
       theta
   );
-  
-  // Unbiased estimator of the prior expectation of the integral of grad theta
-  // of the Hamiltonian
-  auto theta_params = config.parameters.prior.get_theta_params();
-  theta_params.sgld_params.out_file = prefix + "_prior_ws.csv";
-  UEGradThetaPrior ue_prior_exp_int_grad_theta_H(
-      ue_grad_w_h,
-      ue_int_grad_theta_H,
-      rng,
-      theta_params
+  const F sigma = 0.1;
+  auto x_obs = pift::loadtxtvec<F>("example02_n=10_sigma=1.00e-01_0_x_obs.csv");
+  auto y_obs = pift::loadtxtvec<F>("example02_n=10_sigma=1.00e-01_0_y_obs.csv");
+  assert(x_obs.size() == y_obs.size());
+  L l(phi, x_obs.size(), x_obs.data(), y_obs.data(), sigma);
+  UEGradWL ue_grad_w_l(l, theta, config.parameters.post.batch_size, rng);
+  UEGradWP ue_grad_w_post(ue_grad_w_h, ue_grad_w_l);
+
+  // // Unbiased estimator of the posterior expectation of the integral of
+  // grad theta of the Hamiltonian
+  auto theta_params = config.parameters.post.get_theta_params();
+  theta_params.sgld_params.out_file = prefix + "_post_ws.csv";
+  UEGradThetaPost ue_post_exp_int_grad_theta_H(
+       ue_grad_w_post,
+       ue_int_grad_theta_H,
+       rng,
+       theta_params
   );
 
-  // Let's test this because we haven't really tested it
   F grad_theta[h.get_num_params()];
-  //ue_prior_exp_int_grad_theta_H.warmup(theta);
-  // Let's evaluate this at some theta's
-  theta[0] = std::log(100.0);
-  ue_prior_exp_int_grad_theta_H(theta, grad_theta);
   theta[0] = std::log(10000.0);
-  ue_prior_exp_int_grad_theta_H(theta, grad_theta);
+  ue_post_exp_int_grad_theta_H(theta, grad_theta);
+  // theta[0] = std::log(10000.0);
+  // ue_prior_exp_int_grad_theta_H(theta, grad_theta);
 
   // Postprocess the results
   const int n = config.postprocess.num_points_per_dim[0];
   postprocess<F>(
-      phi, domain, config.postprocess.num_points_per_dim[0],
-      theta_params.sgld_params.out_file,
-      prefix
+     phi, domain, config.postprocess.num_points_per_dim[0],
+     theta_params.sgld_params.out_file,
+     prefix
   );
 
   return 0;

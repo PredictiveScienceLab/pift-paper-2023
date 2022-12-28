@@ -46,7 +46,7 @@ public:
     delete tmp;
   }
 
-  inline void set_theta(const T* theta) {
+  inline void set_theta(T* theta) {
     prior.set_theta(theta);
     likelihood.set_theta(theta);
   }

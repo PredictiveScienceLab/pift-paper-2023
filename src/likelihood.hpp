@@ -141,7 +141,7 @@ class UEGradWL {
       delete unif_int;
     }
 
-    inline void set_theta(const T* theta) { this->theta = theta; }
+    inline void set_theta(T* theta) { this->theta = theta; }
     inline int get_dim_w() const { return dim_w; }
 
     inline T operator()(const T* w, T* out) {

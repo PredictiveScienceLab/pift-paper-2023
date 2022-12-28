@@ -73,7 +73,7 @@ parameters:
       # Number of different w chains to sample
       num_chains: 1
       # The warmup to do at the beginning
-      num_init_warmup: 1000000
+      num_init_warmup: 0
       # The number of distinct w samples you wish to obtain
       num_bursts: 1
       # Whether or not to reinitialize the ws at each iteration of theta
@@ -89,19 +89,19 @@ parameters:
       batch_size: 1
       sgld:
         # The learning rate parameters
-        alpha: 0.01
+        alpha: 1.0
         beta: 0.1
         gamma: 0.51 
         save_to_file: true
         save_freq: 1000
         disp: true
-        disp_freq: 1000000
+        disp_freq: 10000
         # The warmup to do on w at each iteration of theta sampling
-        num_warmup: 1
+        num_warmup: 1000000
         # The number of production samples to take after completing the 
         # warmup period. Only the last of these is used for the unbiased
         # estimator of the gradient of the Hamiltonian with respect to theta. 
-        num_samples: 1
+        num_samples: 1000000
 postprocess:
   # We will write to a file <PREFIX>_<BETA>_field.csv the v
   num_points_per_dim:
