@@ -35,12 +35,16 @@ using L = pift::GaussianLikelihood<F, CFField>;
 // Type for the unbiased estimator of the integral of the gradient of the
 // Hamiltonian with respect to w
 using UEGradWH = pift::UEIntegralGradWH<F, H, CFField, Domain>;
+// Type for unbiased estimator for minus the grad w of the log likelihood
+using UEGradWL = pift::UEGradWL<F, L, RNG>;
+// Type for unbiased estimator for minus the grad w of the log posterior
+using UEGradWP = pift::UEGradWPost<F, UEGradWH, UEGradWL>;
 // Type for the unbiased estimator of the integral of the gradient of the
 // Hamiltonian with respect to theta
 using UEGradThetaH = pift::UEIntegralGradThetaH<F, H, CFField, Domain>;
-// Type for unbiased estimator for the prior expectation of grad theta of the
+// Type for unbiased estimator for the posterior expectation of grad theta of the
 // Hamiltonian
-using UEGradThetaPrior = pift::UEGradThetaHF<F, UEGradWH, UEGradThetaH, RNG>;
+using UEGradThetaPost = pift::UEGradThetaHF<F, UEGradWP, UEGradThetaH, RNG>;
 
 int main(int argc, char* argv[]) {
   const F gamma = 1.0;
