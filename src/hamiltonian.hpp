@@ -182,6 +182,8 @@ class UEIntegralGradWH {
 // \int_{\Omega}dx \nabla_{\theta} h(x,\text{Pr}[\phi](x,w),\theta) \approx
 //  \frac{1}{N}\sum_{i=1}^N \nabla_{\theta}(x_i,\text{Pr}[\phi](x_i,w),\theta)
 // \]
+//
+// TODO: Write unittest.
 template<typename T, typename H, typename FA, typename D>
 class UEIntegralGradThetaH {
   protected:

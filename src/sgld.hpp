@@ -20,9 +20,7 @@ namespace pift {
 #include <random>
 #include <string>
 #include <cmath>
-
-using namespace std;
-
+#include <fstream>
 
 template<typename T>
 struct SGLDParams {
@@ -65,10 +63,8 @@ inline void sgld(UE& ue_func,
   sgld(ue_func, w, dim, rng, num_samples, grad_w_H, norm, params);
 }
 
-// SGLD implementation that requires providing 
-// memory space grad_w.
 template <typename T, typename UE, typename R, typename Dist>
-void sgld(UE& ue_func,
+inline void sgld(UE& ue_func,
           T* w,
           const int& dim,
           R& rng,
@@ -77,11 +73,28 @@ void sgld(UE& ue_func,
           Dist& norm,
           const SGLDParams<T>& params = SGLDParams<T>()
 ) {
-#ifndef DISABLE_SGLD_SAVE
   std::ofstream of;
   if (params.save_to_file)
     of.open(params.out_file);
-#endif
+  sgld(ue_func, w, dim, rng, num_samples, grad_w_H, norm, of, params);
+  if (params.save_to_file)
+    of.close();
+}
+
+// SGLD implementation that requires providing 
+// memory space grad_w, a standard normal distribution object,
+// and an open ofstream to write to.
+template <typename T, typename UE, typename R, typename Dist>
+void sgld(UE& ue_func,
+          T* w,
+          const int& dim,
+          R& rng,
+          const int num_samples,
+          T* grad_w_H,
+          Dist& norm,
+          std::ofstream& of,
+          const SGLDParams<T>& params = SGLDParams<T>()
+) {
   const int max_it = num_samples + params.init_it;
   for(int it=params.init_it; it<max_it; it++) {
     const T epsilon = params.alpha 
@@ -90,21 +103,13 @@ void sgld(UE& ue_func,
     const T h_val = ue_func(w, grad_w_H);
     for(int i=0; i<dim; i++)
       w[i] += (-epsilon * grad_w_H[i] + sqrt_2_epsilon * norm(rng));
-#ifndef DISABLE_SGLD_SAVE
     if (params.save_to_file && it % params.save_freq == 0) {
       of << h_val << " ";
       cout_vec(w, dim, of);
     }
-#endif
-#ifndef DISABLE_SGLD_DISP
     if (params.disp && it % params.disp_freq == 0)
       cout_vec(w, dim, std::to_string(it) + ": " + std::to_string(h_val) + " ");
   }
-#endif
-#ifndef DISABLE_SGLD_SAVE
-  if (params.save_to_file)
-    of.close();
-#endif
 } // sgld
 } // namespace pift
 #endif // PIFT_OPT_HPP

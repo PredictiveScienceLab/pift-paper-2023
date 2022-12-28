@@ -14,6 +14,9 @@
 #ifndef PIFT_POSTERIOR_HPP
 #define PIFT_POSTERIOR_HPP
 
+#include <fstream>
+#include <random>
+
 #include "hamiltonian.hpp"
 #include "likelihood.hpp"
 
@@ -120,6 +123,7 @@ protected:
   T* grad_w_H;
   T* tmp_grad_theta;
   std::normal_distribution<T>* norm;
+  std::ofstream of;
 
 public:
   UEGradThetaHF(
@@ -141,6 +145,10 @@ public:
     tmp_grad_theta = new T[num_params];
     norm = new std::normal_distribution<T>(0, 1);
     initialize_chains();
+    std::cout << "save? " << params.sgld_params.save_to_file << std::endl;
+    // REMOVE
+    if (params.sgld_params.save_to_file)
+      of.open(params.sgld_params.out_file);
   }
 
   ~UEGradThetaHF() {
@@ -148,6 +156,8 @@ public:
     delete ws;
     delete tmp_grad_theta;
     delete norm;
+    if (params.sgld_params.save_to_file)
+      of.close();
   }
 
   inline T get_scale_ratio() const { return scale_ratio; }
@@ -162,10 +172,20 @@ public:
     ue_grad_w_h.set_theta(theta);
     params.sgld_params.init_it = 0;
     for(int c=0; c<params.num_chains; c++) {
+      std::cout << "*** doing chain: " << c << std::endl; // REMOVE
       T* w = ws + c * dim_w;
-      sgld(ue_grad_w_h, w, dim_w, rng,
-           params.num_init_warmup,
-           grad_w_H, *norm, params.sgld_params);
+      sgld(
+          ue_grad_w_h,
+          w,
+          dim_w,
+          rng,
+          params.num_init_warmup,
+          grad_w_H,
+          *norm,
+          of,
+          params.sgld_params
+      );
+      std::cout << "*** done" << std::endl;
     }
     params.sgld_params.init_it = params.num_init_warmup;
   }
@@ -173,31 +193,39 @@ public:
   T operator()(T* theta, T* grad_theta) {
     T result = 0.0;
     std::fill(grad_theta, grad_theta + num_params, 0.0);
-#ifndef PIFT_THETA_DO_NOT_REINITIALIZE_WS
     if (params.reinitialize_ws)
       initialize_chains();
     ue_grad_w_h.set_theta(theta);
     const int init_it = params.sgld_params.init_it;
-#endif
     for(int c=0; c<params.num_chains; c++) {
       T* w = ws + c * dim_w;
-#ifndef PIFT_THETA_DO_NOT_REINITIALIZE_WS
       params.sgld_params.init_it = init_it;
-#endif
-      sgld(ue_grad_w_h, w, dim_w, rng,
-           params.num_per_it_warmup,
-           grad_w_H, *norm, params.sgld_params);
-#ifndef PIFT_THETA_DO_NOT_UPDATE_INIT_IT
+      sgld(
+          ue_grad_w_h,
+          w,
+          dim_w,
+          rng,
+          params.num_per_it_warmup,
+          grad_w_H,
+          *norm,
+          of,
+          params.sgld_params
+      );
       params.sgld_params.init_it += params.num_per_it_warmup;
-#endif
       for(int b=0; b<params.num_bursts; b++) {
         // Sample w num_thinning times
-        sgld(ue_grad_w_h, w, dim_w, rng,
-             params.num_thinning,
-             grad_w_H, *norm, params.sgld_params);
-#ifndef PIFT_THETA_DO_NOT_UPDATE_INIT_IT
+        sgld(
+            ue_grad_w_h,
+            w,
+            dim_w,
+            rng,
+            params.num_thinning,
+            grad_w_H,
+            *norm,
+            of,
+            params.sgld_params
+        );
         params.sgld_params.init_it += params.num_thinning;
-#endif
         // Get the gradient with respect to theta
         result += ue_grad_theta_f(w, theta, tmp_grad_theta);
         for(int i=0; i<num_params; i++)
