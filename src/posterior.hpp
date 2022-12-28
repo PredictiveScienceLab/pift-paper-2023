@@ -50,7 +50,9 @@ public:
     prior.set_theta(theta);
     likelihood.set_theta(theta);
   }
-  inline T get_beta(const T* theta) const { return prior.get_beta(theta); }
+  inline T get_beta(const T* theta) const {
+    return std::max(prior.get_beta(theta), likelihood.get_beta(theta));
+  }
   inline UEH& get_prior() { return prior; }
   inline UEL& get_likelihood() { return likelihood; }
 

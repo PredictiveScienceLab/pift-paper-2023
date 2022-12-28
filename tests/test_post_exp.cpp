@@ -100,7 +100,7 @@ int main(int argc, char* argv[]) {
       config.parameters.prior.num_collocation,
       theta
   );
-  const F sigma = 0.1;
+  const F sigma = 0.01;
   auto x_obs = 
     pift::loadtxtvec<F>("../examples/example02_n=15_sigma=1.00e-02_0_x_obs.csv");
   auto y_obs = 
@@ -122,7 +122,7 @@ int main(int argc, char* argv[]) {
   );
 
   F grad_theta[h.get_num_params()];
-  theta[0] = std::log(10000.0);
+  theta[0] = std::log(1000.0);
   ue_post_exp_int_grad_theta_H(theta, grad_theta);
   // theta[0] = std::log(10000.0);
   // ue_prior_exp_int_grad_theta_H(theta, grad_theta);

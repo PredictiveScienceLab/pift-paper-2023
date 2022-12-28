@@ -65,6 +65,7 @@ public:
     delete grad_phi;
   }
 
+  inline T get_beta(const T* theta) const { return 1.0 / sigma2; }
   inline int get_num_params() const { return num_params; }
   inline const FA& get_phi() const { return phi; }
   inline int get_dim_w() const { return dim_w; }
@@ -141,6 +142,7 @@ class UEGradWL {
       delete unif_int;
     }
 
+    inline T get_beta(const T* theta) const { return l.get_beta(theta); }
     inline void set_theta(T* theta) { this->theta = theta; }
     inline int get_dim_w() const { return dim_w; }
 
