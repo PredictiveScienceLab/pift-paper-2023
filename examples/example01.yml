@@ -28,10 +28,10 @@ sgld:
   beta: 0.1
   gamma: 0.51 
   # Whether or not to save the sampled w's. The w's will be saved in a
-  # file called <PREFIX>_<BETA>_warmup.csv
-  save_warmup: true
-  # The samples will be saved in <PREFIX>_<BETA>_samples.csv
-  save_samples: true
+  # files called:
+  #   - <PREFIX>_<BETA>_warmup.csv
+  #   - <PREFIX>_<BETA>_samples.csv
+  save_to_file: true
   # How often to save the samples
   save_freq: 10000
   # Whether or not to display the progress in the screen

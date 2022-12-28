@@ -19,6 +19,7 @@
 
 #include "hamiltonian.hpp"
 #include "likelihood.hpp"
+#include "io.hpp"
 
 namespace pift {
 
@@ -78,6 +79,8 @@ struct UEThetaParams {
   T init_w_sigma;
   // Whether or not to reinitialize the ws on every iteration
   bool reinitialize_ws;
+  // The prefix used for saving iles
+  std::string output_prefix;
   // The parameters used in SGLD
   SGLDParams<T> sgld_params; 
 
@@ -89,6 +92,7 @@ struct UEThetaParams {
     num_thinning(1),
     init_w_sigma(1.0),
     reinitialize_ws(false),
+    output_prefix("theta_default_output_prefix"),
     sgld_params(SGLDParams<T>())
   {}
 }; // UEThetaParams
@@ -171,9 +175,11 @@ public:
   inline void warmup(T* theta) {
     ue_grad_w_h.set_theta(theta);
     params.sgld_params.init_it = 0;
+    of << "# INITIAL WARMUP" << std::endl;
+    pift::cout_vec(theta, num_params, of, "# THETA: ");
     for(int c=0; c<params.num_chains; c++) {
-      std::cout << "*** doing chain: " << c << std::endl; // REMOVE
       T* w = ws + c * dim_w;
+      of << "# CHAIN " << c << std::endl;
       sgld(
           ue_grad_w_h,
           w,
@@ -185,7 +191,6 @@ public:
           of,
           params.sgld_params
       );
-      std::cout << "*** done" << std::endl;
     }
     params.sgld_params.init_it = params.num_init_warmup;
   }

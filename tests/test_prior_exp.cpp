@@ -99,6 +99,7 @@ int main(int argc, char* argv[]) {
   // Unbiased estimator of the prior expectation of the integral of grad theta
   // of the Hamiltonian
   auto theta_params = config.parameters.prior.get_theta_params();
+  theta_params.sgld_params.out_file = prefix + "_prior_ws.csv";
   UEGradThetaPrior ue_prior_exp_int_grad_theta_H(
       ue_grad_w_h,
       ue_int_grad_theta_H,

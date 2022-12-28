@@ -93,6 +93,8 @@ std::vector<T> loadtxtvec(const std::string& filename) {
   std::string line;
   std::vector<T> result;
   while(getline(iff, line)) {
+    if(line[0] == '#')
+      continue;
     const T x = static_cast<T>(std::stod(line));
     result.push_back(x);
   }
@@ -110,6 +112,8 @@ std::vector<std::vector<T>> loadtxtmat(
   std::string line;
   std::vector<std::vector<T>> result;
   while(getline(iff, line)) {
+    if(line[0] == '#')
+      continue;
     std::vector<T> row;
     std::stringstream s(line);
     std::string value;

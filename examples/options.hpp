@@ -59,8 +59,7 @@ struct SGLDConfig {
   T alpha;
   T beta;
   T gamma;
-  bool save_warmup;
-  bool save_samples;
+  bool save_to_file;
   int save_freq;
   bool disp;
   int disp_freq;
@@ -70,8 +69,7 @@ struct SGLDConfig {
     alpha(yaml["alpha"].as<T>()),
     beta(yaml["alpha"].as<T>()),
     gamma(yaml["gamma"].as<T>()),
-    save_warmup(yaml["save_warmup"].as<bool>()),
-    save_samples(yaml["save_samples"].as<bool>()),
+    save_to_file(yaml["save_to_file"].as<bool>()),
     save_freq(yaml["save_freq"].as<int>()),
     disp(yaml["disp"].as<bool>()),
     disp_freq(yaml["disp_freq"].as<int>()),
@@ -92,7 +90,7 @@ struct SGLDConfig {
     sgld_params.alpha = alpha;
     sgld_params.beta = beta;
     sgld_params.gamma = gamma;
-    sgld_params.save_to_file = save_warmup;
+    sgld_params.save_to_file = save_to_file;
     sgld_params.save_freq = save_freq;
     sgld_params.disp = disp;
     sgld_params.disp_freq = disp_freq;

@@ -25,8 +25,7 @@ parameters:
       beta: 0.1
       gamma: 0.51 
       # sigma_w is irrelevant
-      save_warmup: true
-      save_samples: true
+      save_to_file: true
       save_freq: 10000
       disp: true
       disp_freq: 1
@@ -40,7 +39,7 @@ parameters:
       # Number of different w chains to sample
       num_chains: 10
       # The warmup to do at the beginning
-      num_init_warmup: 5
+      num_init_warmup: 20
       # The number of distinct w samples you wish to obtain
       num_bursts: 1
       # Whether or not to reinitialize the ws at each iteration of theta
@@ -56,10 +55,9 @@ parameters:
         alpha: 0.01
         beta: 0.1
         gamma: 0.51 
-        save_warmup: true 
-        save_samples: false
-        save_freq: 10000
-        disp: true
+        save_to_file: true 
+        save_freq: 1
+        disp: false 
         disp_freq: 1
         # The warmup to do on w at each iteration of theta sampling
         num_warmup: 1
@@ -90,8 +88,7 @@ parameters:
         alpha: 0.01
         beta: 0.1
         gamma: 0.51 
-        save_warmup: false
-        save_samples: false
+        save_to_file: true
         save_freq: 10000
         disp: true
         disp_freq: 1000000

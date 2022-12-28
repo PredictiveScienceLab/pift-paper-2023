@@ -88,13 +88,11 @@ int main(int argc, char* argv[]) {
   std::generate(w, w + psi.get_dim_w(), [&norm, &rng]() {return norm(rng);});
 
   // Do the warmup
-  sgld_params.save_to_file = config.sgld.save_warmup;
   sgld_params.out_file = warmup_out_file; 
   sgld(eu_h, w, phi.get_dim_w(), rng, config.sgld.num_warmup, sgld_params);
 
   // Do the production samples
   sgld_params.init_it = config.sgld.num_warmup;
-  sgld_params.save_to_file = config.sgld.save_samples;
   sgld_params.out_file = samples_out_file;
   sgld(eu_h, w, phi.get_dim_w(), rng, config.sgld.num_samples, sgld_params);
 
@@ -109,9 +107,9 @@ int main(int argc, char* argv[]) {
   // We are done
   std::cout << "*** Done ***" << std::endl;
   std::cout << "I wrote the following files:" << std::endl;
-  if(config.sgld.save_warmup)
+  if(config.sgld.save_to_file)
     std::cout << "\t- " << warmup_out_file << std::endl;
-  if(config.sgld.save_samples)
+  if(config.sgld.save_to_file)
     std::cout << "\t- " << samples_out_file << std::endl;
   std::cout << "\t- " << prefix + "_x.csv" << std::endl;
   std::cout << "\t- " << prefix + "_phi.csv" << std::endl;
