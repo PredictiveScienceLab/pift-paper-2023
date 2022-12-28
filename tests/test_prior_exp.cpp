@@ -112,33 +112,11 @@ int main(int argc, char* argv[]) {
   F grad_theta[h.get_num_params()];
   //ue_prior_exp_int_grad_theta_H.warmup(theta);
   // Let's evaluate this at some theta's
-  //theta[0] = std::log(100.0);
-  //ue_prior_exp_int_grad_theta_H(theta, grad_theta);
+  theta[0] = std::log(100.0);
+  ue_prior_exp_int_grad_theta_H(theta, grad_theta);
   theta[0] = std::log(10000.0);
   ue_prior_exp_int_grad_theta_H(theta, grad_theta);
-  //theta[0] = std::log(10000.0);
-  //ue_prior_exp_int_grad_theta_H(theta, grad_theta);  
 
-//  // An unbiased estimator of the gradient of the Hamiltonian with respect
-//  // to w
-//  UEGradWH eu_h(h, phi, domain, config.sgld.num_collocation, nullptr);
-//
-//  // Initialize the w's
-//  F w[phi.get_dim_w()];
-//  std::normal_distribution<F> norm(0, config.sgld.sigma_w);
-//  std::generate(w, w + psi.get_dim_w(), [&norm, &rng]() {return norm(rng);});
-//
-//  // Do the warmup
-//  sgld_params.save_to_file = config.sgld.save_warmup;
-//  sgld_params.out_file = warmup_out_file; 
-//  sgld(eu_h, w, phi.get_dim_w(), rng, config.sgld.num_warmup, sgld_params);
-//
-//  // Do the production samples
-//  sgld_params.init_it = config.sgld.num_warmup;
-//  sgld_params.save_to_file = config.sgld.save_samples;
-//  sgld_params.out_file = samples_out_file;
-//  sgld(eu_h, w, phi.get_dim_w(), rng, config.sgld.num_samples, sgld_params);
-//
   // Postprocess the results
   const int n = config.postprocess.num_points_per_dim[0];
   postprocess<F>(
@@ -146,16 +124,6 @@ int main(int argc, char* argv[]) {
       theta_params.sgld_params.out_file,
       prefix
   );
-//
-//  // We are done
-//  std::cout << "*** Done ***" << std::endl;
-//  std::cout << "I wrote the following files:" << std::endl;
-//  if(config.sgld.save_warmup)
-//    std::cout << "\t- " << warmup_out_file << std::endl;
-//  if(config.sgld.save_samples)
-//    std::cout << "\t- " << samples_out_file << std::endl;
-//  std::cout << "\t- " << prefix + "_x.csv" << std::endl;
-//  std::cout << "\t- " << prefix + "_phi.csv" << std::endl;
 
   return 0;
 } // main
