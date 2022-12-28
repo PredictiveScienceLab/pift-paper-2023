@@ -112,7 +112,7 @@ int main(int argc, char* argv[]) {
 
   // // Unbiased estimator of the posterior expectation of the integral of
   // grad theta of the Hamiltonian
-  auto theta_params = config.parameters.post.get_theta_params();
+  auto theta_params = config.parameters.post.get_params();
   theta_params.sgld_params.out_file = prefix + "_post_ws.csv";
   UEGradThetaPost ue_post_exp_int_grad_theta_H(
        ue_grad_w_post,

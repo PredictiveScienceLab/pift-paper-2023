@@ -32,6 +32,9 @@ public:
   Hamiltonian(const int& num_params) : num_params(num_params)
   {}
 
+  // All objects must have copy constructors like this one
+  Hamiltonian(const Hamiltonian<T>& obj) : Hamiltonian<T>(obj.num_params) {}
+
   inline int get_num_params() const { return num_params; }
 
   // Return the beta (inverse temperature of the Hamiltonian) from knowledge
@@ -257,6 +260,5 @@ class UEIntegralGradThetaH {
       return s * scale_ratio;
     }
 }; // UEIntegralGradThetaH
-
 } // namespace pift
 #endif // PIFT_HAMILTONIAN_HPP

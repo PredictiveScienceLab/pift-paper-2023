@@ -170,6 +170,7 @@ public:
       of.close();
   }
 
+  inline UEThetaParams<T>& get_params() { return params; }
   inline T get_scale_ratio() const { return scale_ratio; }
   inline int get_num_params() const { return num_params; }
 
@@ -179,6 +180,7 @@ public:
   }
 
   inline void adjust_alpha(const T* theta) {
+    const T beta = ue_grad_w_h.get_beta(theta);
     if(params.adjust_alpha) {
       const T beta = ue_grad_w_h.get_beta(theta);
       params.sgld_params.alpha = alpha0 / beta;
@@ -325,5 +327,64 @@ public:
   }
 }; // UEGradThetaMinusLogPost
 
+
+// The following functionality requires restructoring the code
+// TODO: Fix me.
+template<
+  typename T,
+  typename H,
+  typename FA,
+  typename D,
+  typename RNG,
+  typename C>
+auto make_ue_prior_exp_int_grad_theta(
+    H& h,
+    FA& phi,
+    D& domain,
+    RNG& rng,
+    C& config,
+    T* theta,
+    std::string& prefix
+) {
+  // The unbiased estimator of the integral of the gradient of the
+  // Hamiltonian with respect to theta
+  using UEGradThetaH = UEIntegralGradThetaH<T, H, FA, D>;
+  UEGradThetaH ue_int_grad_theta_H(
+      h,
+      phi,
+      domain,
+      config.num_collocation
+  );
+
+  // Unbiased estimator used to take expectations over prior
+  using UEGradWH = UEIntegralGradWH<T, H, FA, D>;
+  UEGradWH ue_grad_w_h(
+      h,
+      phi,
+      domain,
+      config.num_collocation,
+      theta
+  );
+
+  // Unbiased estimator of the prior expectation of the integral of grad theta
+  // of the Hamiltonian
+  auto theta_params = config.get_theta_params();
+  theta_params.sgld_params.out_file = prefix + "_prior_ws.csv";
+  using UEGradThetaPrior = UEGradThetaHF<T, UEGradWH, UEGradThetaH, RNG>;
+  UEGradThetaPrior ue_prior_exp_int_grad_theta_H(
+      ue_grad_w_h,
+      ue_int_grad_theta_H,
+      rng,
+      theta_params
+  );
+  //UEGradThetaPrior* ue_prior_exp_int_grad_theta_H = new UEGradThetaPrior(
+  //    ue_grad_w_h,
+  //    ue_int_grad_theta_H,
+  //    rng,
+  //    theta_params
+  //);
+
+  return ue_prior_exp_int_grad_theta_H;
+} // make_ue_prior_exp_int_grad_theta
 } // namespace pift
 #endif // PIFT_POSTERIOR_HPP

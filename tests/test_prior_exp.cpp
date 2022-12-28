@@ -114,16 +114,14 @@ int main(int argc, char* argv[]) {
   // Let's evaluate this at some theta's
   theta[0] = std::log(100.0);
   ue_prior_exp_int_grad_theta_H(theta, grad_theta);
-  theta[0] = std::log(10000.0);
-  ue_prior_exp_int_grad_theta_H(theta, grad_theta);
 
   // Postprocess the results
-  const int n = config.postprocess.num_points_per_dim[0];
-  postprocess<F>(
-      phi, domain, config.postprocess.num_points_per_dim[0],
-      theta_params.sgld_params.out_file,
-      prefix
-  );
+  // const int n = config.postprocess.num_points_per_dim[0];
+  // postprocess<F>(
+  //    phi, domain, config.postprocess.num_points_per_dim[0],
+  //    theta_params.sgld_params.out_file,
+  //    prefix
+  //);
 
   return 0;
 } // main
