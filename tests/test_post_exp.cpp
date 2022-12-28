@@ -101,8 +101,10 @@ int main(int argc, char* argv[]) {
       theta
   );
   const F sigma = 0.1;
-  auto x_obs = pift::loadtxtvec<F>("example02_n=10_sigma=1.00e-01_0_x_obs.csv");
-  auto y_obs = pift::loadtxtvec<F>("example02_n=10_sigma=1.00e-01_0_y_obs.csv");
+  auto x_obs = 
+    pift::loadtxtvec<F>("../examples/example02_n=10_sigma=1.00e-02_0_x_obs.csv");
+  auto y_obs = 
+    pift::loadtxtvec<F>("../examples/example02_n=10_sigma=1.00e-02_0_y_obs.csv");
   assert(x_obs.size() == y_obs.size());
   L l(phi, x_obs.size(), x_obs.data(), y_obs.data(), sigma);
   UEGradWL ue_grad_w_l(l, theta, config.parameters.post.batch_size, rng);
