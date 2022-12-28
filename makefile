@@ -17,9 +17,9 @@ CXXFLAGS=-O3 -ffast-math -std=c++20 -I./src -I./examples \
 LDFLAGS=-L$(YAMLCPP)/lib -lyaml-cpp
 
 # all: test_domain test_fields test_hamiltonian test_posterior \
-# 		 test_free \
+# 		 test_free test_prior_exp test_post_exp\
 # 		 example01 example02
-all: test_prior_exp
+all: test_post_exp
 
 clean:
 	$(RM) tests/*.o examples/*.o
@@ -59,6 +59,12 @@ test_prior_exp: test_prior_exp.o
 
 test_prior_exp.o: tests/test_prior_exp.cpp
 	$(CXX) -c tests/test_prior_exp.cpp $(CXXFLAGS) -o tests/test_prior_exp.o
+
+test_post_exp: test_post_exp.o
+	$(CXX) -o tests/test_post_exp tests/test_post_exp.o $(LDFLAGS)
+
+test_post_exp.o: tests/test_post_exp.cpp
+	$(CXX) -c tests/test_post_exp.cpp $(CXXFLAGS) -o tests/test_post_exp.o
 
 example01: example01.o
 	$(CXX) -o examples/example01 examples/example01.o $(LDFLAGS)
