@@ -7,6 +7,7 @@
 // Date:
 //  12/28/2022
 
+#include <cmath>
 #include <random>
 #include <cassert>
 #include <cstdio>
@@ -109,7 +110,14 @@ int main(int argc, char* argv[]) {
 
   // Let's test this because we haven't really tested it
   F grad_theta[h.get_num_params()];
-  ue_prior_exp_int_grad_theta_H.warmup(theta);
+  //ue_prior_exp_int_grad_theta_H.warmup(theta);
+  // Let's evaluate this at some theta's
+  //theta[0] = std::log(100.0);
+  //ue_prior_exp_int_grad_theta_H(theta, grad_theta);
+  theta[0] = std::log(10000.0);
+  ue_prior_exp_int_grad_theta_H(theta, grad_theta);
+  //theta[0] = std::log(10000.0);
+  //ue_prior_exp_int_grad_theta_H(theta, grad_theta);  
 
 //  // An unbiased estimator of the gradient of the Hamiltonian with respect
 //  // to w
@@ -131,13 +139,13 @@ int main(int argc, char* argv[]) {
 //  sgld_params.out_file = samples_out_file;
 //  sgld(eu_h, w, phi.get_dim_w(), rng, config.sgld.num_samples, sgld_params);
 //
-//  // Postprocess the results
-//  const int n = config.postprocess.num_points_per_dim[0];
-//  postprocess<F>(
-//      phi, domain, config.postprocess.num_points_per_dim[0],
-//      samples_out_file,
-//      prefix
-//  );
+  // Postprocess the results
+  const int n = config.postprocess.num_points_per_dim[0];
+  postprocess<F>(
+      phi, domain, config.postprocess.num_points_per_dim[0],
+      theta_params.sgld_params.out_file,
+      prefix
+  );
 //
 //  // We are done
 //  std::cout << "*** Done ***" << std::endl;

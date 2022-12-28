@@ -106,6 +106,7 @@ struct PriorConfig {
   bool reinitialize_ws;
   int num_collocation;
   T sigma_w;
+  bool adjust_alpha;
   SGLDConfig<T> sgld;
 
   PriorConfig(const YAML::Node& yaml) :
@@ -115,6 +116,7 @@ struct PriorConfig {
     reinitialize_ws(yaml["reinitialize_ws"].as<bool>()),
     num_collocation(yaml["num_collocation"].as<int>()),
     sigma_w(yaml["sigma_w"].as<T>()),
+    adjust_alpha(yaml["adjust_alpha"].as<bool>()),
     sgld(yaml["sgld"])
   {
     assert(num_chains >= 1);
@@ -131,6 +133,7 @@ struct PriorConfig {
     theta_params.num_bursts = num_bursts;
     theta_params.num_thinning = sgld.num_samples;
     theta_params.init_w_sigma = sigma_w;
+    theta_params.adjust_alpha = adjust_alpha;
     theta_params.reinitialize_ws = reinitialize_ws;
     theta_params.sgld_params = sgld.get_sgld_params();
     return theta_params;

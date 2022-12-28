@@ -50,6 +50,7 @@ public:
     prior.set_theta(theta);
     likelihood.set_theta(theta);
   }
+  inline T get_beta(const T* theta) const { return prior.get_beta(theta); }
   inline UEH& get_prior() { return prior; }
   inline UEL& get_likelihood() { return likelihood; }
 
@@ -77,6 +78,8 @@ struct UEThetaParams {
   int num_thinning;
   // The variance for initializing sigma
   T init_w_sigma;
+  // Whether or not to adjust the SGLD alpha by dividing it by beta
+  bool adjust_alpha;
   // Whether or not to reinitialize the ws on every iteration
   bool reinitialize_ws;
   // The prefix used for saving iles
@@ -91,6 +94,7 @@ struct UEThetaParams {
     num_bursts(1),
     num_thinning(1),
     init_w_sigma(1.0),
+    adjust_alpha(true),
     reinitialize_ws(false),
     output_prefix("theta_default_output_prefix"),
     sgld_params(SGLDParams<T>())
@@ -122,6 +126,7 @@ protected:
   const int dim_w;
   const int num_params;
   const T scale_ratio;
+  const T alpha0;
   UEThetaParams<T>& params;
   T* ws;
   T* grad_w_H;
@@ -140,6 +145,7 @@ public:
     ue_grad_theta_f(ue_grad_theta_f),
     rng(rng),
     params(params),
+    alpha0(params.sgld_params.alpha),
     dim_w(ue_grad_theta_f.get_dim_w()),
     num_params(ue_grad_theta_f.get_num_params()),
     scale_ratio(1.0 / (params.num_bursts * params.num_chains))      
@@ -149,9 +155,7 @@ public:
     tmp_grad_theta = new T[num_params];
     norm = new std::normal_distribution<T>(0, 1);
     initialize_chains();
-    std::cout << "save? " << params.sgld_params.save_to_file << std::endl;
-    // REMOVE
-    if (params.sgld_params.save_to_file)
+    if(params.sgld_params.save_to_file)
       of.open(params.sgld_params.out_file);
   }
 
@@ -160,7 +164,7 @@ public:
     delete ws;
     delete tmp_grad_theta;
     delete norm;
-    if (params.sgld_params.save_to_file)
+    if(params.sgld_params.save_to_file)
       of.close();
   }
 
@@ -172,14 +176,28 @@ public:
       ws[i] = params.init_w_sigma * (*norm)(rng);
   }
 
+  inline void adjust_alpha(const T* theta) {
+    if(params.adjust_alpha) {
+      const T beta = ue_grad_w_h.get_beta(theta);
+      params.sgld_params.alpha = alpha0 / beta;
+    }
+  }
+
   inline void warmup(T* theta) {
     ue_grad_w_h.set_theta(theta);
+    adjust_alpha(theta);
     params.sgld_params.init_it = 0;
-    of << "# INITIAL WARMUP" << std::endl;
+    if(params.sgld_params.save_to_file)
+      of << "# INITIAL WARMUP" << std::endl;
+    if(params.sgld_params.disp)
+      std::cout << "INITIAL WARMUP" << std::endl;
     pift::cout_vec(theta, num_params, of, "# THETA: ");
     for(int c=0; c<params.num_chains; c++) {
       T* w = ws + c * dim_w;
-      of << "# CHAIN " << c << std::endl;
+      if(params.sgld_params.save_to_file)
+        of << "# CHAIN: " << c << std::endl;
+      if(params.sgld_params.disp)
+        std::cout << "CHAIN: " << c << std::endl;
       sgld(
           ue_grad_w_h,
           w,
@@ -198,13 +216,22 @@ public:
   T operator()(T* theta, T* grad_theta) {
     T result = 0.0;
     std::fill(grad_theta, grad_theta + num_params, 0.0);
-    if (params.reinitialize_ws)
+    if(params.reinitialize_ws)
       initialize_chains();
     ue_grad_w_h.set_theta(theta);
+    adjust_alpha(theta);
     const int init_it = params.sgld_params.init_it;
+    if(params.sgld_params.save_to_file)
+       pift::cout_vec(theta, num_params, of, "# THETA: ");
     for(int c=0; c<params.num_chains; c++) {
       T* w = ws + c * dim_w;
       params.sgld_params.init_it = init_it;
+      if(params.sgld_params.save_to_file) {
+        of << "# CHAIN: " << c << std::endl;
+        of << "# WARMUP" << std::endl;
+      }
+      if(params.sgld_params.disp)
+        std::cout << "CHAIN: " << c << std::endl;
       sgld(
           ue_grad_w_h,
           w,
@@ -218,7 +245,10 @@ public:
       );
       params.sgld_params.init_it += params.num_per_it_warmup;
       for(int b=0; b<params.num_bursts; b++) {
-        // Sample w num_thinning times
+        if(params.sgld_params.save_to_file)
+          of << "# BURST: " << b << std::endl;
+        if(params.sgld_params.disp)
+          std::cout << "BURST: " << b << std::endl;
         sgld(
             ue_grad_w_h,
             w,
@@ -232,12 +262,27 @@ public:
         );
         params.sgld_params.init_it += params.num_thinning;
         // Get the gradient with respect to theta
-        result += ue_grad_theta_f(w, theta, tmp_grad_theta);
+        const T r = ue_grad_theta_f(w, theta, tmp_grad_theta);
+        if(params.sgld_params.save_to_file)
+          pift::cout_vec(
+              tmp_grad_theta,
+              num_params,
+              of,
+              "# SAMPLE_PRIOR_EXP_INT_GRAD_THETA_H: "
+          );
+        result += r;
         for(int i=0; i<num_params; i++)
           grad_theta[i] += tmp_grad_theta[i];
       } // end for over bursts
     } // end for over chains
     scale(grad_theta, num_params, scale_ratio);
+    if(params.sgld_params.save_to_file)
+           pift::cout_vec(
+              grad_theta,
+              num_params,
+              of,
+              "# UE_PRIOR_EXP_INT_GRAD_THETA_H: "
+           );
     result *= scale_ratio;
     return result;
   }

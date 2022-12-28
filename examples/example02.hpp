@@ -34,6 +34,8 @@ class Example02Hamiltonian : public pift::Hamiltonian<T> {
       pift::Hamiltonian<T>(1), gamma(gamma), D(D), kappa(kappa)
     {}
 
+    inline T get_beta(const T* theta) const { return std::exp(theta[0]); }
+
     // The source term
     inline T f(const T* x) const
     {

@@ -34,6 +34,10 @@ public:
 
   inline int get_num_params() const { return num_params; }
 
+  // Return the beta (inverse temperature of the Hamiltonian) from knowledge
+  // of the parameters.
+  virtual inline T get_beta(const T* theta) const = 0;
+
   // The density of the Hamiltonian
   // This must be overloaded by the deriving class.
   // Parameters:
@@ -145,6 +149,7 @@ class UEIntegralGradWH {
 
     // TODO: Think if we need to keep this
     inline void set_theta(T* theta) { this->theta = theta; }
+    inline T get_beta(const T* theta) const { return h.get_beta(theta); }
     inline FA& get_phi() const { return phi; }
     inline int get_num_collocation() const { return num_collocation; }
 

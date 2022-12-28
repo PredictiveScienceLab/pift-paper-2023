@@ -30,6 +30,8 @@ class Example01Hamiltonian : public pift::Hamiltonian<T> {
       pift::Hamiltonian<T>(0), beta(beta), kappa(kappa)
   {}
 
+    inline T get_beta(const T* theta) const { return beta; }
+
     // The source term
     inline T q(const T* x) const
     {
