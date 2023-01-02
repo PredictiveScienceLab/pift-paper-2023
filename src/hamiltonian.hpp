@@ -106,10 +106,10 @@ class UEIntegralGradWH {
     const int dim_w;
     const int prolong_size;
     const T scale_ratio;
-    T* prolong_phi;
-    T* grad_w_prolong_phi;
-    T* grad_prolong_phi_H;
-    T* x;
+    std::vector<T> prolong_phi;
+    std::vector<T> grad_w_prolong_phi;
+    std::vector<T> grad_prolong_phi_H;
+    std::vector<T> x;
 
   public:
     // Initialize the object
@@ -132,22 +132,10 @@ class UEIntegralGradWH {
       scale_ratio(domain.get_volume() / num_collocation),
       theta(theta)
     {
-      prolong_phi = new T[prolong_size];
-      grad_w_prolong_phi = new T[phi.get_grad_w_prolong_size()];
-      grad_prolong_phi_H = new T[prolong_size];
-      std::fill(
-          grad_prolong_phi_H,
-          grad_prolong_phi_H + prolong_size,
-          0.0
-      );
-      x = new T[dim_x];
-    }
-
-    ~UEIntegralGradWH() {
-      delete prolong_phi;
-      delete grad_w_prolong_phi;
-      delete grad_prolong_phi_H;
-      delete x;
+      prolong_phi.resize(prolong_size);
+      grad_w_prolong_phi.resize(phi.get_grad_w_prolong_size());
+      grad_prolong_phi_H.resize(prolong_size);
+      x.resize(dim_x);
     }
 
     // TODO: Think if we need to keep this
@@ -159,8 +147,8 @@ class UEIntegralGradWH {
     // Adds the gradient of the Hamiltonian density with respect to w to out
     // Returns the Hamiltonian density at x.
     inline T add_grad(const T* x, const T* w, T* out) {
-      phi(x, w, prolong_phi, grad_w_prolong_phi);
-      const T h_x = h(x, prolong_phi, theta, grad_prolong_phi_H);
+      phi(x, w, prolong_phi.data(), grad_w_prolong_phi.data());
+      const T h_x = h(x, prolong_phi.data(), theta, grad_prolong_phi_H.data());
       for(int i=0; i<dim_w; i++)
         for(int j=0; j<prolong_size; j++)
          out[i] += grad_prolong_phi_H[j] * grad_w_prolong_phi[dim_w * j + i]; 
@@ -174,8 +162,8 @@ class UEIntegralGradWH {
       T s = 0.0;
       std::fill(out, out + dim_w, 0.0);
       for(int i=0; i<num_collocation; i++) {
-        domain.sample(x);
-        s += add_grad(x, w, out);
+        domain.sample(x.data());
+        s += add_grad(x.data(), w, out);
       }
       scale(out, dim_w, scale_ratio, out);
       return s * scale_ratio;
@@ -201,10 +189,11 @@ class UEIntegralGradThetaH {
     const int num_collocation;
     const int dim_x;
     const int dim_w;
+    const int num_params;
     const int prolong_size;
     const T scale_ratio;
-    T* prolong_phi;
-    T* x;
+    std::vector<T> prolong_phi;
+    std::vector<T> x;
 
   public:
     // Initialize the object
@@ -222,16 +211,12 @@ class UEIntegralGradThetaH {
       dim_x(phi.get_dim_x()),
       dim_w(phi.get_dim_w()),
       prolong_size(phi.get_prolong_size()),
+      num_params(h.get_num_params()),
       num_collocation(num_collocation),
       scale_ratio(domain.get_volume() / num_collocation)
     {
-      prolong_phi = new T[prolong_size];
-      x = new T[dim_x];
-    }
-
-    ~UEIntegralGradThetaH() {
-      delete prolong_phi;
-      delete x;
+      prolong_phi.resize(prolong_size);
+      x.resize(dim_x);
     }
 
     inline FA& get_phi() const { return phi; }
@@ -243,20 +228,20 @@ class UEIntegralGradThetaH {
     // Adds the gradient of the Hamiltonian density with respect to w to out
     // Returns the Hamiltonian density at x.
     inline T add_grad(const T* x, const T* w, const T* theta, T* out) {
-      phi(x, w, prolong_phi);
-      return h.add_grad_theta(x, prolong_phi, theta, out);
+      phi(x, w, prolong_phi.data());
+      return h.add_grad_theta(x, prolong_phi.data(), theta, out);
     }
 
     // Returns the estimator.
-    // In out, it writes the gradient of the estimator with respect to w
+    // In out, it writes the gradient of the estimator with respect to theta
     inline T operator()(const T* w, const T* theta, T* out) {
       T s = 0.0;
-      std::fill(out, out + dim_w, 0.0);
+      std::fill(out, out + num_params, 0.0);
       for(int i=0; i<num_collocation; i++) {
-        domain.sample(x);
-        s += add_grad(x, w, theta, out);
+        domain.sample(x.data());
+        s += add_grad(x.data(), w, theta, out);
       }
-      scale(out, dim_w, scale_ratio, out);
+      scale(out, num_params, scale_ratio, out);
       return s * scale_ratio;
     }
 }; // UEIntegralGradThetaH

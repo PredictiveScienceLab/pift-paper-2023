@@ -22,7 +22,7 @@ class UniformRectangularDomain {
     std::vector<T> bounds;
     T volume;
     const int dim;
-    std::uniform_real_distribution<T>* unif;
+    std::uniform_real_distribution<T> unif{0,1};
     R& rng;
 
     inline T calculate_volume() const {
@@ -34,7 +34,6 @@ class UniformRectangularDomain {
 
     inline void init() {
       volume = calculate_volume();
-      unif = new std::uniform_real_distribution<T>(0, 1);
     }
 
   public:
@@ -61,10 +60,6 @@ class UniformRectangularDomain {
       }
     }
 
-    ~UniformRectangularDomain() {
-      delete unif;
-    }
-
     inline int get_dim() const { return dim; }
     inline T get_volume() const { return volume; }
     inline T a(const int& i) const { return bounds[2 * i]; }
@@ -74,7 +69,7 @@ class UniformRectangularDomain {
       for(int i=0; i<get_dim(); i++) {
         const T ai = a(i);
         const T bi = b(i);
-        x[i] = (bi - ai) * (*unif)(rng) + ai;
+        x[i] = (bi - ai) * unif(rng) + ai;
       }
     }
 

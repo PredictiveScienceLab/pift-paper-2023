@@ -102,17 +102,17 @@ int main(int argc, char* argv[]) {
   );
   const F sigma = 0.01;
   auto x_obs = 
-    pift::loadtxtvec<F>("../examples/example02_n=15_sigma=1.00e-02_0_x_obs.csv");
+    pift::loadtxtvec<F>("../examples/example02_n=100_sigma=1.00e-04_0_x_obs.csv");
   auto y_obs = 
-    pift::loadtxtvec<F>("../examples/example02_n=15_sigma=1.00e-02_0_y_obs.csv");
+    pift::loadtxtvec<F>("../examples/example02_n=100_sigma=1.00e-04_0_y_obs.csv");
   assert(x_obs.size() == y_obs.size());
   L l(phi, x_obs.size(), x_obs.data(), y_obs.data(), sigma);
   UEGradWL ue_grad_w_l(l, theta, config.parameters.post.batch_size, rng);
   UEGradWP ue_grad_w_post(ue_grad_w_h, ue_grad_w_l);
 
-  // // Unbiased estimator of the posterior expectation of the integral of
+  // Unbiased estimator of the posterior expectation of the integral of
   // grad theta of the Hamiltonian
-  auto theta_params = config.parameters.post.get_params();
+  auto theta_params = config.parameters.post.get_theta_params();
   theta_params.sgld_params.out_file = prefix + "_post_ws.csv";
   UEGradThetaPost ue_post_exp_int_grad_theta_H(
        ue_grad_w_post,
@@ -122,7 +122,7 @@ int main(int argc, char* argv[]) {
   );
 
   F grad_theta[h.get_num_params()];
-  theta[0] = std::log(1000.0);
+  theta[0] = std::log(10000.0);
   ue_post_exp_int_grad_theta_H(theta, grad_theta);
   // theta[0] = std::log(10000.0);
   // ue_prior_exp_int_grad_theta_H(theta, grad_theta);

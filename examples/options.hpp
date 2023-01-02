@@ -156,6 +156,7 @@ template<typename T>
 struct ParamsConfig {
   std::vector<T> init_mean;
   std::vector<T> init_std;
+  int num_collocation;
   SGLDConfig<T> sgld;
   PriorConfig<T> prior;
   PostConfig<T> post;
@@ -163,6 +164,7 @@ struct ParamsConfig {
   ParamsConfig(const YAML::Node& yaml) :
     init_mean(yaml["init_mean"].as<std::vector<T>>()),
     init_std(yaml["init_std"].as<std::vector<T>>()),
+    num_collocation(yaml["num_collocation"].as<int>()),
     sgld(yaml["sgld"]),
     prior(yaml["prior"]),
     post(yaml["post"])

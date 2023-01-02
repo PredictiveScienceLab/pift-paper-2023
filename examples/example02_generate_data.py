@@ -46,7 +46,7 @@ args = parser.parse_args()
 
 # Set up and solve the boundary value problem
 D = 0.1
-kappa = 0.0
+kappa = 1.0
 f = lambda x: np.cos(4.0 * x)
 rhs = lambda x, y: (y[1], (f(x) + kappa * y[0] ** 3) / D)
 bc = lambda ya, yb: np.array([ya[0] - 0.0, yb[0] - 0.0])
@@ -75,7 +75,7 @@ for t in range(args.num_times):
     obs_prefix = prefix + f"_{t}"
     x_file = obs_prefix + "_x_obs.csv"
     y_file = obs_prefix + "_y_obs.csv"
-    x_obs = np.linspace(0, 1, args.num_observations)
+    x_obs = np.linspace(0, 1, args.num_observations + 2)[1:-1]
     y_obs = f(x_obs) + args.sigma * np.random.randn(x_obs.shape[0])
     np.savetxt(x_file, x_obs)
     np.savetxt(y_file, y_obs)

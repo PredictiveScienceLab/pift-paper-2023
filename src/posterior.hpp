@@ -16,6 +16,7 @@
 
 #include <fstream>
 #include <random>
+#include <vector>
 
 #include "hamiltonian.hpp"
 #include "likelihood.hpp"
@@ -31,19 +32,18 @@ protected:
   UEH& prior;
   UEL& likelihood;
   const int dim_w;
-  T* tmp;
-  std::uniform_int_distribution<int>* unif_int;
+  std::vector<T> tmp; 
+  //std::uniform_int_distribution<int>* unif_int;
 
 public:
   UEGradWPost(UEH& prior, UEL& likelihood) : 
     prior(prior), likelihood(likelihood),
     dim_w(likelihood.get_dim_w())
   {
-    tmp = new T[dim_w];
+    tmp.resize(dim_w);
   }
 
   ~UEGradWPost() {
-    delete tmp;
   }
 
   inline void set_theta(T* theta) {
@@ -51,6 +51,7 @@ public:
     likelihood.set_theta(theta);
   }
   inline T get_beta(const T* theta) const {
+    //return prior.get_beta(theta);
     return std::max(prior.get_beta(theta), likelihood.get_beta(theta));
   }
   inline UEH& get_prior() { return prior; }
@@ -58,7 +59,7 @@ public:
 
   inline T operator()(const T* w, T* out) {
     const T p = prior(w, out);
-    const T l = likelihood(w, tmp);
+    const T l = likelihood(w, tmp.data());
     for(int i=0; i<dim_w; i++)
       out[i] += tmp[i];
     return p + l;
@@ -130,10 +131,10 @@ protected:
   const T scale_ratio;
   const T alpha0;
   UEThetaParams<T>& params;
-  T* ws;
-  T* grad_w_H;
-  T* tmp_grad_theta;
-  std::normal_distribution<T>* norm;
+  std::vector<T> ws;
+  std::vector<T> grad_w_H;
+  std::vector<T> tmp_grad_theta;
+  std::normal_distribution<T> norm{0,1};
   std::ofstream of;
 
 public:
@@ -152,20 +153,15 @@ public:
     num_params(ue_grad_theta_f.get_num_params()),
     scale_ratio(1.0 / (params.num_bursts * params.num_chains))      
   {
-    grad_w_H = new T[dim_w];
-    ws = new T[params.num_chains * dim_w];
-    tmp_grad_theta = new T[num_params];
-    norm = new std::normal_distribution<T>(0, 1);
+    ws.resize(params.num_chains * dim_w);
+    grad_w_H.resize(dim_w);
+    tmp_grad_theta.resize(num_params);
     initialize_chains();
     if(params.sgld_params.save_to_file)
       of.open(params.sgld_params.out_file);
   }
 
   ~UEGradThetaHF() {
-    delete grad_w_H;
-    delete ws;
-    delete tmp_grad_theta;
-    delete norm;
     if(params.sgld_params.save_to_file)
       of.close();
   }
@@ -176,11 +172,10 @@ public:
 
   inline void initialize_chains() {
     for(int i=0; i<params.num_chains * dim_w; i++)
-      ws[i] = params.init_w_sigma * (*norm)(rng);
+      ws[i] = params.init_w_sigma / std::sqrt(static_cast<T>(dim_w)) * norm(rng);
   }
 
   inline void adjust_alpha(const T* theta) {
-    const T beta = ue_grad_w_h.get_beta(theta);
     if(params.adjust_alpha) {
       const T beta = ue_grad_w_h.get_beta(theta);
       params.sgld_params.alpha = alpha0 / beta;
@@ -197,7 +192,7 @@ public:
       std::cout << "INITIAL WARMUP" << std::endl;
     pift::cout_vec(theta, num_params, of, "# THETA: ");
     for(int c=0; c<params.num_chains; c++) {
-      T* w = ws + c * dim_w;
+      T* w = ws.data() + c * dim_w;
       if(params.sgld_params.save_to_file)
         of << "# CHAIN: " << c << std::endl;
       if(params.sgld_params.disp)
@@ -208,8 +203,8 @@ public:
           dim_w,
           rng,
           params.num_init_warmup,
-          grad_w_H,
-          *norm,
+          grad_w_H.data(),
+          norm,
           of,
           params.sgld_params
       );
@@ -218,17 +213,20 @@ public:
   }
 
   T operator()(T* theta, T* grad_theta) {
-    T result = 0.0;
-    std::fill(grad_theta, grad_theta + num_params, 0.0);
+    T foo[num_params];
+    T result = T(0.0);
+    T r2 = T(0.0);
+    std::fill(grad_theta, grad_theta + num_params, T(0.0));
+    std::fill(foo, foo + num_params, T(0.0));
     if(params.reinitialize_ws)
       initialize_chains();
-    ue_grad_w_h.set_theta(theta);
+    //ue_grad_w_h.set_theta(theta);
     adjust_alpha(theta);
     const int init_it = params.sgld_params.init_it;
     if(params.sgld_params.save_to_file)
        pift::cout_vec(theta, num_params, of, "# THETA: ");
     for(int c=0; c<params.num_chains; c++) {
-      T* w = ws + c * dim_w;
+      T* w = ws.data() + c * dim_w;
       params.sgld_params.init_it = init_it;
       if(params.sgld_params.save_to_file) {
         of << "# CHAIN: " << c << std::endl;
@@ -242,8 +240,8 @@ public:
           dim_w,
           rng,
           params.num_per_it_warmup,
-          grad_w_H,
-          *norm,
+          grad_w_H.data(),
+          norm,
           of,
           params.sgld_params
       );
@@ -259,26 +257,30 @@ public:
             dim_w,
             rng,
             params.num_thinning,
-            grad_w_H,
-            *norm,
+            grad_w_H.data(),
+            norm,
             of,
             params.sgld_params
         );
         params.sgld_params.init_it += params.num_thinning;
         // Get the gradient with respect to theta
-        const T r = ue_grad_theta_f(w, theta, tmp_grad_theta);
+        const T r = ue_grad_theta_f(w, theta, tmp_grad_theta.data());
         if(params.sgld_params.save_to_file)
           pift::cout_vec(
               tmp_grad_theta,
-              num_params,
               of,
               "# SAMPLE_PRIOR_EXP_INT_GRAD_THETA_H: "
           );
         result += r;
-        for(int i=0; i<num_params; i++)
+        r2 += r * r;
+        for(int i=0; i<num_params; i++) {
+          foo[i] += std::pow(tmp_grad_theta[i], 2);
           grad_theta[i] += tmp_grad_theta[i];
+        }
       } // end for over bursts
     } // end for over chains
+    params.sgld_params.init_it = init_it + params.num_per_it_warmup 
+      + params.num_bursts * params.num_thinning;
     scale(grad_theta, num_params, scale_ratio);
     if(params.sgld_params.save_to_file)
            pift::cout_vec(
@@ -288,6 +290,11 @@ public:
               "# UE_PRIOR_EXP_INT_GRAD_THETA_H: "
            );
     result *= scale_ratio;
+    scale(foo, num_params, scale_ratio);
+    for(int i=0; i<num_params; i++)
+      foo[i] -= std::pow(grad_theta[i], 2);
+    //std::cout << "*** VALUE: " << grad_theta[0] << std::endl;
+    //std::cout << "*** UNCERTAINTY: " << 2.0 * std::sqrt(foo[0] * scale_ratio) << std::endl;
     return result;
   }
 }; 
@@ -296,31 +303,44 @@ public:
 // the data
 template <typename T, typename UEGradThetaPrior, typename UEGradThetaPost>
 class UEGradThetaMinusLogPost {
-public:
+private:
   UEGradThetaPrior& ue_prior;
   UEGradThetaPost& ue_post;
-  T* grad_theta_prior; // Do I need this?
+  std::vector<T> grad_theta_prior;
   int num_params; // Do I need this?
+
+public:
   UEGradThetaMinusLogPost(
       UEGradThetaPrior& ue_prior,
       UEGradThetaPost& ue_post
   ) : ue_prior(ue_prior), ue_post(ue_post),
       num_params(ue_prior.get_num_params())
   {
-    grad_theta_prior = new T[num_params];
+    grad_theta_prior.resize(num_params);
   }
 
-  ~UEGradThetaMinusLogPost() {
-    delete ue_prior;
-    delete ue_post;
-    delete grad_theta_prior;
-  }
-
+  inline UEGradThetaPrior& get_prior() { return ue_prior; }
+  inline UEGradThetaPost& get_post() { return ue_post; }
   inline int get_num_params() const { return num_params; }
+  inline void initialize_chains() {
+    ue_prior.initialize_chains();
+    ue_post.initialize_chains();
+  }
+  inline void warmup(T* theta) {
+    ue_prior.warmup(theta);
+    ue_post.warmup(theta);
+  }
 
-  T operator()(const T* theta, T* grad_theta) {
-    const T h_prior = ue_prior(theta, grad_theta_prior);
+  T operator()(T* theta, T* grad_theta) {
+    // std::cout << "PRIOR" << std::endl;
+    grad_theta_prior[0] = -1.0;
+    const T h_prior = ue_prior(theta, grad_theta_prior.data());
+    //cout_vec(grad_theta_prior, num_params, std::cout, "before: ");
+    // std::cout << "POSTERIOR" << std::endl;
     const T h_post = ue_post(theta, grad_theta);
+    //std::cout << "**: " << grad_theta_prior[0] << " " << grad_theta[0] << std::endl;
+    //cout_vec(grad_theta_prior, num_params, std::cout, "after: ");
+    //exit(0);
     for(int i=0; i<num_params; i++)
       grad_theta[i] -= grad_theta_prior[i];
     return h_post - h_prior;

@@ -16,7 +16,7 @@
 #include "pift.hpp"
 
 // This is a nonlinear diffusion Hamiltonian. The only parameter is
-// the log of beta.
+// the g(beta).
 template<typename T>
 class Example02Hamiltonian : public pift::Hamiltonian<T> {
   private:
@@ -30,11 +30,14 @@ class Example02Hamiltonian : public pift::Hamiltonian<T> {
     const T gamma;
 
   public:
-    Example02Hamiltonian(const T& gamma=1.0, const T& D=0.1, const T& kappa=1.0) : 
+    Example02Hamiltonian(const T& gamma=1.0f, const T& D=0.1f, const T& kappa=1.0f) : 
       pift::Hamiltonian<T>(1), gamma(gamma), D(D), kappa(kappa)
     {}
 
-    inline T get_beta(const T* theta) const { return std::exp(theta[0]); }
+    inline T get_beta(const T* theta) const {
+      //return theta[0];
+      return std::exp(theta[0]);
+    }
 
     // The source term
     inline T f(const T* x) const
@@ -44,7 +47,7 @@ class Example02Hamiltonian : public pift::Hamiltonian<T> {
 
     inline T operator()(const T* x, const T* prolong_phi, const T* theta) const 
     {
-      const T beta = std::exp(theta[0]);
+      const T beta = get_beta(theta);
       const T phi = prolong_phi[0];
       const T phi_prime = prolong_phi[1];
       return beta * (0.5 * D * phi_prime * phi_prime
@@ -57,7 +60,7 @@ class Example02Hamiltonian : public pift::Hamiltonian<T> {
       T* out
     ) const
     {
-      const T beta = std::exp(theta[0]);
+      const T beta = get_beta(theta);
       const T phi = prolong_phi[0];
       const T phi_prime = prolong_phi[1];
       const T f_x = f(x);
@@ -73,14 +76,17 @@ class Example02Hamiltonian : public pift::Hamiltonian<T> {
       const T* theta,
       T* out
     ) const {
-      const T beta = std::exp(theta[0]);
       const T phi = prolong_phi[0];
       const T phi_prime = prolong_phi[1];
-      const T result = beta * (0.5 * D * phi_prime * phi_prime
+      const T beta = get_beta(theta);
+      const T res = beta * (0.5 * D * phi_prime * phi_prime
           + 0.25 * kappa * std::pow(phi, 4)
           + phi * f(x));
-      out[0] += result;
-      return result;
+      //const T res = 0.5 * D * phi_prime * phi_prime
+      //    + 0.25 * kappa * std::pow(phi, 4)
+      //    + phi * f(x);
+      out[0] += res;
+      return res;
     }
 }; // Example02Hamiltonian
 

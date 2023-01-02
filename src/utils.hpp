@@ -16,7 +16,7 @@ template<typename T>
 void linspace(const T& a, const T& b, const int& n, T* x) {
   const T dx = (b - a) / static_cast<T>(n - 1);
   for(int i=0; i <n; i++)
-    x[i] = i * dx;
+    x[i] = a + i * dx;
 }
 
 // Scale a vector

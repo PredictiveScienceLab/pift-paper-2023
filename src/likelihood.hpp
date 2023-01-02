@@ -123,8 +123,8 @@ class UEGradWL {
     const int batch_size;
     const T scale_ratio;
     const int dim_w;
-    R& rng;
-    std::uniform_int_distribution<int>* unif_int;
+    R rng;
+    std::uniform_int_distribution<int> unif_int;
 
   public:
     UEGradWL(
@@ -135,14 +135,14 @@ class UEGradWL {
       dim_w(l.get_dim_w()),
       scale_ratio(static_cast<T>(l.get_num_obs()) / static_cast<T>(batch_size))
     {
-      unif_int = new std::uniform_int_distribution<int>(0, l.get_num_obs() - 1);
+      unif_int.param(
+          std::uniform_int_distribution<int>::param_type(
+            0, l.get_num_obs() - 1
+          )
+      );
     }
 
-    ~UEGradWL() {
-      delete unif_int;
-    }
-
-    inline T get_beta(const T* theta) const { return l.get_beta(theta); }
+    inline T get_beta(const T* theta) const { return l.get_beta(theta) * l.get_num_obs(); }
     inline void set_theta(T* theta) { this->theta = theta; }
     inline int get_dim_w() const { return dim_w; }
 
@@ -150,7 +150,7 @@ class UEGradWL {
       std::fill(out, out + dim_w, 0.0);
       T s = 0.0;
       for(int m=0; m<batch_size; m++) {
-        const int n = (*unif_int)(rng);
+        const int n = unif_int(rng);
         s += l.add_grad_w(n, w, theta, out);
       }
       s *= scale_ratio;
