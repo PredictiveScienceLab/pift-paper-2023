@@ -67,10 +67,11 @@ class Example02BHamiltonian : public pift::Hamiltonian<T> {
       const T phi = prolong_phi[0];
       const T phi_prime = prolong_phi[1];
       const T f_x = f(x);
-      const T tmp1 = kappa * pow(phi, 3);
-      out[0] = beta * (tmp1 + f_x);
+      const T tmp1 = gamma * kappa * pow(phi, 3);
+      const T tmp2 = (1.0 - gamma) * phi;
+      out[0] = beta * (tmp1 + tmp2 + f_x);
       out[1] = beta * D * phi_prime;
-      return 0.5 * out[1] * phi_prime + (0.25 * tmp1 + f_x) * phi;
+      return 0.5 * out[1] * phi_prime + (0.25 * tmp1 + 0.5 * tmp2 + f_x) * phi;
     }
 
     inline T add_grad_theta(
@@ -83,7 +84,8 @@ class Example02BHamiltonian : public pift::Hamiltonian<T> {
       const T phi_prime = prolong_phi[1];
       const T beta = get_beta(theta);
       const T res = beta * (0.5 * D * phi_prime * phi_prime
-          + 0.25 * kappa * std::pow(phi, 4)
+          + 0.25 * gamma * kappa * std::pow(phi, 4)
+          + 0.5 * (1.0 - gamma) * std::pow(phi, 2)
           + phi * f(x));
       //const T res = 0.5 * D * phi_prime * phi_prime
       //    + 0.25 * kappa * std::pow(phi, 4)

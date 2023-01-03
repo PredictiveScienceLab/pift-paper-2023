@@ -29,7 +29,6 @@ class Example01Hamiltonian : public pift::Hamiltonian<T> {
     Example01Hamiltonian(const T& beta, const T& kappa=0.25) : 
       pift::Hamiltonian<T>(0), beta(beta), kappa(kappa)
     {
-      std::cout << "I WAS CALLED." << std::endl;
     }
 
     inline T get_beta(const T* theta) const { return beta; }

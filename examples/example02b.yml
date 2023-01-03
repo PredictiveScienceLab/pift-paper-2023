@@ -16,7 +16,7 @@ field:
 # Sampling details for the parameters
 parameters:
     # How to initialize the parameters
-    init_mean: [8.0]
+    init_mean: [10.0]
     init_std: [0.0]
     # The number of collocation points for integrating over the spatial
     # dimension when taking gradients with respect to theta
@@ -31,7 +31,7 @@ parameters:
       save_freq: 100
       disp: true 
       disp_freq: 10000
-      num_warmup: 100000
+      num_warmup: 1000000
       num_samples: 0
     # To sample the parameters we need to construct unbiased estimators prior
     # and posterior expectations over w of the gradient of the Hamiltonian

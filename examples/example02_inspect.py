@@ -20,7 +20,8 @@ obs_prefix = f"example02_n={n}_sigma={sigma:1.2e}_0"
 x_file = obs_prefix + "_x_obs.csv"
 y_file = obs_prefix + "_y_obs.csv"
 
-prefix = f"example02_resultsa/example02_gamma={gamma:1.2e}_n={n}_sigma={sigma:1.2e}_0"
+prefix = f"example02b_results/example02_gamma={gamma:1.2e}_n={n}_sigma={sigma:1.2e}_0"
+#prefix = f"example02_gamma={gamma:1.2e}_n={n}_sigma={sigma:1.2e}_0"
 
 # Visualize weights
 wspr = np.loadtxt(prefix + "_prior_ws.csv")
@@ -42,7 +43,7 @@ xst = np.loadtxt("example02_xs.csv")
 yst = np.loadtxt("example02_ys.csv")
 
 skip_prior = 0
-skip = 90
+skip = 0
 end = 1000
 thin = 1
 
@@ -55,8 +56,8 @@ ax[1].plot(xst, yst, 'k', lw=1)
 ax[1].plot(x_obs, y_obs, 'kx')
 
 
-thetas = np.loadtxt(prefix + "_theta.csv")
-fig, ax = plt.subplots()
-ax.plot(thetas[:, 1])
+#thetas = np.loadtxt(prefix + "_theta.csv")
+#fig, ax = plt.subplots()
+#ax.plot(thetas[:, 1])
 
 plt.show()
