@@ -20,7 +20,7 @@ obs_prefix = f"example02_n={n}_sigma={sigma:1.2e}_0"
 x_file = obs_prefix + "_x_obs.csv"
 y_file = obs_prefix + "_y_obs.csv"
 
-prefix = f"example02_results/example02_gamma={gamma:1.2e}_n={n}_sigma={sigma:1.2e}_0"
+prefix = f"example02_resultsa/example02_gamma={gamma:1.2e}_n={n}_sigma={sigma:1.2e}_0"
 
 # Visualize weights
 wspr = np.loadtxt(prefix + "_prior_ws.csv")

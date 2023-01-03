@@ -26,11 +26,11 @@ sigma = float(sys.argv[2])
 thetas = []
 gammas = [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]
 for gamma in gammas:
-    prefix = f"example02_results/example02_gamma={gamma:1.2e}_n={n}_sigma={sigma:1.2e}_0"
+    prefix = f"example02_resultsa/example02_gamma={gamma:1.2e}_n={n}_sigma={sigma:1.2e}_0"
     thetas.append(np.loadtxt(prefix + "_theta.csv")[:, 1])
 thetas = np.array(thetas)
 
-skip = 1000
+skip = 200
 
 thetas = thetas[:, skip:]
 
@@ -63,6 +63,9 @@ ax.spines['bottom'].set_visible(True)
 ax.spines['left'].set_visible(True)
 #ax.spines['left'].set_bounds(, ymax)
 plt.tight_layout()
+plt.savefig("example02_prelim.png")
+plt.savefig("example02_prelim.eps")
+plt.savefig("example02_prelim.pdf")
 plt.show()
     
 

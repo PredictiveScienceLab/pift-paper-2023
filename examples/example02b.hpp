@@ -1,15 +1,17 @@
-// This is the Hamiltonian of Example 2 of the paper.
+// This is the Hamiltonian of Example 2 of the paper when the error is in the
+// energy.
 //
 // Author:
 //  Ilias Bilionis
 //
 // Date:
 //  12/21/2022
+//  1/3/2023
 //
 
 
-#ifndef PIFT_EXAMPLE02_HPP
-#define PIFT_EXAMPLE02_HPP
+#ifndef PIFT_EXAMPLE02B_HPP
+#define PIFT_EXAMPLE02B_HPP
 
 #include <cmath>
 
@@ -18,7 +20,7 @@
 // This is a nonlinear diffusion Hamiltonian. The only parameter is
 // the g(beta).
 template<typename T>
-class Example02Hamiltonian : public pift::Hamiltonian<T> {
+class Example02BHamiltonian : public pift::Hamiltonian<T> {
   private:
     // The diffusion coefficient
     const T D;
@@ -42,7 +44,7 @@ class Example02Hamiltonian : public pift::Hamiltonian<T> {
     // The source term
     inline T f(const T* x) const
     {
-      return gamma * std::cos(4.0f * x[0]) + (1.0f - gamma) * std::exp(-x[0]);
+      return std::cos(4.0f * x[0]);
     }
 
     inline T operator()(const T* x, const T* prolong_phi, const T* theta) const 
@@ -51,7 +53,8 @@ class Example02Hamiltonian : public pift::Hamiltonian<T> {
       const T phi = prolong_phi[0];
       const T phi_prime = prolong_phi[1];
       return beta * (0.5 * D * phi_prime * phi_prime
-          + 0.25 * kappa * std::pow(phi, 4)
+          + gamma * 0.25 * kappa * std::pow(phi, 4)
+          + (1.0 - gamma) * 0.5 * std::pow(phi, 2)
           + phi * f(x));
     }
     
