@@ -2,11 +2,14 @@
 # Some parameters the control the output
 output:
   # The output files will have the following prefix
-  prefix: example02
+  prefix: example03
 # The physical domain
 domain: 
   bounds:
     - [0.0, 1.0]
+source:
+  num_terms: 4
+  precision: 1.0
 # Parameterization details
 field:
   # The number of Fourier terms to use
@@ -16,14 +19,16 @@ field:
 # Sampling details for the parameters
 parameters:
     # How to initialize the parameters
-    init_mean: [10.0]
-    init_std: [0.0]
+    init_mean: [0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    init_std: [0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
     # The number of collocation points for integrating over the spatial
     # dimension when taking gradients with respect to theta
     num_collocation: 1
     # The SGLD options for parameter sampling
     sgld:
-      alpha: 1e-3
+      alpha: 0.01
       beta: 0.0
       gamma: 0.51
       # sigma_w is irrelevant
@@ -61,7 +66,7 @@ parameters:
         beta: 0.0
         gamma: 0.51
         save_to_file: true 
-        save_freq: 10000
+        save_freq: 100000
         disp: false
         disp_freq: 1
         # The warmup to do on w at each iteration of theta sampling
@@ -91,11 +96,11 @@ parameters:
       batch_size: 1
       sgld:
         # The learning rate parameters
-        alpha: 2.0
+        alpha: 10.0
         beta: 0.0
         gamma: 0.51
         save_to_file: true
-        save_freq: 10000
+        save_freq: 100000
         disp: false
         disp_freq: 1000000
         # The warmup to do on w at each iteration of theta sampling

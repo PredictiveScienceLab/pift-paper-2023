@@ -293,8 +293,6 @@ public:
     scale(foo, num_params, scale_ratio);
     for(int i=0; i<num_params; i++)
       foo[i] -= std::pow(grad_theta[i], 2);
-    //std::cout << "*** VALUE: " << grad_theta[0] << std::endl;
-    //std::cout << "*** UNCERTAINTY: " << 2.0 * std::sqrt(foo[0] * scale_ratio) << std::endl;
     return result;
   }
 }; 
@@ -332,15 +330,9 @@ public:
   }
 
   T operator()(T* theta, T* grad_theta) {
-    // std::cout << "PRIOR" << std::endl;
     grad_theta_prior[0] = -1.0;
     const T h_prior = ue_prior(theta, grad_theta_prior.data());
-    //cout_vec(grad_theta_prior, num_params, std::cout, "before: ");
-    // std::cout << "POSTERIOR" << std::endl;
     const T h_post = ue_post(theta, grad_theta);
-    //std::cout << "**: " << grad_theta_prior[0] << " " << grad_theta[0] << std::endl;
-    //cout_vec(grad_theta_prior, num_params, std::cout, "after: ");
-    //exit(0);
     for(int i=0; i<num_params; i++)
       grad_theta[i] -= grad_theta_prior[i];
     return h_post - h_prior;

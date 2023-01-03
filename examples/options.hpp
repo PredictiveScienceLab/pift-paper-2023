@@ -231,5 +231,27 @@ struct Configuration02 {
   }
 }; // Configuration02
 
+// A structure representing the parameters for the source term
+template<typename T>
+struct SourceTermConfig {
+  int num_terms;
+  T precision;
+
+  SourceTermConfig(const YAML::Node& yaml) :
+    num_terms(yaml["num_terms"].as<int>()),
+    precision(yaml["precision"].as<T>())
+  {}
+}; // SourceTermConfig
+
+template<typename T>
+struct Configuration03 : public Configuration02<T> {
+  SourceTermConfig<T> source;
+
+  Configuration03(const YAML::Node& yaml) :
+    Configuration02<T>(yaml),
+    source(yaml["source"])
+  {}
+}; // Configuration03
+
 
 #endif // EXAMPLES_OPTIONS

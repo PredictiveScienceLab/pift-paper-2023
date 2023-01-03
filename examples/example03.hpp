@@ -21,23 +21,28 @@ class Example03Hamiltonian : public pift::Hamiltonian<T> {
   private:
     // The inverse temperature
     const T beta;
+    // The precision of the source term weights
+    const T tau;
     FA& f;
     std::vector<T> grad_w;
 
   public:
-    Example03Hamiltonian(const T& beta, FA& f) : 
-      pift::Hamiltonian<T>(2 + f.get_dim_w()), beta(beta), f(f)
+    Example03Hamiltonian(const T& beta, FA& f, const T& tau=10) : 
+      pift::Hamiltonian<T>(2 + f.get_dim_w()), beta(beta), f(f), tau(tau)
     {
       assert(f.get_dim_x() == 1);
       grad_w.resize(f.get_dim_w());
     }
 
+    inline T get_tau(const T* theta) const { return tau; }
     inline T get_beta(const T* theta) const { return beta; }
+    inline T get_D(const T* theta) const { return std::exp(theta[0]); }
+    inline T get_kappa(const T* theta) const { return std::exp(theta[1]); }
 
     inline T operator()(const T* x, const T* prolong_phi, const T* theta) const 
     {
-      const T D = theta[0];
-      const T kappa = theta[1];
+      const T D = get_D(theta);
+      const T kappa = get_kappa(theta);
       const T* w = theta + 2;
       const T phi = prolong_phi[0];
       const T phi_prime = prolong_phi[1];
@@ -51,8 +56,8 @@ class Example03Hamiltonian : public pift::Hamiltonian<T> {
       T* out
     ) const
     {
-      const T D = theta[0];
-      const T kappa = theta[1];
+      const T D = get_D(theta);
+      const T kappa = get_kappa(theta);
       const T* w = theta + 2;
       const T phi = prolong_phi[0];
       const T phi_prime = prolong_phi[1];
@@ -70,16 +75,16 @@ class Example03Hamiltonian : public pift::Hamiltonian<T> {
       const T* theta,
       T* out
     ) {
-      const T D = theta[0];
-      const T kappa = theta[1];
+      const T D = get_D(theta);
+      const T kappa = get_kappa(theta);
       const T* w = theta + 2;
       const T phi = prolong_phi[0];
       const T phi_prime = prolong_phi[1];
       const T f_x = f.eval_grad(x, w, grad_w.data());
-      out[0] += 0.5 * beta * std::pow(phi_prime, 2);
-      out[1] += 0.25 * beta * std::pow(phi, 4);
+      out[0] += 0.5 * beta * std::pow(phi_prime, 2) * D; 
+      out[1] += 0.25 * beta * std::pow(phi, 4) * kappa;
       for(int i=0; i<f.get_dim_w(); i++)
-        out[2 + i] += beta * phi * grad_w[i];
+        out[2 + i] += beta * phi * grad_w[i] + tau * w[i];
       return beta * (0.5 * D * std::pow(phi_prime, 2)
           + 0.25 * kappa * std::pow(phi, 4)
           + phi * f_x);

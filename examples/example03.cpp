@@ -83,9 +83,9 @@ int main(int argc, char* argv[]) {
   Configuration02<F> config(yaml);
 
   // The data files
-  std::string x_file = config.output.prefix + "_" + std::string(buffer) 
+  std::string x_file = "example02_" + std::string(buffer) 
     + "_x_obs.csv";
-  std::string y_file = config.output.prefix + "_" + std::string(buffer) 
+  std::string y_file = "example02_" + std::string(buffer) 
     + "_y_obs.csv";
 
   // The output prefix
@@ -106,19 +106,18 @@ int main(int argc, char* argv[]) {
   CFField phi(psi, domain, config.field.boundary_values);
 
   // The field representing the source term
-  FField f(domain, config.field.num_terms); // TODO change
+  FField f(domain, 4); // TODO change
 
   // The Hamiltonian
   H h(beta, f);
-
-  exit(0);
 
   // Initialize the parameters
   std::normal_distribution<F> norm(0, 1);
   F theta[h.get_num_params()];
   for(int i=0; i<h.get_num_params(); i++)
-    theta[i] = config.parameters.init_mean[0] +
-               config.parameters.init_std[0] * norm(rng);
+    theta[i] = config.parameters.init_mean[i] +
+               config.parameters.init_std[i] * norm(rng);
+
 
   // The unbiased estimator of the integral of the gradient of the
   // Hamiltonian with respect to theta
@@ -144,6 +143,7 @@ int main(int argc, char* argv[]) {
       theta_prior_params
   );
 
+
   // Load the filenames
   auto x_obs = pift::loadtxtvec<F>(x_file);
   auto y_obs = pift::loadtxtvec<F>(y_file);
@@ -157,6 +157,7 @@ int main(int argc, char* argv[]) {
       config.parameters.post.num_collocation,
       theta
   );
+
   UEGradWP ue_grad_w_post(ue_grad_w_h_tmp, ue_grad_w_l);
 
   // Unbiased estimator of the posterior expectation of the integral of
@@ -176,8 +177,10 @@ int main(int argc, char* argv[]) {
       ue_post_exp_int_grad_theta_H
   );
 
+
   ue_grad_theta.warmup(theta);
   auto sgld_params = config.parameters.sgld.get_sgld_params();
+  sgld_params.alpha /= beta;
   sgld_params.out_file = prefix + "_theta.csv";
   sgld(
       ue_grad_theta,
@@ -188,6 +191,7 @@ int main(int argc, char* argv[]) {
       sgld_params,
       false
   );
+
   // Postprocess the results
   auto prior_prefix = prefix + "_prior";
   postprocess<F>(
@@ -200,6 +204,11 @@ int main(int argc, char* argv[]) {
       phi, domain, config.postprocess.num_points_per_dim[0],
       theta_post_params.sgld_params.out_file,
       post_prefix
+  );
+  postprocess_source<F>(
+      f, domain, config.postprocess.num_points_per_dim[0],
+      sgld_params.out_file,
+      prefix
   );
 
   return 0;
