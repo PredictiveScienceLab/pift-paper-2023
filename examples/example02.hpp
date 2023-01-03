@@ -67,7 +67,7 @@ class Example02Hamiltonian : public pift::Hamiltonian<T> {
       const T tmp1 = kappa * pow(phi, 3);
       out[0] = beta * (tmp1 + f_x);
       out[1] = beta * D * phi_prime;
-      return 0.5 * out[1] * phi_prime + (0.25 * tmp1 + f_x) * phi;
+      return 0.5 * out[1] * phi_prime + beta * (0.25 * tmp1 + f_x) * phi;
     }
 
     inline T add_grad_theta(

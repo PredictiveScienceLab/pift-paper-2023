@@ -21,7 +21,7 @@ LDFLAGS=-L$(YAMLCPP)/lib -lyaml-cpp
 # all: test_domain test_fields test_hamiltonian test_posterior \
 # 		 test_free test_prior_exp test_post_exp\
 # 		 example01 example02 example02b
-all: example02 example02b
+all: example03
 
 clean:
 	$(RM) tests/*.o examples/*.o
@@ -91,3 +91,9 @@ example02b: example02b.o
 
 example02b.o: examples/example02b.cpp
 	$(CXX) -c examples/example02b.cpp $(CXXFLAGS) -o examples/example02b.o
+
+example03: example03.o
+	$(CXX) -o examples/example03 examples/example03.o $(LDFLAGS)
+
+example03.o: examples/example03.cpp
+	$(CXX) -c examples/example03.cpp $(CXXFLAGS) -o examples/example03.o

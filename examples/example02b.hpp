@@ -71,7 +71,7 @@ class Example02BHamiltonian : public pift::Hamiltonian<T> {
       const T tmp2 = (1.0 - gamma) * phi;
       out[0] = beta * (tmp1 + tmp2 + f_x);
       out[1] = beta * D * phi_prime;
-      return 0.5 * out[1] * phi_prime + (0.25 * tmp1 + 0.5 * tmp2 + f_x) * phi;
+      return 0.5 * out[1] * phi_prime + beta * (0.25 * tmp1 + 0.5 * tmp2 + f_x) * phi;
     }
 
     inline T add_grad_theta(
