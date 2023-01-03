@@ -1,4 +1,4 @@
-// Example 01 of the paper.
+// Example 02 of the paper (wrong source term).
 //
 // Authors:
 //  Ilias Bilionis

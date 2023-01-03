@@ -32,7 +32,7 @@ class Example02BHamiltonian : public pift::Hamiltonian<T> {
     const T gamma;
 
   public:
-    Example02Hamiltonian(const T& gamma=1.0f, const T& D=0.1f, const T& kappa=1.0f) : 
+    Example02BHamiltonian(const T& gamma=1.0f, const T& D=0.1f, const T& kappa=1.0f) : 
       pift::Hamiltonian<T>(1), gamma(gamma), D(D), kappa(kappa)
     {}
 
