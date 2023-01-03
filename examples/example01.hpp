@@ -64,7 +64,7 @@ class Example01Hamiltonian : public pift::Hamiltonian<T> {
       const T* prolong_phi,
       const T* theta,
       T* out
-    ) const {
+    ) {
       return this->operator()(x, prolong_phi, theta);
     }
 

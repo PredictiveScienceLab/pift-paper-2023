@@ -75,7 +75,7 @@ class Example02Hamiltonian : public pift::Hamiltonian<T> {
       const T* prolong_phi,
       const T* theta,
       T* out
-    ) const {
+    ) {
       const T phi = prolong_phi[0];
       const T phi_prime = prolong_phi[1];
       const T beta = get_beta(theta);

@@ -26,7 +26,7 @@ class Example03Hamiltonian : public pift::Hamiltonian<T> {
 
   public:
     Example03Hamiltonian(const T& beta, FA& f) : 
-      pift::Hamiltonian<T>(2 + f.get_dim_w()), beta(beta)
+      pift::Hamiltonian<T>(2 + f.get_dim_w()), beta(beta), f(f)
     {
       assert(f.get_dim_x() == 1);
       grad_w.resize(f.get_dim_w());
@@ -69,13 +69,13 @@ class Example03Hamiltonian : public pift::Hamiltonian<T> {
       const T* prolong_phi,
       const T* theta,
       T* out
-    ) const {
+    ) {
       const T D = theta[0];
       const T kappa = theta[1];
       const T* w = theta + 2;
       const T phi = prolong_phi[0];
       const T phi_prime = prolong_phi[1];
-      const T* f_x = f.eval_grad(x, w, grad_w.data());
+      const T f_x = f.eval_grad(x, w, grad_w.data());
       out[0] += 0.5 * beta * std::pow(phi_prime, 2);
       out[1] += 0.25 * beta * std::pow(phi, 4);
       for(int i=0; i<f.get_dim_w(); i++)
@@ -83,7 +83,6 @@ class Example03Hamiltonian : public pift::Hamiltonian<T> {
       return beta * (0.5 * D * std::pow(phi_prime, 2)
           + 0.25 * kappa * std::pow(phi, 4)
           + phi * f_x);
-      return res;
     }
 
 }; // Example03Hamiltonian

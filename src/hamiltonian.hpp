@@ -75,7 +75,7 @@ public:
       const T* prolong_phi,
       const T* theta,
       T* out
-  ) const = 0;
+  ) = 0;
 }; // Hamiltonian
 
 // An unbiased estimator of the spatial integral of grad w of the Hamiltonian
