@@ -186,17 +186,17 @@ public:
     ue_grad_w_h.set_theta(theta);
     adjust_alpha(theta);
     params.sgld_params.init_it = 0;
-    if(params.sgld_params.save_to_file)
-      of << "# INITIAL WARMUP" << std::endl;
-    if(params.sgld_params.disp)
-      std::cout << "INITIAL WARMUP" << std::endl;
-    pift::cout_vec(theta, num_params, of, "# THETA: ");
+    //if(params.sgld_params.save_to_file)
+    //  of << "# INITIAL WARMUP" << std::endl;
+    //if(params.sgld_params.disp)
+    //  std::cout << "INITIAL WARMUP" << std::endl;
+    //pift::cout_vec(theta, num_params, of, "# THETA: ");
     for(int c=0; c<params.num_chains; c++) {
       T* w = ws.data() + c * dim_w;
-      if(params.sgld_params.save_to_file)
-        of << "# CHAIN: " << c << std::endl;
-      if(params.sgld_params.disp)
-        std::cout << "CHAIN: " << c << std::endl;
+      //if(params.sgld_params.save_to_file)
+      //  of << "# CHAIN: " << c << std::endl;
+      //if(params.sgld_params.disp)
+      //  std::cout << "CHAIN: " << c << std::endl;
       sgld(
           ue_grad_w_h,
           w,
@@ -223,17 +223,17 @@ public:
     //ue_grad_w_h.set_theta(theta);
     adjust_alpha(theta);
     const int init_it = params.sgld_params.init_it;
-    if(params.sgld_params.save_to_file)
-       pift::cout_vec(theta, num_params, of, "# THETA: ");
+    //if(params.sgld_params.save_to_file)
+    //   pift::cout_vec(theta, num_params, of, "# THETA: ");
     for(int c=0; c<params.num_chains; c++) {
       T* w = ws.data() + c * dim_w;
       params.sgld_params.init_it = init_it;
-      if(params.sgld_params.save_to_file) {
-        of << "# CHAIN: " << c << std::endl;
-        of << "# WARMUP" << std::endl;
-      }
-      if(params.sgld_params.disp)
-        std::cout << "CHAIN: " << c << std::endl;
+      //if(params.sgld_params.save_to_file) {
+      //  of << "# CHAIN: " << c << std::endl;
+      //  of << "# WARMUP" << std::endl;
+      //}
+      //if(params.sgld_params.disp)
+      //  std::cout << "CHAIN: " << c << std::endl;
       sgld(
           ue_grad_w_h,
           w,
@@ -247,10 +247,10 @@ public:
       );
       params.sgld_params.init_it += params.num_per_it_warmup;
       for(int b=0; b<params.num_bursts; b++) {
-        if(params.sgld_params.save_to_file)
-          of << "# BURST: " << b << std::endl;
-        if(params.sgld_params.disp)
-          std::cout << "BURST: " << b << std::endl;
+        //if(params.sgld_params.save_to_file)
+        //  of << "# BURST: " << b << std::endl;
+        //if(params.sgld_params.disp)
+        //  std::cout << "BURST: " << b << std::endl;
         sgld(
             ue_grad_w_h,
             w,

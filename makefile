@@ -11,9 +11,9 @@ YAMLCPP=/opt/homebrew/Cellar/yaml-cpp/0.7.0/
 # The compiler you wish to use
 CXX=g++
 # Compile options
-#CXXFLAGS=-O3 -ffast-math -std=c++20 -I./src -I./examples \
-#				 -I$(YAMLCPP)/include
-CXXFLAGS=-g -std=c++20 -I./src -I./examples \
+CXXFLAGS=-O3 -ffast-math -std=c++20 -I./src -I./examples \
+				 -I$(YAMLCPP)/include
+#CXXFLAGS=-g -std=c++20 -I./src -I./examples \
 				 -I$(YAMLCPP)/include
 # Link options
 LDFLAGS=-L$(YAMLCPP)/lib -lyaml-cpp
@@ -21,7 +21,7 @@ LDFLAGS=-L$(YAMLCPP)/lib -lyaml-cpp
 # all: test_domain test_fields test_hamiltonian test_posterior \
 # 		 test_free test_prior_exp test_post_exp\
 # 		 example01 example02 example02b
-all: example03
+all: example03b
 
 clean:
 	$(RM) tests/*.o examples/*.o
@@ -97,3 +97,9 @@ example03: example03.o
 
 example03.o: examples/example03.cpp
 	$(CXX) -c examples/example03.cpp $(CXXFLAGS) -o examples/example03.o
+
+example03b: example03b.o
+	$(CXX) -o examples/example03b examples/example03b.o $(LDFLAGS)
+
+example03b.o: examples/example03b.cpp
+	$(CXX) -c examples/example03b.cpp $(CXXFLAGS) -o examples/example03b.o

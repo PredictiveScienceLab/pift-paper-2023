@@ -2,14 +2,11 @@
 # Some parameters the control the output
 output:
   # The output files will have the following prefix
-  prefix: example03
+  prefix: example03b
 # The physical domain
 domain: 
   bounds:
     - [0.0, 1.0]
-source:
-  num_terms: 4
-  precision: 10.0
 # Parameterization details
 field:
   # The number of Fourier terms to use
@@ -19,10 +16,8 @@ field:
 # Sampling details for the parameters
 parameters:
     # How to initialize the parameters
-    init_mean: [0.0, 0.0,
-      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-    init_std: [0.0, 0.0,
-      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    init_mean: [0.0, 0.0]
+    init_std: [0.0, 0.0]
     # The number of collocation points for integrating over the spatial
     # dimension when taking gradients with respect to theta
     num_collocation: 1
