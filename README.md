@@ -2,6 +2,9 @@
 
 This repository replicates the result of the paper **ADD DOI WHEN PUBLISHED**.
 
+## Code outline
+
+
 ## Installing the code
 
 The main code is written in C++.
@@ -30,7 +33,6 @@ This command will compile the following executables:
 + `examples/example02b`: Example 2.b of the paper.
 + `examples/example03a`: Example 3.a of the paper.
 + `examples/example03b`: Example 3.b of the paper.
-+ Several unit tests which are put in the directory `./tests`.
 
 The requirements for the Python plotting scripts are (ignoring standard libraries):
 + [matplotlib](https://matplotlib.org)
