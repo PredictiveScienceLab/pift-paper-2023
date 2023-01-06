@@ -125,7 +125,7 @@ The above script creates the following figures and puts them in directories
 called `example03a_results` and `example03b_results` for Example 3.a and 3.b,
 respectively.
 
-### Example 3.a ($D$ and $\kappa$ unknown)
+### Example 3.a ( $D$ and $\kappa$ unknown)
 
 ![Example 3.a.i](./paper_figures/example03a_theta.png)
 ![Example 3.a.ii](./paper_figures/example03a_theta_post.png)
@@ -133,6 +133,6 @@ respectively.
 ![Example 3.a.iv](./paper_figures/example03a_fitted_post_predictive.png)
 
 
-### Example 3.b ($D$, $\kappa$, and $f(x)$ unknown)
+### Example 3.b ( $D$, $\kappa$, and $f(x)$ unknown)
 
 ![Example 2.b](./paper_figures/example02b.png)
