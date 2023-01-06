@@ -9,35 +9,51 @@ Namely, we see that:
 
 ## Mathematical details
 In this example the spatial domain is $[0, 1]$.
-The boundary value problem is:
+The ground truth field satisfies the equation:
 
 $$
-\kappa \frac{d^2\phi}{dx^2} = q(x),
+D\frac{d^2\phi}{dx^2} - \kappa \phi^3  = f,
 $$
 
-with the source term being:
+with source term:
 
 $$
-q(x) = e^{-x},
+f(x) = \cos(4x),
 $$
 
-and the conductivity being:
+conductivity:
 
 $$
-\kappa = 0.25.
+D = 0.1,
 $$
 
-The boundary conditions are:
+non-linear coefficient:
 
 $$
-\phi(0) = 1, 
+\kappa = 1,
+$$
+
+and boundary conditions:
+
+$$
+\phi(0) = 0, 
 $$
 
 and
 
 $$
-\phi(1) = 0.1.
+\phi(1) = 0.
 $$
+
+We sample the field at $40$ equidistant points between $0$ and $1$ and we add
+Gaussian noise with zero mean and standard deviation $0.01$.
+The observed field inputs are [here](example02_n=40_sigma=1.00e-02_0_x_obs.csv)
+and the observed field otuputs are [here](example02_n=40_sigma=1.00e-02_0_x_obs.csv).
+If you wish to review how the observations were generated, consult script
+[](example02_generate_observations.py).
+
+
+We introduce 
 
 The Hamiltonian is:
 
