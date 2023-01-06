@@ -83,7 +83,13 @@ $$
 To enforce positive, we sample in the logarithmic space:
 
 $$
-\theta_1 = \log(D),\;\theta_2 = \log(\kappa).
+\theta_1 = \log(D),
+$$
+
+and
+
+$$
+\theta_2 = \log(\kappa).
 $$
 
 ### Example 3.b: Model error in the energy
@@ -121,7 +127,11 @@ respectively.
 
 ### Example 3.a
 
-![Example 2.a](./paper_figures/example02a.png)
+![Example 3.a.i](./paper_figures/example03a_theta.png)
+![Example 3.a.ii](./paper_figures/example03a_theta_post.png)
+![Example 3.a.iii](./paper_figures/example03a_fitted_prior_predictive.png)
+![Example 3.a.iv](./paper_figures/example03a_fitted_post_predictive.png)
+
 
 ### Example 3.b
 
