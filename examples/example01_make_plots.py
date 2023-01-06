@@ -63,3 +63,4 @@ for b in betas:
     file = prefix + ".pdf"
     print("> writing: " + file)
     plt.savefig(prefix + ".pdf")
+    plt.savefig(prefix + ".png", dpi=150)
