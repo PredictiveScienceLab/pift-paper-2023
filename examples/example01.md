@@ -65,3 +65,6 @@ The above script creates the following figures and puts them in a directory
 called `example01_results`.
 
 ![](./paper_figures/example01_beta=1.00e+02.png)
+![](./paper_figures/example01_beta=1.00e+03.png)
+![](./paper_figures/example01_beta=1.00e+04.png)
+![](./paper_figures/example01_beta=1.00e+05.png)
