@@ -23,55 +23,7 @@ LDFLAGS=-L$(YAMLCPP)/lib -lyaml-cpp
 all: example01
 
 clean:
-	$(RM) tests/*.o examples/*.o
-
-test_domain: test_domain.o
-	$(CXX) -o tests/test_domain tests/test_domain.o
-
-test_domain.o: tests/test_domain.cpp
-	$(CXX) -c tests/test_domain.cpp $(CXXFLAGS) -o tests/test_domain.o
-
-test_fields: test_fields.o
-	$(CXX) -o tests/test_fields tests/test_fields.o
-
-test_fields.o: tests/test_fields.cpp
-	$(CXX) -c tests/test_fields.cpp $(CXXFLAGS) -o tests/test_fields.o
-
-test_hamiltonian: test_hamiltonian.o
-	$(CXX) -o tests/test_hamiltonian tests/test_hamiltonian.o
-
-test_hamiltonian.o: tests/test_hamiltonian.cpp
-	$(CXX) -c tests/test_hamiltonian.cpp $(CXXFLAGS) -o tests/test_hamiltonian.o
-
-test_posterior: test_posterior.o
-	$(CXX) -o tests/test_posterior tests/test_posterior.o
-
-test_posterior.o: tests/test_posterior.cpp
-	$(CXX) -c tests/test_posterior.cpp $(CXXFLAGS) -o tests/test_posterior.o
-
-test_free: test_free.o
-	$(CXX) -o tests/test_free tests/test_free.o
-
-test_free.o: tests/test_free.cpp
-	$(CXX) -c tests/test_free.cpp $(CXXFLAGS) -o tests/test_free.o
-
-test_prior_exp: test_prior_exp.o
-	$(CXX) -o tests/test_prior_exp tests/test_prior_exp.o $(LDFLAGS)
-
-test_prior_exp.o: tests/test_prior_exp.cpp
-	$(CXX) -c tests/test_prior_exp.cpp $(CXXFLAGS) -o tests/test_prior_exp.o
-
-test_post_exp: test_post_exp.o
-	$(CXX) -o tests/test_post_exp tests/test_post_exp.o $(LDFLAGS)
-
-test_post_exp.o: tests/test_post_exp.cpp
-	$(CXX) -c tests/test_post_exp.cpp $(CXXFLAGS) -o tests/test_post_exp.o
-
-test_constructor: test_constructor.o
-	$(CXX) -o tests/test_constructor tests/test_constructor.o $(LDFLAGS)
-
-test_constructor.o: tests/test_constructor.cpp
-	$(CXX) -c tests/test_constructor.cpp $(CXXFLAGS) -o tests/test_constructor.o
+	$(RM) examples/*.o
 
 example01: example01.o
 	$(CXX) -o examples/example01 examples/example01.o $(LDFLAGS)

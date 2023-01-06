@@ -41,6 +41,6 @@ mv example01*.csv example01_results/
 mv example01*.png example01_results/
 
 # Make all plots
-python3 example01_plot_all.py
+python3 example01_make_plots.py
 
 echo "*** END EXAMPLE 01 ***"
