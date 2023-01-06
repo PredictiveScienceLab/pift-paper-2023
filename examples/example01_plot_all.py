@@ -10,8 +10,8 @@ Date:
 
 import matplotlib.pyplot as plt
 import seaborn as sns
-#sns.set_context("paper")
-#sns.set_style("white")
+sns.set_context("paper")
+sns.set_style("ticks")
 plt.rcParams['text.latex.preamble']=[r"\usepackage{lmodern}"]
 params = {'text.usetex' : True,
           'font.size' : 9,
@@ -30,6 +30,7 @@ c2 = yb - ya + (np.exp(-1.) - 1.) / k
 f = lambda x: c1 + c2 * x - 1 / k * np.exp(-x)
 
 # Make prediction plots
+print("*** Making plots")
 betas = [100, 1000, 10000, 100000]
 for b in betas:
     prefix = f"example01_results/example01_beta={b:1.2e}"
@@ -57,31 +58,8 @@ for b in betas:
         ax.set_ylabel("$y$")
     if b == 100000:
         plt.legend(loc="best", frameon=False)
-    plt.tight_layout(pad=0.1)
     sns.despine(trim=True)
+    plt.tight_layout(pad=0.1)
+    file = prefix + ".pdf"
+    print("> writing: " + file)
     plt.savefig(prefix + ".pdf")
-
-
-# Make figure that depicts uncertainty
-data = []
-for b in [1, 1e2, 1e3, 1e4, 1e5, 1e6]:
-    prefix = f"example01_results/example01_beta={b:1.2e}"
-    xs = np.loadtxt(prefix + "_x.csv")
-    i = xs.shape[0] // 2
-    x = xs[i]
-    ys = np.loadtxt(prefix + "_phi.csv")
-    y = ys[:, i]
-    data.append(y)
-data = np.array(data)
-fig, ax = plt.subplots(figsize=(7.48, 7.48/1.618))
-ax.boxplot(data.T, showbox=False, whis=[5, 95], showfliers=False,
-           widths=0.05, capwidths=0)
-ax.plot(np.arange(1, 7), f(x) * np.ones((6,)), '--', lw=0.5, color=sns.color_palette()[2])
-ax.set_ylabel("$\phi(0.5)$", rotation="horizontal")
-ax.set_xlabel("$\\beta$")
-l, u = np.percentile(data, [5., 95.], axis=1)
-ax.set_yticks([l.min(), f(x), u.max()])
-ax.set_xticklabels(["$1$", "$10^2$", "$10^3$", "$10^4$", "$10^5$", "$10^6$"])
-plt.tight_layout(pad=0.1)
-sns.despine(trim=True)
-plt.show()

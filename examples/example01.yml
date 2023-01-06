@@ -10,7 +10,7 @@ domain:
 # Parameterization details
 field:
   # The number of Fourier terms to use
-  num_terms: 4
+  num_terms: 20
   # The values at the boundary
   boundary_values: [1.0, 0.1]
 # This is the number of points used to construct and unbiased estimator of
@@ -37,7 +37,7 @@ sgld:
   # Whether or not to display the progress in the screen
   disp: true
   # The display frequency
-  disp_freq: 1000000
+  disp_freq: 10000000
   # The number of warmup steps
   num_warmup: 100000000
   # The number of production samples

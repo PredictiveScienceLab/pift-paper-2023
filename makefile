@@ -22,7 +22,7 @@ LDFLAGS=-L$(YAMLCPP)/lib -lyaml-cpp
 # 		 test_free test_prior_exp test_post_exp\
 # 		 example01 example02 example02b
 #all: example01 example02 example02b example03 #example03c
-all: example03 example03b example03c
+all: example01
 
 clean:
 	$(RM) tests/*.o examples/*.o

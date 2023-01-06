@@ -1,24 +1,20 @@
 # Physics-informed Information Field Theory
 
-## TODO for Alex
+This repository replicates the result of the paper **ADD DOI WHEN PUBLISHED**.
 
-+ Read the file `examples/example_01.py` and modify it to make the plots you
-need for Example 1.
-+ Read the file `examples/example_01.sh`. You can use this file to produce all
-the figures for Example 1.
-You can run it from your terminal by typing: `./examples/example_01.sh` from the
-pift directory.
-+ Read the file `examples/example_02.py`. This is reproducing Example 2. But
-with the same problem as Example 1.
-I think this is better. You could add another example with the integrated
-squared residual if you want.
+## Installing the code
 
-## Examples
+The main code is written in C++.
+The plotting code is written in Python.
 
-+ Example 1 - Demonstrate the effect of beta on the forward problem.
-+ Example 2 - Demonstrate how beta can be picked when adding data.
-We will use a bisection algorithm to find the best beta. Vary:
-  - number of observations
-  - observation noise
-
-Alex is working on problem 1.
+The requirements for the C++ code is:
++ [YAML-CPP](https://github.com/jbeder/yaml-cpp) for reading YAML configuration
+  files. If you are on OS X and you are using
+  [homebrew](https://brew.sh), then you can simply do:
+  ```
+    brew install yaml-cpp
+  ```
+  If you are on a different OS, you are on your own.
+  In any case, once you have YAML-CPP installed, you need to edit the
+  [makefile](./makefile) to make the variable `YAMLCPP` point to the right
+  folder.
