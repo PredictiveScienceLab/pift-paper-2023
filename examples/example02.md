@@ -1,4 +1,4 @@
-# Reproducing the results of Example 1
+# Reproducing the results of Example 2
 
 ## Objective
 The objective of this example is to demonstrate how the inverse temperature
