@@ -64,4 +64,4 @@ corresponding configuration file: [example01.yml](./example01.yml).
 The above script creates the following figures and puts them in a directory
 called `example01_results`.
 
-<embed src="./paper_figures/example01_beta=1.00e+02.pdf" type="application/pdf'>
+![](./paper_figures/example01_beta=1.00e+02.png)
