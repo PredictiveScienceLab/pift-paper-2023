@@ -8,41 +8,13 @@ Date:
 
 """
 
-
-import jax.numpy as jnp
-from jax.random import PRNGKey
 import numpy as np
-import matplotlib.pyplot as plt
-
 from scipy.integrate import solve_bvp
-from options import *
+import sys
 
-parser = make_standard_option_parser()
-
-parser.add_argument(
-    "--num-times",
-    dest="num_times",
-    help="the number of times to repeat the data sampling process",
-    type=int,
-    default=10
-)
-parser.add_argument(
-    "--num-observations",
-    dest="num_observations",
-    help="the number of observations to use in the example",
-    type=int,
-    default=10
-)
-parser.add_argument(
-    "--sigma",
-    dest="sigma",
-    help="the scale of the observation noise.",
-    type=float,
-    default=0.01
-)
-
-
-args = parser.parse_args()
+num_times = 1
+num_observations = 40
+sigma=0.01
 
 # Set up and solve the boundary value problem
 D = 0.1
@@ -66,16 +38,16 @@ np.savetxt(prefix + "_xs.csv", xs)
 np.savetxt(prefix + "_ys.csv", ys)
 
 # Same the sampled measured data
-prefix += f"_n={args.num_observations}_sigma={args.sigma:1.2e}"
-s = len(str(args.num_times))
+prefix += f"_n={num_observations}_sigma={sigma:1.2e}"
+s = len(str(num_times))
 ymin = 1e99
 ymax = -1e99
 
-for t in range(args.num_times):
+for t in range(num_times):
     obs_prefix = prefix + f"_{t}"
     x_file = obs_prefix + "_x_obs.csv"
     y_file = obs_prefix + "_y_obs.csv"
-    x_obs = np.linspace(0, 1, args.num_observations + 2)[1:-1]
-    y_obs = f(x_obs) + args.sigma * np.random.randn(x_obs.shape[0])
+    x_obs = np.linspace(0, 1, num_observations + 2)[1:-1]
+    y_obs = f(x_obs) + sigma * np.random.randn(x_obs.shape[0])
     np.savetxt(x_file, x_obs)
     np.savetxt(y_file, y_obs)
