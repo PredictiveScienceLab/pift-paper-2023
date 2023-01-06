@@ -8,7 +8,10 @@ Namely, we see that:
 + if the model is wrong, $\beta$ tends to be small.
 
 ## Mathematical details
-In this example the spatial domain is $[0, 1]$.
+The ground truth problem is as in [Example 2](./example02.md).
+We reproduce here the details for your convenience.
+
+The spatial domain is $[0, 1]$.
 The ground truth field satisfies the equation:
 
 $$
@@ -59,57 +62,67 @@ H = \int dx \left\[\frac{1}{2}D \left(\frac{d\phi}{dx}\right)^2 + \frac{1}{4}\ka
 + \phi f\right].
 $$
 
+We solve two different inverse problems of increasing complexity and ill-posedness:
 
-We introduce model error in a continuous way using a parameter $\gamma$ that
-ranges from $0$ to $1$.
-When $\gamma$ is $0$ the model is wrong. When $\gamma$ is $1$ the model is correct.
+### Example 3.a: Model error in the source term
 
-We do this in two different ways:
-
-### Example 2.a: Model error in the source term
-
-In this example we make the source term:
+In this inverse problem we assume that the source term is known and we are
+looking for $D$ and $\kappa$.
+We use Jeffrey's priors on these parameters, i.e.,
 
 $$
-f(x;\gamma) = \gamma \cos(4x) + (1-\gamma)e^{-x},
+p(D) \propto \frac{1}{D},
 $$
 
-where $\gamma$ is fixed at different levels from $0$ to $1$.
-
-### Example 2.b: Model error in the energy
-
-In this example we use the correct source term, but we change the Hamiltonian to:
+and
 
 $$
-H = \int dx \left\[\frac{1}{2}D \left(\frac{d\phi}{dx}\right)^2 + \gamma\frac{1}{4}\kappa\phi^4
-+ (1-\gamma)\frac{1}{2}\phi^2
-+ \phi f\right].
+p(\kappa) \propto \frac{1}{\kappa}.
 $$
+
+To enforce positive, we sample in the logarithmic space:
+
+$$
+\theta_1 = \log(D),\;\theta_2 = \log(\kappa).
+$$
+
+### Example 3.b: Model error in the energy
+
+As in Example 3.a both parameters $D$ and $\kappa$ are assumed to be uknown.
+We use exactly the same treatement: Jeffrey's prior and work in logarithmic space.
+However, we now assume that we do not know the source term $f(x)$.
+To parameterize the source term we use a Fourier expansion with 15 terms.
+We use a zero mean Gaussian prior on the Fourier coefficients.
+The covariance of this prior is diagonal.
+The prior variance of each Fourier weight decreases quadratically with the order
+of the Fourier term.
+This penalizes very high frequencies.
 
 ## Running the example
 
 Make sure you have compiled the code following the instructions 
 [here](../README.md).
-The script [example02_run.sh](./example02_run.sh) reproduces the paper figures.
+The script [example03_run.sh](./example03_run.sh) reproduces the paper figures.
 To run it, change in the directory `./examples` and type in your terminal:
 ```
-./example02_run.sh
+./example03_run.sh
 ```
 
 If you wish to change any of default settings, feel free to edit the 
 corresponding configuration files:
-+ [example02a.yml](./example02a.yml) for Example 2.a, and
-+ [example02b.yml](./example02b.yml) for Example 2.b.
++ [example03a.yml](./example03a.yml) for Example 3.a, and
++ [example03b.yml](./example03b.yml) for Example 3.b.
 
 ## The results
 
-The above script creates the following figures and puts them in a directory
-called `example01_results`.
+The above script creates the following figures and puts them in directories
+called `example03a_results` and `example03b_results` for Example 3.a and 3.b,
+respectively.
 
-### Example 2.a
+### Example 3.a
 
 ![Example 2.a](./paper_figures/example02a.png)
 
-### Example 2.b
+### Example 3.b
 
 ![Example 2.b](./paper_figures/example02b.png)
