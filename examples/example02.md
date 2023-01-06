@@ -1,11 +1,8 @@
 # Reproducing the results of Example 2
 
 ## Objective
-The objective of this example is to demonstrate how the inverse temperature
-$\beta$ detects model form error.
-Namely, we see that:
-+ if the model is correct, $\beta$ tends to be large
-+ if the model is wrong, $\beta$ tends to be small.
+The objective of this example is to demonstrate how physics-informed information
+field theory can be used to solve inverse problems.
 
 ## Mathematical details
 In this example the spatial domain is $[0, 1]$.
@@ -52,13 +49,12 @@ and the observed field otuputs are [here](example02_n=40_sigma=1.00e-02_0_x_obs.
 If you wish to review how the observations were generated, consult the script
 [example02_generate_observations.py](./example02_generate_observations.py).
 
-The correct Hamiltonian for this problem is:
+The Hamiltonian for this problem is:
 
 $$
 H = \int dx \left\[\frac{1}{2}D \left(\frac{d\phi}{dx}\right)^2 + \frac{1}{4}\kappa\phi^4
 + \phi f\right].
 $$
-
 
 We introduce model error in a continuous way using a parameter $\gamma$ that
 ranges from $0$ to $1$.
@@ -97,7 +93,9 @@ To run it, change in the directory `./examples` and type in your terminal:
 ```
 
 If you wish to change any of default settings, feel free to edit the 
-corresponding configuration file: [example02.yml](./example02.yml).
+corresponding configuration files:
++ [example02a.yml](./example02a.yml) for Example 2.a, and
++ [example02b.yml](./example02b.yml) for Example 2.b.
 
 ## The results
 
