@@ -29,7 +29,7 @@ sigma = float(sys.argv[2])
 thetas = []
 gammas = [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]
 for gamma in gammas:
-    prefix = f"example02_newb_results/example02_gamma={gamma:1.2e}_n={n}_sigma={sigma:1.2e}_0"
+    prefix = f"example02_newa_results/example02_gamma={gamma:1.2e}_n={n}_sigma={sigma:1.2e}_0"
     thetas.append(np.loadtxt(prefix + "_theta.csv")[:, 1])
 thetas = np.vstack(thetas)
 

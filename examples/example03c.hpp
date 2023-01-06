@@ -26,14 +26,19 @@ class Example03CHamiltonian : public pift::Hamiltonian<T> {
     const T beta;
     // The precision of the source term weights
     const T tau;
+    // Spectral decay coefficient
+    const T a;
     FA& f;
+    const int num_terms;
     std::vector<T> w;
     std::vector<T> grad_w;
 
   public:
-    Example03CHamiltonian(const T& beta, FA& f, const T& tau=10) : 
-      pift::Hamiltonian<T>(2 + f.get_dim_w() - 1), beta(beta), f(f), tau(tau),
-      f0(0.25 * std::sin(4.0))
+    Example03CHamiltonian(const T& beta, FA& f, const T& tau=10, const T& a=2.0) : 
+      pift::Hamiltonian<T>(2 + f.get_dim_w() - 1), beta(beta), f(f),
+      tau(tau), a(a),
+      f0(0.25 * std::sin(4.0)),
+      num_terms((f.get_dim_w() - 1) / 2)
     {
       assert(f.get_dim_x() == 1);
       w.resize(f.get_dim_w());
@@ -53,18 +58,20 @@ class Example03CHamiltonian : public pift::Hamiltonian<T> {
       const T phi = prolong_phi[0];
       const T phi_prime = prolong_phi[1];
       std::copy(theta + 2, theta + 1 + f.get_dim_w(), w.begin() + 1);
+      T pw = T(0.0);
+      for(int i=0; i<num_terms; i++)
+        pw += 0.5 * tau * std::pow(i+1, a) * 
+          (w[1+i] * w[1+i] + w[1+num_terms+i] * w[1+num_terms+i]);
       return beta * (0.5 * D * std::pow(phi_prime, 2)
           + 0.25 * kappa * std::pow(phi, 4)
           + phi * f(x, w.data()))
-        + 0.5 * tau * std::inner_product(w.begin() + 1, w.end(),
-                                         w.begin() + 1, T(0.0));
+          + pw; 
     }
     
     inline T operator()(
       const T* x, const T* prolong_phi, const T* theta,
       T* out
-    ) 
-    {
+    ) {
       const T D = get_D(theta);
       const T kappa = get_kappa(theta);
       const T phi = prolong_phi[0];
@@ -75,9 +82,12 @@ class Example03CHamiltonian : public pift::Hamiltonian<T> {
       const T tmp2 = beta * f_x;
       out[0] = tmp1 + tmp2;
       out[1] = beta * D * phi_prime;
+      T pw = T(0.0);
+      for(int i=0; i<num_terms; i++)
+        pw += 0.5 * tau * std::pow(i+1, a) * 
+          (w[1+i] * w[1+i] + w[1+num_terms+i] * w[1+num_terms+i]);
       return 0.5 * out[1] * phi_prime + (0.25 * tmp1 + tmp2) * phi
-        + 0.5 * tau * std::inner_product(w.begin() + 1, w.end(),
-                                         w.begin() + 1, T(0.0)); 
+        + pw;
     }
 
     inline T add_grad_theta(
@@ -94,13 +104,19 @@ class Example03CHamiltonian : public pift::Hamiltonian<T> {
       const T f_x = f.eval_grad(x, w.data(), grad_w.data());
       out[0] += 0.5 * beta * std::pow(phi_prime, 2) * D; 
       out[1] += 0.25 * beta * std::pow(phi, 4) * kappa;
+      T pw = T(0.0);
+      for(int i=0; i<num_terms; i++) {
+        const T tmp = tau * std::pow(i+1, a);
+        pw += 0.5 * tmp * (w[1+i] * w[1+i] + w[1+num_terms+i] * w[1+num_terms+i]);
+        out[2 + i] += tmp * w[1+i];
+        out[2 + num_terms + i] += tmp * w[1+num_terms+i];
+      }
       for(int i=0; i<f.get_dim_w() - 1; i++)
-        out[2 + i] += beta * phi * grad_w[i + 1] + tau * w[i + 1];
+        out[2 + i] += beta * phi * grad_w[i + 1];
       return beta * (0.5 * D * std::pow(phi_prime, 2)
           + 0.25 * kappa * std::pow(phi, 4)
           + phi * f_x)
-        + 0.5 * tau * std::inner_product(w.begin() + 1, w.end(),
-                                         w.begin() + 1, T(0.0));
+          + pw; 
     }
 
 }; // Example03CHamiltonian

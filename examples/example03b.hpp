@@ -44,7 +44,7 @@ class Example03BHamiltonian : public pift::Hamiltonian<T> {
           + 0.25 * kappa * std::pow(phi, 4)
           + phi * f(x));
     }
-    
+
     inline T operator()(
       const T* x, const T* prolong_phi, const T* theta,
       T* out

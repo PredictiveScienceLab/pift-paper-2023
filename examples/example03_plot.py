@@ -26,8 +26,8 @@ sigma = float(sys.argv[3])
 
 prefix = f"example03_beta={beta:1.2e}_n={n}_sigma={sigma:1.2e}_0"
 
-skip = 10000 
-thin = 200
+skip = 50
+thin = 1
 
 thetas = np.loadtxt(prefix + "_theta.csv")
 

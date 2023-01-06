@@ -47,7 +47,7 @@ class Example02BHamiltonian : public pift::Hamiltonian<T> {
       return std::cos(4.0f * x[0]);
     }
 
-    inline T operator()(const T* x, const T* prolong_phi, const T* theta) const 
+    inline T operator()(const T* x, const T* prolong_phi, const T* theta) 
     {
       const T beta = get_beta(theta);
       const T phi = prolong_phi[0];
@@ -61,7 +61,7 @@ class Example02BHamiltonian : public pift::Hamiltonian<T> {
     inline T operator()(
       const T* x, const T* prolong_phi, const T* theta,
       T* out
-    ) const
+    )
     {
       const T beta = get_beta(theta);
       const T phi = prolong_phi[0];

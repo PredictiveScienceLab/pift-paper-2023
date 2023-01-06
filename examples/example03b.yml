@@ -10,28 +10,28 @@ domain:
 # Parameterization details
 field:
   # The number of Fourier terms to use
-  num_terms: 8
+  num_terms: 20
   # The values at the boundary
   boundary_values: [0.0, 0.0]
 # Sampling details for the parameters
 parameters:
     # How to initialize the parameters
     init_mean: [0.0, 0.0]
-    init_std: [.1, 0.1]
+    init_std: [0.1, 0.1]
     # The number of collocation points for integrating over the spatial
     # dimension when taking gradients with respect to theta
     num_collocation: 1
     # The SGLD options for parameter sampling
     sgld:
-      alpha: 0.01
+      alpha: 0.1
       beta: 0.0
       gamma: 0.51
       # sigma_w is irrelevant
       save_to_file: true
-      save_freq: 100000
+      save_freq: 10000
       disp: true 
-      disp_freq: 1000000
-      num_warmup: 200000000
+      disp_freq: 100000
+      num_warmup: 100000000
       num_samples: 0
     # To sample the parameters we need to construct unbiased estimators prior
     # and posterior expectations over w of the gradient of the Hamiltonian
@@ -60,8 +60,8 @@ parameters:
         alpha: 1e-1
         beta: 0.0
         gamma: 0.51
-        save_to_file: false
-        save_freq: 10000000
+        save_to_file: true 
+        save_freq: 100000
         disp: false
         disp_freq: 1
         # The warmup to do on w at each iteration of theta sampling
@@ -94,8 +94,8 @@ parameters:
         alpha: 10.0
         beta: 0.0
         gamma: 0.51
-        save_to_file: false
-        save_freq: 1000000
+        save_to_file: true
+        save_freq: 10000
         disp: false
         disp_freq: 1000000
         # The warmup to do on w at each iteration of theta sampling
