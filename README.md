@@ -63,3 +63,4 @@ The requirements for the Python plotting scripts are (ignoring standard librarie
 Follow the links to see how you can reproduce the paper results for each eaxmple:
 + [Example 1](./examples/example01.md)
 + [Example 2](./examples/example02.md)
++ [Example 3](./examples/example03.md)

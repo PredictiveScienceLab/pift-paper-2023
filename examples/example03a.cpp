@@ -1,4 +1,4 @@
-// Example 03 of the paper.
+// Example 3.a of the paper.
 //
 // Authors:
 //  Ilias Bilionis
@@ -15,7 +15,7 @@
 
 #include "pift.hpp"
 // The Hamiltonian we will use is here:
-#include "example03c.hpp"
+#include "example03a.hpp"
 
 #include "options.hpp"
 #include "postprocessing.hpp"
@@ -29,7 +29,7 @@ using FField = pift::Fourier1DField<F, Domain>;
 // Type for constrained parameterized field
 using CFField = pift::Constrained1DField<F, FField, Domain>;
 // Type for Hamiltonian
-using H = Example03CHamiltonian<F, FField>;
+using H = Example03AHamiltonian<F>;
 // Type for likelihood
 using L = pift::GaussianLikelihood<F, CFField>;
 // Type for the unbiased estimator of the integral of the gradient of the
@@ -80,7 +80,7 @@ int main(int argc, char* argv[]) {
   }
     
   YAML::Node yaml = YAML::LoadFile(config_file); 
-  Configuration03<F> config(yaml);
+  Configuration02<F> config(yaml);
 
   // The data files
   std::string x_file = "example02_" + std::string(buffer) 
@@ -105,11 +105,8 @@ int main(int argc, char* argv[]) {
   // Constrain the field to satisfy the boundary conditions
   CFField phi(psi, domain, config.field.boundary_values);
 
-  // The field representing the source term
-  FField f(domain, config.source.num_terms);
-
   // The Hamiltonian
-  H h(beta, f, config.source.precision);
+  H h(beta);
 
   // Initialize the parameters
   std::normal_distribution<F> norm(0, 1);
@@ -204,11 +201,6 @@ int main(int argc, char* argv[]) {
       phi, domain, config.postprocess.num_points_per_dim[0],
       theta_post_params.sgld_params.out_file,
       post_prefix
-  );
-  postprocess_sourcec<F>(
-      f, domain, config.postprocess.num_points_per_dim[0],
-      sgld_params.out_file,
-      prefix
   );
 
   return 0;
