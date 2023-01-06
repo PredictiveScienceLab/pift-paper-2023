@@ -2,7 +2,7 @@
 # Some parameters the control the output
 output:
   # The output files will have the following prefix
-  prefix: example03d
+  prefix: example03
 # The physical domain
 domain: 
   bounds:

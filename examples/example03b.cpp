@@ -1,4 +1,4 @@
-// Example 03 of the paper.
+// Example 3.b of the paper.
 //
 // Authors:
 //  Ilias Bilionis
@@ -15,7 +15,7 @@
 
 #include "pift.hpp"
 // The Hamiltonian we will use is here:
-#include "example03c.hpp"
+#include "example03b.hpp"
 
 #include "options.hpp"
 #include "postprocessing.hpp"
@@ -29,7 +29,7 @@ using FField = pift::Fourier1DField<F, Domain>;
 // Type for constrained parameterized field
 using CFField = pift::Constrained1DField<F, FField, Domain>;
 // Type for Hamiltonian
-using H = Example03CHamiltonian<F, FField>;
+using H = Example03BHamiltonian<F, FField>;
 // Type for likelihood
 using L = pift::GaussianLikelihood<F, CFField>;
 // Type for the unbiased estimator of the integral of the gradient of the

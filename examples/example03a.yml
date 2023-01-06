@@ -2,7 +2,7 @@
 # Some parameters the control the output
 output:
   # The output files will have the following prefix
-  prefix: example03a
+  prefix: example03
 # The physical domain
 domain: 
   bounds:
@@ -31,7 +31,7 @@ parameters:
       save_freq: 10000
       disp: true 
       disp_freq: 100000
-      num_warmup: 100000000
+      num_warmup: 10000000
       num_samples: 0
     # To sample the parameters we need to construct unbiased estimators prior
     # and posterior expectations over w of the gradient of the Hamiltonian

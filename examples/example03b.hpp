@@ -8,8 +8,8 @@
 //
 
 
-#ifndef PIFT_EXAMPLE03C_HPP
-#define PIFT_EXAMPLE03C_HPP
+#ifndef PIFT_EXAMPLE03B_HPP
+#define PIFT_EXAMPLE03B_HPP
 
 #include <cmath>
 #include <vector>
@@ -120,4 +120,4 @@ class Example03CHamiltonian : public pift::Hamiltonian<T> {
     }
 
 }; // Example03CHamiltonian
-#endif // PIFT_EXAMPLE03C_HPP
+#endif // PIFT_EXAMPLE03B_HPP
