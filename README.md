@@ -4,6 +4,12 @@ This repository replicates the result of the paper **ADD DOI WHEN PUBLISHED**.
 
 ## Code outline
 
+The code is structured as follows:
++ [src](./src): Contains the C++ code that implements the methodology.
+Note that for the time being we only support fields with one input and one
+output. Support for multiple outputs will be added in the future.
++ [examples](./examples): Contains the C++ code that implements the paper
+examples, and the Python scripts that make the plots.
 
 ## Installing the code
 
