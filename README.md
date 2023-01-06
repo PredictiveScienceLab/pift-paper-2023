@@ -42,9 +42,9 @@ The requirements for the Python plotting scripts are (ignoring standard librarie
   If for some reason you cannot install texlive, you will need to manually edit
   the Python plotting scripts and comment out the lines:
   ```
-plt.rcParams['text.latex.preamble']=[r"\usepackage{lmodern}"]
-params = {'text.usetex' : True,
-          'font.size' : 9,
-          'font.family' : 'lmodern'
-          }
+    plt.rcParams['text.latex.preamble']=[r"\usepackage{lmodern}"]
+    params = {'text.usetex' : True,
+              'font.size' : 9,
+              'font.family' : 'lmodern'
+              }
   ```
