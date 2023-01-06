@@ -58,3 +58,10 @@ To run it, change in the directory `./examples` and type in your terminal:
 
 If you wish to change any of default settings, feel free to edit the 
 corresponding configuration file: [example01.yml](./example01.yml).
+
+## The results
+
+The above script creates the following figures and puts them in a directory
+called `example01_results`.
+
+![](./paper_figures/example01_beta=1.00e+02.pdf)
