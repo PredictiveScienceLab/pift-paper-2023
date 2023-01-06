@@ -13,8 +13,6 @@ CXX=g++
 # Compile options
 CXXFLAGS=-O3 -ffast-math -std=c++20 -I./src -I./examples \
 				 -I$(YAMLCPP)/include
-#CXXFLAGS=-g -std=c++20 -I./src -I./examples \
-				 -I$(YAMLCPP)/include
 # Link options
 LDFLAGS=-L$(YAMLCPP)/lib -lyaml-cpp
 
