@@ -99,8 +99,9 @@ corresponding configuration files:
 
 ## The results
 
-The above script creates the following figures and puts them in a directory
-called `example01_results`.
+The above script creates the following figures and puts them in directories
+called `example02a_results` and `example02b_results` for Example 2.a and 2.b,
+respectively.
 
 ### Example 2.a
 

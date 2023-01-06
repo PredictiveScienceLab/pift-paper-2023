@@ -97,7 +97,9 @@ To run it, change in the directory `./examples` and type in your terminal:
 ```
 
 If you wish to change any of default settings, feel free to edit the 
-corresponding configuration file: [example02.yml](./example02.yml).
+corresponding configuration files:
++ [example02a.yml](./example02a.yml) for Example 2.a, and
++ [example02b.yml](./example02b.yml) for Example 2.b.
 
 ## The results
 
