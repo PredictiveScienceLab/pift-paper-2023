@@ -19,7 +19,7 @@
 #include "pift.hpp"
 
 template<typename T, typename FA>
-class Example03CHamiltonian : public pift::Hamiltonian<T> {
+class Example03BHamiltonian : public pift::Hamiltonian<T> {
   private:
     const T f0;
     // The inverse temperature
@@ -34,7 +34,7 @@ class Example03CHamiltonian : public pift::Hamiltonian<T> {
     std::vector<T> grad_w;
 
   public:
-    Example03CHamiltonian(const T& beta, FA& f, const T& tau=10, const T& a=2.0) : 
+    Example03BHamiltonian(const T& beta, FA& f, const T& tau=10, const T& a=2.0) : 
       pift::Hamiltonian<T>(2 + f.get_dim_w() - 1), beta(beta), f(f),
       tau(tau), a(a),
       f0(0.25 * std::sin(4.0)),
@@ -119,5 +119,5 @@ class Example03CHamiltonian : public pift::Hamiltonian<T> {
           + pw; 
     }
 
-}; // Example03CHamiltonian
+}; // Example03BHamiltonian
 #endif // PIFT_EXAMPLE03B_HPP

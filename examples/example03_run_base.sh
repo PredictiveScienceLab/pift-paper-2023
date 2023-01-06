@@ -39,4 +39,4 @@ if [ $? -ne 0 ]; then
 fi
 
 # Make the plots
-# python3 example03_make_plots.py $n $sigma $out_folder
+# python3 example03_make_plots.py $beta $n $sigma $out_folder
