@@ -96,10 +96,11 @@ public:
     T* out
   ) {
     const T phi_n = phi.eval_grad(x_obs + n * dim_x, w, grad_phi);
-    const T std_err = (phi_n - y_obs[n]) / sigma2;
+    const T std_err = (phi_n - y_obs[n]) / sigma;
+    const T std_err_over_sigma = std_err / sigma;
     // grad_w_minus_log_like = d_minus_log_like_d_phi * grad_w_phi
     for(int i=0; i<dim_w; i++)
-      out[i] += std_err * grad_phi[i];
+      out[i] += std_err_over_sigma * grad_phi[i];
     return 0.5 * std::pow(std_err, 2);
   }
 

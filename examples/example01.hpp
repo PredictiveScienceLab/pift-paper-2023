@@ -39,7 +39,7 @@ class Example01Hamiltonian : public pift::Hamiltonian<T> {
       return std::exp(-x[0]);
     }
 
-    inline T operator()(const T* x, const T* prolong_phi, const T* theta) const 
+    inline T operator()(const T* x, const T* prolong_phi, const T* theta) 
     {
       const T phi = prolong_phi[0];
       const T phi_prime = prolong_phi[1];
@@ -49,7 +49,7 @@ class Example01Hamiltonian : public pift::Hamiltonian<T> {
     inline T operator()(
       const T* x, const T* prolong_phi, const T* theta,
       T* out
-    ) const
+    )
     {
       const T phi = prolong_phi[0];
       const T phi_prime = prolong_phi[1];

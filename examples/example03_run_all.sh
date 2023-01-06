@@ -1,17 +1,14 @@
 # Run everything about example 3
-for s in 0.01 0.0001
-do
-for n in 10 80
-do
-  for b in 1000 10000 100000
-  do
-    ./example03 $b example03.yml $n $s 0 &
-  done
-  wait
-  for b in 1000 10000 100000
-  do
-    ./example03b $b example03b.yml $n $s 0 &
-  done
-  wait
-done
-done
+# ./example03b 100 example03b.yml 10 0.01 0
+# ./example03b 100 example03b.yml 20 0.01 0
+# ./example03b 1000 example03b.yml 10 0.01 0
+# ./example03b 1000 example03b.yml 20 0.01 0
+# ./example03b 10000 example03b.yml 10 0.01 0
+# ./example03b 10000 example03b.yml 20 0.01 0
+# ./example03 100 example03.yml 10 0.01 0
+# ./example03 100 example03.yml 20 0.01 0
+# ./example03 1000 example03.yml 10 0.01 0
+# ./example03 1000 example03.yml 20 0.01 0
+# ./example03 10000 example03.yml 10 0.01 0
+# ./example03 10000 example03.yml 20 0.01 0
+./example03c 1000 example03c.yml 10 0.01 0

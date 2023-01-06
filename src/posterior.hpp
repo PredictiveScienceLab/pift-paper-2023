@@ -186,17 +186,8 @@ public:
     ue_grad_w_h.set_theta(theta);
     adjust_alpha(theta);
     params.sgld_params.init_it = 0;
-    //if(params.sgld_params.save_to_file)
-    //  of << "# INITIAL WARMUP" << std::endl;
-    //if(params.sgld_params.disp)
-    //  std::cout << "INITIAL WARMUP" << std::endl;
-    //pift::cout_vec(theta, num_params, of, "# THETA: ");
     for(int c=0; c<params.num_chains; c++) {
       T* w = ws.data() + c * dim_w;
-      //if(params.sgld_params.save_to_file)
-      //  of << "# CHAIN: " << c << std::endl;
-      //if(params.sgld_params.disp)
-      //  std::cout << "CHAIN: " << c << std::endl;
       sgld(
           ue_grad_w_h,
           w,
@@ -220,20 +211,11 @@ public:
     std::fill(foo, foo + num_params, T(0.0));
     if(params.reinitialize_ws)
       initialize_chains();
-    //ue_grad_w_h.set_theta(theta);
     adjust_alpha(theta);
     const int init_it = params.sgld_params.init_it;
-    //if(params.sgld_params.save_to_file)
-    //   pift::cout_vec(theta, num_params, of, "# THETA: ");
     for(int c=0; c<params.num_chains; c++) {
       T* w = ws.data() + c * dim_w;
       params.sgld_params.init_it = init_it;
-      //if(params.sgld_params.save_to_file) {
-      //  of << "# CHAIN: " << c << std::endl;
-      //  of << "# WARMUP" << std::endl;
-      //}
-      //if(params.sgld_params.disp)
-      //  std::cout << "CHAIN: " << c << std::endl;
       sgld(
           ue_grad_w_h,
           w,
@@ -247,10 +229,6 @@ public:
       );
       params.sgld_params.init_it += params.num_per_it_warmup;
       for(int b=0; b<params.num_bursts; b++) {
-        //if(params.sgld_params.save_to_file)
-        //  of << "# BURST: " << b << std::endl;
-        //if(params.sgld_params.disp)
-        //  std::cout << "BURST: " << b << std::endl;
         sgld(
             ue_grad_w_h,
             w,
@@ -265,12 +243,6 @@ public:
         params.sgld_params.init_it += params.num_thinning;
         // Get the gradient with respect to theta
         const T r = ue_grad_theta_f(w, theta, tmp_grad_theta.data());
-        if(params.sgld_params.save_to_file)
-          pift::cout_vec(
-              tmp_grad_theta,
-              of,
-              "# SAMPLE_PRIOR_EXP_INT_GRAD_THETA_H: "
-          );
         result += r;
         r2 += r * r;
         for(int i=0; i<num_params; i++) {
@@ -282,13 +254,6 @@ public:
     params.sgld_params.init_it = init_it + params.num_per_it_warmup 
       + params.num_bursts * params.num_thinning;
     scale(grad_theta, num_params, scale_ratio);
-    if(params.sgld_params.save_to_file)
-           pift::cout_vec(
-              grad_theta,
-              num_params,
-              of,
-              "# UE_PRIOR_EXP_INT_GRAD_THETA_H: "
-           );
     result *= scale_ratio;
     scale(foo, num_params, scale_ratio);
     for(int i=0; i<num_params; i++)

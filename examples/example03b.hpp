@@ -33,7 +33,7 @@ class Example03BHamiltonian : public pift::Hamiltonian<T> {
     inline T get_kappa(const T* theta) const { return std::exp(theta[1]); }
     inline T f(const T* x) const { return std::cos(T(4.0) * x[0]); }
 
-    inline T operator()(const T* x, const T* prolong_phi, const T* theta) const 
+    inline T operator()(const T* x, const T* prolong_phi, const T* theta) 
     {
       const T D = get_D(theta);
       const T kappa = get_kappa(theta);
@@ -48,7 +48,7 @@ class Example03BHamiltonian : public pift::Hamiltonian<T> {
     inline T operator()(
       const T* x, const T* prolong_phi, const T* theta,
       T* out
-    ) const
+    )
     {
       const T D = get_D(theta);
       const T kappa = get_kappa(theta);

@@ -194,17 +194,17 @@ int main(int argc, char* argv[]) {
 
   // Postprocess the results
   auto prior_prefix = prefix + "_prior";
-  postprocess<F>(
-      phi, domain, config.postprocess.num_points_per_dim[0],
-      theta_prior_params.sgld_params.out_file,
-      prior_prefix
-  );
+  //postprocess<F>(
+  //    phi, domain, config.postprocess.num_points_per_dim[0],
+  //    theta_prior_params.sgld_params.out_file,
+  //    prior_prefix
+  //);
   auto post_prefix = prefix + "_post";
-  postprocess<F>(
-      phi, domain, config.postprocess.num_points_per_dim[0],
-      theta_post_params.sgld_params.out_file,
-      post_prefix
-  );
+  //postprocess<F>(
+  //    phi, domain, config.postprocess.num_points_per_dim[0],
+  //    theta_post_params.sgld_params.out_file,
+  //    post_prefix
+  //);
   postprocess_source<F>(
       f, domain, config.postprocess.num_points_per_dim[0],
       sgld_params.out_file,

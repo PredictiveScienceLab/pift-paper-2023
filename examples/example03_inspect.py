@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import sys
 
-gamma = float(sys.argv[1])
+beta = float(sys.argv[1])
 n = int(sys.argv[2])
 sigma = float(sys.argv[3])
 
@@ -20,8 +20,7 @@ obs_prefix = f"example02_n={n}_sigma={sigma:1.2e}_0"
 x_file = obs_prefix + "_x_obs.csv"
 y_file = obs_prefix + "_y_obs.csv"
 
-prefix = f"example02_newa_results/example02_gamma={gamma:1.2e}_n={n}_sigma={sigma:1.2e}_0"
-#prefix = f"example02_gamma={gamma:1.2e}_n={n}_sigma={sigma:1.2e}_0"
+prefix = f"example03_beta={beta:1.2e}_n={n}_sigma={sigma:1.2e}_0"
 
 # Visualize weights
 wspr = np.loadtxt(prefix + "_prior_ws.csv")
@@ -42,8 +41,8 @@ y_obs = np.loadtxt(y_file)
 xst = np.loadtxt("example02_xs.csv")
 yst = np.loadtxt("example02_ys.csv")
 
-skip_prior = 100
-skip = 100
+skip_prior = 0
+skip = 0
 end = 1000
 thin = 1
 
@@ -54,7 +53,14 @@ ax[0].plot(x_obs, y_obs, 'kx')
 ax[1].plot(xs, phips[skip:end:thin,:].T, 'r', lw=0.5)
 ax[1].plot(xst, yst, 'k', lw=1)
 ax[1].plot(x_obs, y_obs, 'kx')
-
+plt.show()
+# Visualize the source term
+skip_s = 90
+fig, ax = plt.subplots()
+xs = np.loadtxt(prefix + "_source_x.csv")
+fs = np.loadtxt(prefix + "_source_f.csv")
+ax.plot(xs, fs[skip_s::, :].T, 'r', lw=0.1)
+ax.plot(xs, np.cos(4.0 * xs), '--')
 
 #thetas = np.loadtxt(prefix + "_theta.csv")
 #fig, ax = plt.subplots()

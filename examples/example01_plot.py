@@ -71,3 +71,5 @@ phis_file = prefix + "_phis.png"
 print("\t- ", phis_file)
 plt.savefig(phis_file)
 
+plt.show()
+

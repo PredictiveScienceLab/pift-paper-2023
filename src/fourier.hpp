@@ -51,7 +51,7 @@ class Fourier1DField : public ParameterizedField<T> {
     // w -- The weight vector of size dim
     T operator()(const T* x, const T* w) const {
       T s = w[0];
-      const T dx = M_PI / L() * (x[0] - a());
+      const T dx = 2.0 * M_PI / L() * (x[0] - a());
       for(int i=1; i<num_terms; i++) {
         const T tmp = dx * i;
         s += w[i] * std::cos(tmp) + w[num_terms + i - 1] * std::sin(tmp);
@@ -62,7 +62,7 @@ class Fourier1DField : public ParameterizedField<T> {
     inline void operator()(const T* x, const T* w, T* prolong) const {
       prolong[0] = w[0];
       prolong[1] = 0.0;
-      const T tmp1 =  M_PI / L();
+      const T tmp1 =  2 * M_PI / L();
       const T dx = (x[0] - a());
       for(int i=1; i<num_terms; i++) {
         const T omega = tmp1 * i;
@@ -81,7 +81,7 @@ class Fourier1DField : public ParameterizedField<T> {
     inline T eval_grad(const T* x, const T* w, T* grad_w) const {
       T f = w[0];
       grad_w[0] = 1.0;
-      const T tmp1 =  M_PI / L();
+      const T tmp1 =  2 * M_PI / L();
       const T dx = (x[0] - a());
       for(int i=1; i<num_terms; i++) {
         const T omega = tmp1 * i;
@@ -106,7 +106,7 @@ class Fourier1DField : public ParameterizedField<T> {
       prolong[1] = 0.0;
       grad_w_prolong[0] = 1.0;
       grad_w_prolong[dim_w] = 0.0;
-      const T tmp1 =  M_PI / L();
+      const T tmp1 =  2 * M_PI / L();
       const T dx = (x[0] - a());
       for(int i=1; i<num_terms; i++) {
         const T omega = tmp1 * i;

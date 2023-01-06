@@ -11,16 +11,16 @@ if [ ! -f ./example02 ]; then
   exit 1
 fi
 
-if [ -d example02a_results ]; then
-  rm -rf example02a_results
+if [ -d example02_newa_results ]; then
+  rm -rf example02_newa_results
 fi
 
-mkdir example02a_results
+mkdir example02_newa_results
 
 id=0
-for n in 80
+for n in 40
 do
-for sigma in 0.0001
+for sigma in 0.01
 do
 for gamma in 0.0 0.2 0.4 0.6 0.8 1.0
 do
@@ -32,7 +32,7 @@ do
     exit 2
   fi
   prefix=`printf "example02_gamma=%1.2e_n=%d_sigma=%1.2e_%d" $gamma $n $sigma $id`
-  mv ${prefix}*.csv example02a_results/
+  mv ${prefix}*.csv example02_newa_results/
   if [ $? -ne 0 ]; then
     echo "*** FAILED ***"
     exit 2

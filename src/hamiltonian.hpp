@@ -52,7 +52,7 @@ public:
   //  The value of the hamiltonian density
   virtual inline T operator()(
       const T* x, const T* prolong_phi, const T* theta
-  ) const = 0;
+  ) = 0;
 
   // The gradient of the Hamiltonian with respect to the prolongation of phi
   //  x             --  The spatial point on which to evaluate the Hamiltonian
@@ -66,7 +66,7 @@ public:
   virtual inline T operator()(
       const T* x, const T* prolong_phi, const T* theta,
       T* out
-  ) const = 0;
+  ) = 0;
 
   // Add the gradient of the Hamiltonian with respect to the phyisical
   // parameters theta

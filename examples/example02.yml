@@ -10,7 +10,7 @@ domain:
 # Parameterization details
 field:
   # The number of Fourier terms to use
-  num_terms: 8
+  num_terms: 20
   # The values at the boundary
   boundary_values: [0.0, 0.0]
 # Sampling details for the parameters

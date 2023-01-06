@@ -36,7 +36,7 @@ parameters:
       save_freq: 10000
       disp: true 
       disp_freq: 10000
-      num_warmup: 100000000
+      num_warmup: 200000000
       num_samples: 0
     # To sample the parameters we need to construct unbiased estimators prior
     # and posterior expectations over w of the gradient of the Hamiltonian
@@ -65,7 +65,7 @@ parameters:
         alpha: 1e-1
         beta: 0.0
         gamma: 0.51
-        save_to_file: true 
+        save_to_file: false 
         save_freq: 100000
         disp: false
         disp_freq: 1
@@ -96,10 +96,10 @@ parameters:
       batch_size: 1
       sgld:
         # The learning rate parameters
-        alpha: 10.0
+        alpha: 1.0
         beta: 0.0
         gamma: 0.51
-        save_to_file: true
+        save_to_file: false
         save_freq: 10000
         disp: false
         disp_freq: 1000000
