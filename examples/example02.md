@@ -52,34 +52,57 @@ and the observed field otuputs are [here](example02_n=40_sigma=1.00e-02_0_x_obs.
 If you wish to review how the observations were generated, consult the script
 [example02_generate_observations.py](./example02_generate_observations.py).
 
-
-We introduce 
-
-The Hamiltonian is:
+The correct Hamiltonian for this problem is:
 
 $$
-H = \int dx \left\[\frac{1}{2}\kappa \left(\frac{d\phi}{dx}\right)^2 - \phi q\right].
+H = \int dx \left\[\frac{1}{2}D \left(\frac{d\phi}{dx}\right)^2 + \frac{1}{4}\kappa\phi^4
++ \phi f\right].
+$$
+
+
+We introduce model error in a continuous way using a parameter $\gamma$ that
+ranges from $0$ to $1$.
+When $\gamma$ is $0$ the model is wrong. When $\gamma$ is $1$ the model is correct.
+
+We do this in two different ways:
+
+### Example 2.a: Model error in the source term
+
+In this example we make the source term:
+
+$$
+f(x;\gamma) = \gamma \cos(4x) + (1-\gamma)e^{-x},
+$$
+
+where $\gamma$ is fixed at different levels from $0$ to $1$.
+
+### Example 2.b: Model error in the energy
+
+In this example we use the correct source term, but we change the Hamiltonian to:
+
+$$
+H = \int dx \left\[\frac{1}{2}D \left(\frac{d\phi}{dx}\right)^2 + \gamma\frac{1}{4}\kappa\phi^4
++ (1-\gamma)\frac{1}{2}\phi^2
++ \phi f\right].
 $$
 
 ## Running the example
 
 Make sure you have compiled the code following the instructions 
 [here](../README.md).
-The script [example01_run.sh](./example01_run.sh) reproduces the paper figures.
+The script [example02_run.sh](./example02_run.sh) reproduces the paper figures.
 To run it, change in the directory `./examples` and type in your terminal:
 ```
-./example01_run.sh
+./example02_run.sh
 ```
 
 If you wish to change any of default settings, feel free to edit the 
-corresponding configuration file: [example01.yml](./example01.yml).
+corresponding configuration file: [example02.yml](./example02.yml).
 
 ## The results
 
 The above script creates the following figures and puts them in a directory
 called `example01_results`.
 
-![](./paper_figures/example01_beta=1.00e+02.png)
-![](./paper_figures/example01_beta=1.00e+03.png)
-![](./paper_figures/example01_beta=1.00e+04.png)
-![](./paper_figures/example01_beta=1.00e+05.png)
+![Example 2.a](./paper_figures/example01a.png)
+![Example 2.b](./paper_figures/example01b.png)
