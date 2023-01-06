@@ -57,3 +57,8 @@ The requirements for the Python plotting scripts are (ignoring standard librarie
               'font.family' : 'lmodern'
               }
   ```
+
+## Reproducing the paper results
+
+Follow the links to see how you can reproduce the paper results for each eaxmple:
++ [Example 1](./examples/example01.rst)
