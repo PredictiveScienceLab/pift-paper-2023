@@ -25,11 +25,12 @@ import sys
 
 n = int(sys.argv[1])
 sigma = float(sys.argv[2])
+folder = sys.argv[3]
 
 thetas = []
 gammas = [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]
 for gamma in gammas:
-    prefix = f"example02_newb_results/example02_gamma={gamma:1.2e}_n={n}_sigma={sigma:1.2e}_0"
+    prefix = folder + "/" + f"example02_gamma={gamma:1.2e}_n={n}_sigma={sigma:1.2e}_0"
     thetas.append(np.loadtxt(prefix + "_theta.csv")[:, 1])
 thetas = np.vstack(thetas)
 
@@ -42,14 +43,11 @@ betas = np.exp(thetas)
 p_500, p025, p975 = np.percentile(thetas, [50, 2.5, 97.5], axis=1)
 
 fig, ax = plt.subplots(figsize=(3.543, 3.543/1.618))
-#sns.boxplot(thetas.T, width=0.1, fliersize=0, linewidth=1, whis=[5, 95])
 
 ax.boxplot(thetas[:, :].T, showbox=False, whis=[5, 95], showfliers=False,
            widths=0.05, capwidths=0)
-#ax.set_yscale('log')
 
 ax.set_ylabel("$\\beta$ posterior\nquantiles", rotation="horizontal")
-#print(ax.yaxis.label_coords)
 ax.yaxis.set_label_coords(0.12, 0.9)
 labels = [f"{g:1.2f}" for g in gammas]
 labels[0] = labels[0] + "\nwrong model"
@@ -66,12 +64,10 @@ for b in np.exp(yticks):
 ax.set_yticklabels(ylabels)
 
 sns.despine(trim=True)
-#plt.legend(loc="best", frameon=False)
 
 plt.tight_layout()
-plt.savefig("example02b_prelim.png")
-plt.savefig("example02b_prelim.eps")
-plt.savefig("example02b_prelim.pdf")
-plt.show()
-    
+out_prefix = folder + "/" + "example02"
+print("> writing: " + out_prefix + ".pdf")
+plt.savefig(out_prefix + ".pdf")
+plt.savefig(out_prefix + ".png", dpi=150)
 

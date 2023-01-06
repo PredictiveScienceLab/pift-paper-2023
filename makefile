@@ -20,7 +20,7 @@ LDFLAGS=-L$(YAMLCPP)/lib -lyaml-cpp
 # 		 test_free test_prior_exp test_post_exp\
 # 		 example01 example02 example02b
 #all: example01 example02 example02b example03 #example03c
-all: example01
+all: example01 example02a example02b
 
 clean:
 	$(RM) examples/*.o
@@ -31,11 +31,11 @@ example01: example01.o
 example01.o: examples/example01.cpp
 	$(CXX) -c examples/example01.cpp $(CXXFLAGS) -o examples/example01.o
 
-example02: example02.o
-	$(CXX) -o examples/example02 examples/example02.o $(LDFLAGS)
+example02a: example02a.o
+	$(CXX) -o examples/example02a examples/example02a.o $(LDFLAGS)
 
-example02.o: examples/example02.cpp
-	$(CXX) -c examples/example02.cpp $(CXXFLAGS) -o examples/example02.o
+example02a.o: examples/example02a.cpp
+	$(CXX) -c examples/example02a.cpp $(CXXFLAGS) -o examples/example02a.o
 
 example02b: example02b.o
 	$(CXX) -o examples/example02b examples/example02b.o $(LDFLAGS)

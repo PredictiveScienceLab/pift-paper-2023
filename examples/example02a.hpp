@@ -8,8 +8,8 @@
 //
 
 
-#ifndef PIFT_EXAMPLE02_HPP
-#define PIFT_EXAMPLE02_HPP
+#ifndef PIFT_EXAMPLE02A_HPP
+#define PIFT_EXAMPLE02A_HPP
 
 #include <cmath>
 
@@ -18,7 +18,7 @@
 // This is a nonlinear diffusion Hamiltonian. The only parameter is
 // the g(beta).
 template<typename T>
-class Example02Hamiltonian : public pift::Hamiltonian<T> {
+class Example02AHamiltonian : public pift::Hamiltonian<T> {
   private:
     // The diffusion coefficient
     const T D;
@@ -30,16 +30,14 @@ class Example02Hamiltonian : public pift::Hamiltonian<T> {
     const T gamma;
 
   public:
-    Example02Hamiltonian(const T& gamma=1.0f, const T& D=0.1f, const T& kappa=1.0f) : 
+    Example02AHamiltonian(const T& gamma=1.0f, const T& D=0.1f, const T& kappa=1.0f) : 
       pift::Hamiltonian<T>(1), gamma(gamma), D(D), kappa(kappa)
     {}
 
     inline T get_beta(const T* theta) const {
-      //return theta[0];
       return std::exp(theta[0]);
     }
 
-    // The source term
     inline T f(const T* x) const
     {
       return gamma * std::cos(4.0f * x[0]) + (1.0f - gamma) * std::exp(-x[0]);
@@ -82,12 +80,9 @@ class Example02Hamiltonian : public pift::Hamiltonian<T> {
       const T res = beta * (0.5 * D * phi_prime * phi_prime
           + 0.25 * kappa * std::pow(phi, 4)
           + phi * f(x));
-      //const T res = 0.5 * D * phi_prime * phi_prime
-      //    + 0.25 * kappa * std::pow(phi, 4)
-      //    + phi * f(x);
       out[0] += res;
       return res;
     }
-}; // Example02Hamiltonian
+}; // Example02AHamiltonian
 
-#endif // PIFT_EXAMPLE02_HPP
+#endif // PIFT_EXAMPLE02A_HPP
