@@ -104,5 +104,10 @@ corresponding configuration file: [example02.yml](./example02.yml).
 The above script creates the following figures and puts them in a directory
 called `example01_results`.
 
+### Example 2.a
+
 ![Example 2.a](./paper_figures/example02a.png)
+
+### Example 2.b
+
 ![Example 2.b](./paper_figures/example02b.png)
