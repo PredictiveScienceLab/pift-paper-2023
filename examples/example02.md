@@ -49,8 +49,8 @@ We sample the field at $40$ equidistant points between $0$ and $1$ and we add
 Gaussian noise with zero mean and standard deviation $0.01$.
 The observed field inputs are [here](example02_n=40_sigma=1.00e-02_0_x_obs.csv)
 and the observed field otuputs are [here](example02_n=40_sigma=1.00e-02_0_x_obs.csv).
-If you wish to review how the observations were generated, consult script
-[](example02_generate_observations.py).
+If you wish to review how the observations were generated, consult the script
+[example02_generate_observations.py](./example02_generate_observations.py).
 
 
 We introduce 
