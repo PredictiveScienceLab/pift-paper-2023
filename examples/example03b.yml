@@ -14,8 +14,6 @@ source:
   ell: 0.3
   # Signal strength of squared exponential kernel
   s: 1.0
-  # The mean value
-  mean_value: -0.1892
   # The number of collocation points used in the Nystrom approximation
   nq: 100
 # Parameterization details
@@ -42,8 +40,8 @@ parameters:
       save_to_file: true
       save_freq: 10000
       disp: true 
-      disp_freq: 100000
-      num_warmup: 100000000
+      disp_freq: 10000
+      num_warmup: 10000000
       num_samples: 0
     # To sample the parameters we need to construct unbiased estimators prior
     # and posterior expectations over w of the gradient of the Hamiltonian

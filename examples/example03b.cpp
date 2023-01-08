@@ -29,8 +29,6 @@ using FField = pift::Fourier1DField<F, Domain>;
 // Type for constrained parameterized field
 using CFField = pift::Constrained1DField<F, FField, Domain>;
 // The source field type
-//using RBFField = pift::RBF1DField<F, Domain>;
-//using SourceField = pift::ConstrainedMeanField<F, RBFField, Domain>;
 using Kernel = pift::SquaredExponential1DKernel<F>;
 // Karhunen-Loeve expansion only works in double precision
 using SourceField = pift::KLE<Domain,Kernel>;
@@ -112,17 +110,14 @@ int main(int argc, char* argv[]) {
   CFField phi(psi, domain, config.field.boundary_values);
 
   // The field representing the source term
-  // std::vector<F> rbf_centers(config.source.num_centers);
-  // pift::linspace(F(0.0), F(1.0), rbf_centers.size(), rbf_centers.data());
-  // F ell = F(0.1);
-  // RBFField rf(rbf_centers, config.source.ell);
   Kernel k(config.source.ell, config.source.s);
   SourceField f(
       domain, k,
       config.source.num_terms,
-      config.source.mean_value,
+      0.0,
       config.source.nq
   );
+  //SourceField f(kle, domain, config.source.mean_value);
 
   // The Hamiltonian
   H h(beta, f);

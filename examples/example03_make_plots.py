@@ -28,9 +28,9 @@ folder = sys.argv[4]
 prefix = folder + f"/example03_beta={beta:1.2e}_n={n}_sigma={sigma:1.2e}_0"
 
 # Warmup period
-skip = 2000
+skip = 500
 # How many samples to skip
-thin = 200
+thin = 10
 
 # Load the parameters
 thetas = np.loadtxt(prefix + "_theta.csv")

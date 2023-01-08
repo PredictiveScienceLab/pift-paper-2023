@@ -35,6 +35,7 @@ class KLE : public ParameterizedField<double,D> {
     // The collocation points
     double* xq;
     double* sqrt_eval;
+    double* mu;
 
     // The eigenvalues
     gsl_vector* eval;
@@ -93,11 +94,16 @@ class KLE : public ParameterizedField<double,D> {
       sqrt_eval = new double[num_terms];
       for(int i=0; i<num_terms; i++)
         sqrt_eval[i] = std::sqrt(gsl_vector_get(eval, idx[i]));
+
+      mu = new double[num_terms];
+      for(int j=0; j<num_terms; j++)
+        mu[j] = integrate_eigen_func(j);
     }
 
     ~KLE() {
       delete xq;
       delete sqrt_eval;
+      delete mu;
       gsl_matrix_free(evec);
       gsl_vector_free(eval);
     }
@@ -130,6 +136,14 @@ class KLE : public ParameterizedField<double,D> {
       return s;
     }
 
+    inline double integrate_eigen_func(const int& j) const {
+      double s = 0.0;
+      for(int i=0; i<eval->size; i++)
+        s += kernel.integrate(domain.a(0), domain.b(0), xq[i]) *
+            gsl_matrix_get(evec, i, idx[j]);
+      return s;
+    }
+
     double operator()(const double* x, const double* w) const {
       double s = mean_value;
       for(int j=0; j<num_terms; j++)
@@ -157,15 +171,20 @@ class KLE : public ParameterizedField<double,D> {
     }
 
     double integrate(const D& domain, const double* w) const {
-      return mean_value * domain.get_volume();
+      double s = mean_value;
+      for(int j=0; j<num_terms; j++)
+        s += w[j] * mu[j] / sqrt_eval[j];
+      return s;
     }
 
     double integrate(const D& domain, const double* w, double* grad_w) const {
-      grad_w[0] = 0;
-      return mean_value * domain.get_volume();
+      double s = mean_value;
+      for(int j=0; j<num_terms; j++) {
+        grad_w[j] = mu[j] / sqrt_eval[j];
+        s += w[j] * grad_w[j];
+      }
+      return s;
     }
 }; // ParameterizedField
-
-
 } // namespace pift
 #endif // PIFdouble_KLE_HPP

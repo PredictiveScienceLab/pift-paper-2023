@@ -237,14 +237,12 @@ struct SourceTermConfig {
   int num_terms;
   T ell;
   T s;
-  T mean_value;
   int nq;
 
   SourceTermConfig(const YAML::Node& yaml) :
     num_terms(yaml["num_terms"].as<int>()),
     ell(yaml["ell"].as<T>()),
     s(yaml["s"].as<T>()),
-    mean_value(yaml["mean_value"].as<T>()),
     nq(yaml["nq"].as<T>())
   {}
 }; // SourceTermConfig

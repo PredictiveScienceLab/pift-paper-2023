@@ -71,6 +71,13 @@ class SquaredExponential1DKernel {
       return s * std::exp(-0.5 * std::pow((x1 - x2) / ell, 2));
     }
 
+    inline T integrate(const T& a, const T& b, const T& x) const {
+      return s * ell * (
+            std::erf((b - x) / std::sqrt(2.0) / ell) -
+            std::erf((a - x) / std::sqrt(2.0) / ell)
+            ) / std::sqrt(2.0 / M_PI);
+    }
+
 }; // SquaredExponentialCovariance
 } // namespace pift
 #endif // PIFT_KERNEL_HPP

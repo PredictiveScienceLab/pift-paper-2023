@@ -238,7 +238,7 @@ class ConstrainedMeanField : public ParameterizedField<T,D> {
        phi(phi),
        domain(domain),
        mean_value(mean_value)
-     {
+ {
        // TODO: Find a better way to do this
        dim_x = ParameterizedField<T,D>::dim_x;
        dim_w = ParameterizedField<T,D>::dim_w;
