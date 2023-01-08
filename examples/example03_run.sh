@@ -6,5 +6,5 @@
 # Date:
 #   1/6/2023
 #
-#./example03_run_base.sh a
+./example03_run_base.sh a
 ./example03_run_base.sh b

@@ -82,7 +82,7 @@ H = \int dx \left\[\frac{1}{2}D \left(\frac{d\phi}{dx}\right)^2 + \gamma\frac{1}
 + \phi f\right].
 $$
 
-## Running the example
+## Running the examples
 
 Make sure you have compiled the code following the instructions 
 [here](../README.md).

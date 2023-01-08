@@ -23,17 +23,45 @@ import sys
 beta = float(sys.argv[1])
 n = int(sys.argv[2])
 sigma = float(sys.argv[3])
-folder = sys.argv[4]
+exp_id = sys.argv[4]
+folder = "example03" + exp_id + "_results"
 
 prefix = folder + f"/example03_beta={beta:1.2e}_n={n}_sigma={sigma:1.2e}_0"
-
-# Warmup period
-skip = 500
-# How many samples to skip
-thin = 10
+out_prefix = "paper_figures/example03" + exp_id
 
 # Load the parameters
 thetas = np.loadtxt(prefix + "_theta.csv")
+
+try:
+    # This is example b
+    # Plot posterior of source
+    # Warmup period
+    skip = 500
+    # How many samples to skip
+    thin = 10
+    x = np.loadtxt(prefix + "_source_x.csv")
+    y = np.loadtxt(prefix + "_source_f.csv")
+
+    fig, ax = plt.subplots(figsize=(7.48 / 2, 7.48/2/1.618))
+    med, low, up = np.percentile(y[skip:,:], [50, 2.5, 97.5], axis=0)
+    ax.plot(x, med, color=sns.color_palette()[0], lw=0.5)
+    ax.fill_between(x, low, up, color=sns.color_palette()[0], alpha=0.25)
+    l = ax.plot(x, y[skip::thin*10,:].T, color=sns.color_palette()[1], lw=0.3)
+    ax.plot(x, np.cos(4.0 * x), '--', lw=0.5, color=sns.color_palette()[2])
+    ax.set_xlabel("$x$")
+    ax.set_ylabel("$f(x)$", rotation="horizontal")
+    sns.despine(trim=True)
+    plt.tight_layout(pad=0.1)
+    plt.savefig(out_prefix + "_source.pdf")
+    plt.savefig(out_prefix + "_source.png", dpi=150)
+
+    D_kappa_post_label_x = 0.105
+except:
+    # This is example a
+    skip = 2000
+    thin = 100
+    D_kappa_post_label_x = 0.105
+    print("No source term found.")
 
 # Plot the evolution of the Markov chains (for sanity check)
 fig, ax = plt.subplots(figsize=(7.48 / 2, 7.48/2/1.618))
@@ -50,9 +78,9 @@ ax.text(9000, -0.3, "$\log(\kappa)$", color=sns.color_palette()[1])
 ax.text(9000, -2.0, "$\log(D)$", color=sns.color_palette()[0])
 sns.despine(trim=True)
 plt.tight_layout(pad=0.1)
-print("> writing: " + prefix + "_theta.pdf")
-plt.savefig(prefix + "_theta.pdf")
-plt.savefig(prefix + "_theta.png", dpi=150)
+print("> writing: " + out_prefix + "_theta.pdf")
+plt.savefig(out_prefix + "_theta.pdf")
+plt.savefig(out_prefix + "_theta.png", dpi=150)
 
 # Plot posterior over D and kappa
 fig, ax = plt.subplots(figsize=(7.48 / 2, 7.48/2/1.618))
@@ -65,32 +93,14 @@ ax.set_xlabel("$D$")
 ax.set_ylabel("$\kappa$", rotation="horizontal")
 ax.set_xlim(0., 0.3)
 ax.set_ylim(0.5, 1.5)
-ax.text(0.105, 1.2, "Posterior", color=sns.color_palette()[1]) 
+ax.text(D_kappa_post_label_x, 1.2, "Posterior", color=sns.color_palette()[1]) 
 ax.text(0.105, 1.01, "Ground truth", color=sns.color_palette()[2])
 #plt.legend(loc="best", frameon=False)
 sns.despine(trim=True)
 plt.tight_layout(pad=0.1)
-print("> writing: " + prefix + "_theta_post.pdf")
-plt.savefig(prefix + "_theta_post.pdf")
-plt.savefig(prefix + "_theta_post.png", dpi=150)
-
-# Plot posterior of source
-try:
-    x = np.loadtxt(prefix + "_source_x.csv")
-    y = np.loadtxt(prefix + "_source_f.csv")
-    fig, ax = plt.subplots(figsize=(7.48 / 2, 7.48/2/1.618))
-    med, low, up = np.percentile(y, [50, 2.5, 97.5], axis=0)
-    #ax.plot(x, med, color=sns.color_palette()[0], lw=0.5)
-    #ax.fill_between(x, low, up, color=sns.color_palette()[0], alpha=0.25)
-    l = ax.plot(x, y[skip::thin,:].T, color=sns.color_palette()[1], lw=0.3)
-    ax.plot(x, np.cos(4.0 * x), '--', lw=0.5, color=sns.color_palette()[2])
-    ax.set_xlabel("$x$")
-    ax.set_ylabel("$f(x)$", rotation="horizontal")
-    sns.despine(trim=True)
-    plt.tight_layout(pad=0.1)
-    plt.savefig(prefix + "_source.pdf")
-except:
-    print("No source term found.")
+print("> writing: " + out_prefix + "_theta_post.pdf")
+plt.savefig(out_prefix + "_theta_post.pdf")
+plt.savefig(out_prefix + "_theta_post.png", dpi=150)
 
 # Plot the prior after calibrating the parameters
 obs_prefix = f"example02_n={n}_sigma={sigma:1.2e}_0"
@@ -107,9 +117,9 @@ xst = np.loadtxt("example02_xs.csv")
 yst = np.loadtxt("example02_ys.csv")
 
 fig, ax = plt.subplots(figsize=(7.48/2, 7.48/2 / 1.618))
-med, low, up = np.percentile(phipr, [50, 2.5, 97.5], axis=0)
-#ax.plot(xs, med, color=sns.color_palette()[0], lw=0.5)
-#ax.fill_between(xs, low, up, color=sns.color_palette()[0], alpha=0.25)
+med, low, up = np.percentile(phipr[skip:,:], [50, 2.5, 97.5], axis=0)
+ax.plot(xs, med, color=sns.color_palette()[0], lw=0.5)
+ax.fill_between(xs, low, up, color=sns.color_palette()[0], alpha=0.25)
 ax.plot(xs, phipr[skip::thin*10,:].T, lw=0.3, color=sns.color_palette()[1])
 ax.plot(x_obs, y_obs, 'ko', markeredgewidth=0.5, markersize=1)
 ax.plot(xst, yst, '--', lw=1.0, color=sns.color_palette()[2])
@@ -118,15 +128,15 @@ ax.set_xlabel("$x$")
 ax.set_ylabel("$\phi(x)$", rotation="horizontal")
 sns.despine(trim=True)
 plt.tight_layout(pad=0.1)
-file_pre = prefix + "_fitted_prior_predictive"
+file_pre = out_prefix + "_fitted_prior_predictive"
 print("> writing: " + file_pre + ".pdf")
 plt.savefig(file_pre + ".pdf")
 plt.savefig(file_pre + ".png", dpi=150)
 
 fig, ax = plt.subplots(figsize=(7.48/2, 7.48/2 / 1.618))
-med, low, up = np.percentile(phips, [50, 2.5, 97.5], axis=0)
-#ax.plot(xs, med, color=sns.color_palette()[0], lw=0.5, label="Predictive interval")
-#ax.fill_between(xs, low, up, color=sns.color_palette()[0], alpha=0.25)
+med, low, up = np.percentile(phips[skip:,:], [50, 2.5, 97.5], axis=0)
+ax.plot(xs, med, color=sns.color_palette()[0], lw=0.5, label="Predictive interval")
+ax.fill_between(xs, low, up, color=sns.color_palette()[0], alpha=0.25)
 lines = ax.plot(xs, phips[skip::thin*10,:].T, lw=0.3, color=sns.color_palette()[1])
 lines[0].set_label("Predictive samples")
 ax.plot(xst, yst, '--', lw=1, color=sns.color_palette()[2], label="Ground truth")
@@ -137,10 +147,7 @@ ax.set_xlabel("$x$")
 plt.legend(loc="best", frameon=False)
 sns.despine(trim=True)
 plt.tight_layout(pad=0.1)
-file_pre = prefix + "_fitted_post_predictive"
+file_pre = out_prefix + "_fitted_post_predictive"
 print("> writing: " + file_pre + ".pdf")
 plt.savefig(file_pre + ".pdf")
 plt.savefig(file_pre + ".png", dpi=150)
-
-
-plt.show()

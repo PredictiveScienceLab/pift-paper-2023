@@ -97,14 +97,14 @@ $$
 As in Example 3.a both parameters $D$ and $\kappa$ are assumed to be uknown.
 We use exactly the same treatement: Jeffrey's prior and work in logarithmic space.
 However, we now assume that we do not know the source term $f(x)$.
-To parameterize the source term we use a Fourier expansion with 15 terms.
-We use a zero mean Gaussian prior on the Fourier coefficients.
-The covariance of this prior is diagonal.
-The prior variance of each Fourier weight decreases quadratically with the order
-of the Fourier term.
-This penalizes very high frequencies.
+To parameterize the source term, we use the Karhunen-Lo\`eve expansion (KLE) of 
+a Gaussian random field which we construct using the Nystr\"om, see [Bilionis, et al. 2016](https://link.springer.com/referenceworkentry/10.1007/978-3-319-11259-6_16-1).
+We assume that the covariance of this random field is the squared exponent with
+variance one and lengthscale $\ell = 0.3$.
+The number of KLE components is 10 accounting for more than 99% of the energy
+of the field.
 
-## Running the example
+## Running the examples
 
 Make sure you have compiled the code following the instructions 
 [here](../README.md).
@@ -135,4 +135,7 @@ respectively.
 
 ### Example 3.b ( $D$, $\kappa$, and $f(x)$ unknown )
 
-![Example 2.b](./paper_figures/example02b.png)
+![Example 3.a.i](./paper_figures/example03b_theta.png)
+![Example 3.a.ii](./paper_figures/example03b_theta_post.png)
+![Example 3.a.iii](./paper_figures/example03b_fitted_prior_predictive.png)
+![Example 3.a.iv](./paper_figures/example03b_fitted_post_predictive.png)

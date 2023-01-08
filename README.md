@@ -27,6 +27,13 @@ The requirements for the C++ code is:
   In any case, once you have YAML-CPP installed, you need to edit the
   [makefile](./makefile) to make the variable `YAMLCPP` point to the right
   folder.
++ [GNU Scientific Library](https://www.gnu.org/software/gsl/). This is only
+  used in [Example 3b](examples/example03.md) to find eigenvalues of a
+  symmetric matrix. Again, if you are using on OS X and using 
+  [homebrew](https://brew.sh), then you do:
+  ```
+    brew install gsl
+  ```
 
 To compile the C++ code, simply run:
 ```
