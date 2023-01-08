@@ -10,6 +10,7 @@ Note that for the time being we only support fields with one input and one
 output. Support for multiple outputs will be added in the future.
 + [examples](./examples): Contains the C++ code that implements the paper
 examples, and the Python scripts that make the plots.
++ [tests](./tests): Contains some unit tests. These may not be up to date.
 
 ## Installing the code
 
