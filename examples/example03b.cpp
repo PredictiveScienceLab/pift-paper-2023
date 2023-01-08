@@ -28,8 +28,12 @@ using Domain = pift::UniformRectangularDomain<F, RNG>;
 using FField = pift::Fourier1DField<F, Domain>;
 // Type for constrained parameterized field
 using CFField = pift::Constrained1DField<F, FField, Domain>;
+// The source field type
+using RBFField = pift::RBF1DField<F, Domain>;
+using SourceField = pift::ConstrainedMeanField<F, RBFField, Domain>;
+//using SourceField = pift::ConstrainedMeanField<F, FField, Domain>;
 // Type for Hamiltonian
-using H = Example03BHamiltonian<F, FField>;
+using H = Example03BHamiltonian<F, SourceField>;
 // Type for likelihood
 using L = pift::GaussianLikelihood<F, CFField>;
 // Type for the unbiased estimator of the integral of the gradient of the
@@ -106,7 +110,11 @@ int main(int argc, char* argv[]) {
   CFField phi(psi, domain, config.field.boundary_values);
 
   // The field representing the source term
-  FField f(domain, config.source.num_terms);
+  std::vector<F> rbf_centers(config.source.num_centers);
+  pift::linspace(F(0.0), F(1.0), rbf_centers.size(), rbf_centers.data());
+  F ell = F(0.1);
+  RBFField rf(rbf_centers, config.source.ell);
+  SourceField f(rf, domain, config.source.mean_value);
 
   // The Hamiltonian
   H h(beta, f, config.source.precision);
@@ -114,7 +122,8 @@ int main(int argc, char* argv[]) {
   // Initialize the parameters
   std::normal_distribution<F> norm(0, 1);
   F theta[h.get_num_params()];
-  for(int i=0; i<h.get_num_params(); i++)
+  std::fill(theta, theta + h.get_num_params(), F(0.0));
+  for(int i=0; i<config.parameters.init_mean.size(); i++)
     theta[i] = config.parameters.init_mean[i] +
                config.parameters.init_std[i] * norm(rng);
 
@@ -205,7 +214,7 @@ int main(int argc, char* argv[]) {
       theta_post_params.sgld_params.out_file,
       post_prefix
   );
-  postprocess_sourcec<F>(
+  postprocess_source<F>(
       f, domain, config.postprocess.num_points_per_dim[0],
       sgld_params.out_file,
       prefix

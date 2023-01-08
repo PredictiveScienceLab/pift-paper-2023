@@ -8,8 +8,10 @@ domain:
   bounds:
     - [0.0, 1.0]
 source:
-  num_terms: 8
-  precision: 1.0
+  num_centers: 10
+  ell: 0.2
+  precision: 0.0
+  mean_value: -0.1892
 # Parameterization details
 field:
   # The number of Fourier terms to use
@@ -19,16 +21,15 @@ field:
 # Sampling details for the parameters
 parameters:
     # How to initialize the parameters
-    init_mean: [0.0, 0.0,
-      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-    init_std: [0.1, 0.1,
-      0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.]
+    # The parameters that are not specified start from zero
+    init_mean: [0.0, 0.0]
+    init_std: [0.1, 0.1]
     # The number of collocation points for integrating over the spatial
     # dimension when taking gradients with respect to theta
     num_collocation: 1
     # The SGLD options for parameter sampling
     sgld:
-      alpha: 0.01
+      alpha: 0.1
       beta: 0.0
       gamma: 0.51
       # sigma_w is irrelevant

@@ -20,10 +20,17 @@ LDFLAGS=-L$(YAMLCPP)/lib -lyaml-cpp
 # 		 test_free test_prior_exp test_post_exp\
 # 		 example01 example02 example02b
 #all: example01 example02 example02b example03 #example03c
-all: example01 example02a example02b example03a example03b
+#all: example01 example02a example02b example03a example03b
+all: example03b
 
 clean:
 	$(RM) examples/*.o
+
+test_constrained_mean: test_constrained_mean.o
+	$(CXX) -o tests/test_constrained_mean  tests/test_constrained_mean.o $(LDFLAGS)
+
+test_constrained_mean.o: tests/test_constrained_mean.cpp
+	$(CXX) -c tests/test_constrained_mean.cpp $(CXXFLAGS) -I./tests -o tests/test_constrained_mean.o
 
 example01: example01.o
 	$(CXX) -o examples/example01 examples/example01.o $(LDFLAGS)
@@ -55,3 +62,8 @@ example03b: example03b.o
 example03b.o: examples/example03b.cpp
 	$(CXX) -c examples/example03b.cpp $(CXXFLAGS) -o examples/example03b.o
 
+example03c: example03c.o
+	$(CXX) -o examples/example03c examples/example03c.o $(LDFLAGS)
+
+example03c.o: examples/example03c.cpp
+	$(CXX) -c examples/example03c.cpp $(CXXFLAGS) -o examples/example03c.o

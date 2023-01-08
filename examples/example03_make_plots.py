@@ -28,7 +28,8 @@ folder = sys.argv[4]
 prefix = folder + f"/example03_beta={beta:1.2e}_n={n}_sigma={sigma:1.2e}_0"
 
 # Warmup period
-skip = 1000
+#skip = 2000
+skip = 5000
 # How many samples to skip
 thin = 100
 
@@ -44,6 +45,7 @@ ax.plot([skip, skip], [theta_min, theta_max],
         "k--", lw=0.5)
 ax.set_xlabel("Iteration")
 ax.set_ylabel("Parameters", rotation="horizontal")
+ax.yaxis.set_label_coords(0., 0.9)
 ax.text(skip + 100, theta_min, "End of warmup period")
 ax.text(9000, -0.3, "$\log(\kappa)$", color=sns.color_palette()[1])
 ax.text(9000, -2.0, "$\log(D)$", color=sns.color_palette()[0])
@@ -62,7 +64,7 @@ sns.kdeplot(x=D, y=kappa, linewidths=0.5,
 ax.plot([0.1], [1.0], 'x', color=sns.color_palette()[2], label="Ground truth")
 ax.set_xlabel("$D$")
 ax.set_ylabel("$\kappa$", rotation="horizontal")
-ax.set_xlim(0., 0.5)
+ax.set_xlim(0., 0.3)
 ax.set_ylim(0.5, 1.5)
 ax.text(0.105, 1.2, "Posterior", color=sns.color_palette()[1]) 
 ax.text(0.105, 1.01, "Ground truth", color=sns.color_palette()[2])
@@ -79,9 +81,9 @@ try:
     y = np.loadtxt(prefix + "_source_f.csv")
     fig, ax = plt.subplots(figsize=(7.48 / 2, 7.48/2/1.618))
     med, low, up = np.percentile(y, [50, 2.5, 97.5], axis=0)
-    ax.plot(x, med, color=sns.color_palette()[0], lw=0.5)
-    ax.fill_between(x, low, up, color=sns.color_palette()[0], alpha=0.25)
-    l = ax.plot(x, y[skip::thin*5,:].T, color=sns.color_palette()[1], lw=0.3)
+    #ax.plot(x, med, color=sns.color_palette()[0], lw=0.5)
+    #ax.fill_between(x, low, up, color=sns.color_palette()[0], alpha=0.25)
+    l = ax.plot(x, y[skip::thin,:].T, color=sns.color_palette()[1], lw=0.3)
     ax.plot(x, np.cos(4.0 * x), '--', lw=0.5, color=sns.color_palette()[2])
     ax.set_xlabel("$x$")
     ax.set_ylabel("$f(x)$", rotation="horizontal")
@@ -90,7 +92,6 @@ try:
     plt.savefig(prefix + "_source.pdf")
 except:
     print("No source term found.")
-
 
 # Plot the prior after calibrating the parameters
 obs_prefix = f"example02_n={n}_sigma={sigma:1.2e}_0"
@@ -108,8 +109,8 @@ yst = np.loadtxt("example02_ys.csv")
 
 fig, ax = plt.subplots(figsize=(7.48/2, 7.48/2 / 1.618))
 med, low, up = np.percentile(phipr, [50, 2.5, 97.5], axis=0)
-ax.plot(xs, med, color=sns.color_palette()[0], lw=0.5)
-ax.fill_between(xs, low, up, color=sns.color_palette()[0], alpha=0.25)
+#ax.plot(xs, med, color=sns.color_palette()[0], lw=0.5)
+#ax.fill_between(xs, low, up, color=sns.color_palette()[0], alpha=0.25)
 ax.plot(xs, phipr[skip::thin*10,:].T, lw=0.3, color=sns.color_palette()[1])
 ax.plot(x_obs, y_obs, 'ko', markeredgewidth=0.5, markersize=1)
 ax.plot(xst, yst, '--', lw=1.0, color=sns.color_palette()[2])
@@ -125,8 +126,8 @@ plt.savefig(file_pre + ".png", dpi=150)
 
 fig, ax = plt.subplots(figsize=(7.48/2, 7.48/2 / 1.618))
 med, low, up = np.percentile(phips, [50, 2.5, 97.5], axis=0)
-ax.plot(xs, med, color=sns.color_palette()[0], lw=0.5, label="Predictive interval")
-ax.fill_between(xs, low, up, color=sns.color_palette()[0], alpha=0.25)
+#ax.plot(xs, med, color=sns.color_palette()[0], lw=0.5, label="Predictive interval")
+#ax.fill_between(xs, low, up, color=sns.color_palette()[0], alpha=0.25)
 lines = ax.plot(xs, phips[skip::thin*10,:].T, lw=0.3, color=sns.color_palette()[1])
 lines[0].set_label("Predictive samples")
 ax.plot(xst, yst, '--', lw=1, color=sns.color_palette()[2], label="Ground truth")

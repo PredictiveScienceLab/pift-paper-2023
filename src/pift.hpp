@@ -15,6 +15,7 @@
 #include "domain.hpp"
 #include "field.hpp"
 #include "fourier.hpp"
+#include "rbf.hpp"
 #include "hamiltonian.hpp"
 #include "sgld.hpp"
 #include "likelihood.hpp"

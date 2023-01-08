@@ -8,7 +8,7 @@
 #
 
 example03_exec="example03$1"
-if [ ! -f ./example02a ]; then
+if [ ! -f $example03_exec ]; then
   echo "You haven't compiled the code or you are not running this script from the examples directory."
   exit 1
 fi
@@ -39,4 +39,4 @@ if [ $? -ne 0 ]; then
 fi
 
 # Make the plots
-# python3 example03_make_plots.py $beta $n $sigma $out_folder
+python3 example03_make_plots.py $beta $n $sigma $out_folder

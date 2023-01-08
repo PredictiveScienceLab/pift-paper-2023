@@ -10,7 +10,6 @@
 #define PIFT_FOURIER_HPP
 
 #include <cmath>
-#include <vector>
 
 #include "field.hpp"
 
@@ -26,7 +25,7 @@ namespace pift {
 // phi =  Fourier1DField<float, Domain>(domain, num_terms);
 //
 template<typename T, typename D>
-class Fourier1DField : public ParameterizedField<T> {
+class Fourier1DField : public ParameterizedField<T,D> {
   protected:
     const int num_terms;
     D& domain;
@@ -34,11 +33,11 @@ class Fourier1DField : public ParameterizedField<T> {
 
   public:
     Fourier1DField(D& domain, const int& num_terms) :
-      ParameterizedField<T>(1, 1 + (num_terms - 1) * 2, 1),
+      ParameterizedField<T,D>(1, 1 + (num_terms - 1) * 2, 1),
       domain(domain), num_terms(num_terms)
     {
       // TODO: Find a better way to get this info from the base class.
-      dim_w = ParameterizedField<T>::dim_w;
+      dim_w = ParameterizedField<T,D>::dim_w;
     }
 
     inline T a() const { return domain.a(0); }
@@ -124,7 +123,16 @@ class Fourier1DField : public ParameterizedField<T> {
         grad_w_prolong[dim_w + num_terms - 1 + i] = omega_cos_omega_x;
       }
     }
- 
+
+    inline T integrate(const D& domain, const T* w) const {
+      return w[0];
+    }
+
+    inline T integrate(const D& domain, const T* w, T* grad_w) const {
+      grad_w[0] = T(1.0);
+      std::fill(grad_w + 1, grad_w + dim_w, T(0.0));
+      return w[0];
+    }
 }; // Fourier1DField
 
 } // namespace pift

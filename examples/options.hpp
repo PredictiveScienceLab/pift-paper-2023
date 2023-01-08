@@ -234,12 +234,16 @@ struct Configuration02 {
 // A structure representing the parameters for the source term
 template<typename T>
 struct SourceTermConfig {
-  int num_terms;
+  int num_centers;
+  T ell;
   T precision;
+  T mean_value;
 
   SourceTermConfig(const YAML::Node& yaml) :
-    num_terms(yaml["num_terms"].as<int>()),
-    precision(yaml["precision"].as<T>())
+    num_centers(yaml["num_centers"].as<int>()),
+    ell(yaml["ell"].as<T>()),
+    precision(yaml["precision"].as<T>()),
+    mean_value(yaml["mean_value"].as<T>())
   {}
 }; // SourceTermConfig
 

@@ -16,7 +16,7 @@
 
 template<typename T, typename FA, typename D>
 inline void postprocess(
-    const FA& phi, const D& domain, const int& n,
+    FA& phi, const D& domain, const int& n,
     std::string& samples_out_file, std::string& prefix
 ) {
   T x[n];
@@ -46,30 +46,6 @@ inline void postprocess_source(
   for(int i=0; i<fws.size(); i++)
     for(int j=0; j<n; j++)
       fs[n * i + j] = f(x + j, fws[i].data() + 1 + 2);
-  std::string f_file = prefix + "_source_f.csv";
-  pift::savetxt(fs, fws.size(), n, f_file);
- 
-}
-
-template<typename T, typename FA, typename D>
-inline void postprocess_sourcec(
-    const FA& f, const D& domain, const int& n,
-    std::string& samples_out_file, std::string& prefix
-) {
-  T x[n];
-  std::vector<T> w(f.get_dim_w() + 1);
-  T tmp = 0.25 * std::sin(4.0);
-  w[0] = tmp;
-  pift::linspace(domain.a(0), domain.b(0), n, x);
-  std::string x_file = prefix + "_source_x.csv";
-  pift::savetxt(x, n, x_file);
-  auto fws = pift::loadtxtmat<T>(samples_out_file);
-  T fs[fws.size() * n];
-  for(int i=0; i<fws.size(); i++) {
-    std::copy(fws[i].begin() + 3, fws[i].end(), w.begin() + 1);    
-    for(int j=0; j<n; j++)
-      fs[n * i + j] = f(x + j, w.data());
-  }
   std::string f_file = prefix + "_source_f.csv";
   pift::savetxt(fs, fws.size(), n, f_file);
  

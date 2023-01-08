@@ -20,12 +20,15 @@
 #include <vector>
 #include <cmath>
 #include <cassert>
+#include <exception>
+
+#include "utils.hpp"
 
 namespace pift {
 
 // A class representing a parameterized field.
 // This is an abstract class.
-template<typename T>
+template<typename T, typename D>
 class ParameterizedField {
   protected:
     const int dim_x;
@@ -72,6 +75,20 @@ class ParameterizedField {
     ) const = 0;
     // Evaluates the field and its gradient with respect to w
     virtual T eval_grad(const T* x, const T* w, T* grad_w) const = 0;
+    // Evaluate the integral of the field over a domain
+    virtual T integrate(const D& domain, const T* w) const = 0;
+    // Evaluate the exptation of the field over a domain
+    inline T expectation(const D& domain, const T* w) const {
+      return integrate(domain, w) / domain.get_volume();
+    }
+    // Evaluate the integral of the field and the gradient with respect to the
+    // parameters
+    virtual T integrate(const D& domain, const T* w, T* grad_w) const = 0;
+    inline T expectation(const D& domain, const T* w, T* grad_w) const {
+      const T r = integrate(domain, w, grad_w);
+      scale(grad_w, dim_w, T(1.0) / domain.get_volume(), grad_w);
+      return r / domain.get_volume();
+    }
 }; // ParameterizedField
 
 
@@ -94,7 +111,7 @@ class ParameterizedField {
 //  psi = CField(phi, domain, boundary_values);
 //
 template<typename T, typename PF, typename D>
-class Constrained1DField : public ParameterizedField<T> {
+class Constrained1DField : public ParameterizedField<T,D> {
    protected:
      const PF& phi;
      const D& domain;
@@ -108,7 +125,7 @@ class Constrained1DField : public ParameterizedField<T> {
          const D& domain,
          const T* values
        ) :
-       ParameterizedField<T>(
+       ParameterizedField<T,D>(
            phi.get_dim_x(), phi.get_dim_w(),
            phi.get_max_deriv(), phi.get_prolong_size()
        ),
@@ -116,8 +133,8 @@ class Constrained1DField : public ParameterizedField<T> {
        domain(domain)
      {
        // TODO: Find a better way to do this
-       dim_x = ParameterizedField<T>::dim_x;
-       dim_w = ParameterizedField<T>::dim_w;
+       dim_x = ParameterizedField<T,D>::dim_x;
+       dim_w = ParameterizedField<T,D>::dim_w;
        assert(dim_x == 1);
        this->values.assign(values, values + 2);
      }
@@ -185,6 +202,95 @@ class Constrained1DField : public ParameterizedField<T> {
                 [&xmabmx](T v) {return xmabmx * v;});
       return f;
     }
+
+    // TODO: Implement.
+    inline T integrate(const D& domain, const T* w) const {
+      throw std::runtime_error("Not implemented.");
+      return 0;
+    }
+    // TODO: Implement
+    inline T integrate(const D& domain, const T* w, T* grad_w) const {
+      throw std::runtime_error("Not implemented.");
+      return 0;
+    }
 }; // Constrained1DField
+
+// A class representing a field that has a constrained mean
+template<typename T, typename PF, typename D>
+class ConstrainedMeanField : public ParameterizedField<T,D> {
+   protected:
+     const PF& phi;
+     const D& domain;
+     int dim_w;
+     int dim_x;
+     T mean_value;
+ 
+   public:
+     ConstrainedMeanField(
+         const PF& phi, 
+         const D& domain,
+         const T mean_value
+       ) :
+       ParameterizedField<T,D>(
+           phi.get_dim_x(), phi.get_dim_w(),
+           phi.get_max_deriv(), phi.get_prolong_size()
+       ),
+       phi(phi),
+       domain(domain),
+       mean_value(mean_value)
+     {
+       // TODO: Find a better way to do this
+       dim_x = ParameterizedField<T,D>::dim_x;
+       dim_w = ParameterizedField<T,D>::dim_w;
+       assert(dim_x == 1);
+     }
+
+     inline const D& get_domain() const { return domain; }
+     inline T get_mean() const { return mean_value; } 
+ 
+     inline T mu(const D& d, const T* w) const {
+       return (mean_value - phi.expectation(d, w)) * d.get_volume();
+     }
+
+     inline T mu(const D& d, const T* w, T* grad_w) const {
+       const T r = phi.expectation(d, w, grad_w);
+       const T V = d.get_volume();
+       scale(grad_w, dim_w, -V, grad_w);
+       return (mean_value - r) * V;
+     }
+
+     inline T operator()(const T* x, const T* w) const {
+       return mu(domain, w) + phi(x, w);
+     }
+
+     inline void operator()(const T* x, const T* w, T* prolong) const {
+       throw std::runtime_error("Not implemented.");
+     }  
+ 
+     inline void operator()(
+         const T* x, const T* w, T* prolong, T* grad_w_prolong
+     ) const {
+       throw std::runtime_error("Not implemented."); 
+     }
+ 
+     inline T eval_grad(const T* x, const T* w, T* grad_w) const {
+       T mu_grad_w[dim_w];
+       const T r = mu(domain, w, mu_grad_w);
+       const T g = phi.eval_grad(x, w, grad_w);
+       for(int i=0; i<dim_w; i++)
+         grad_w[i] += mu_grad_w[i];
+       return r + g;
+     }
+
+    // TODO: Implement - not the most general implementation below
+    inline T integrate(const D& domain, const T* w) const {
+      return mean_value * domain.get_volume();
+    }
+    // TODO: Implement - not the most general implementation below
+    inline T integrate(const D& domain, const T* w, T* grad_w) const {
+      std::fill(grad_w, grad_w + dim_w, T(0.0));
+      return mean_value * domain.get_volume();
+    }
+}; // ConstrainedMeanField
 } // namespace pift
 #endif // PIFT_FIELD_HPP
