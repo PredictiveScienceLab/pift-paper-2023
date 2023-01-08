@@ -49,6 +49,15 @@ inline void cout_vec(const std::vector<T>& x, const std::string& prefix="") {
   cout_vec(x, std::cout, prefix);
 }
 
+template<typename T>
+inline void cout_mat(const T* x, const int& n, const int& m) {
+  for(int i=0; i<n; i++) {
+    for(int j=0; j<m; j++)
+      std::cout << x[i * m + j] << " ";
+    std::cout << std::endl;
+  }
+}
+
 // Saves a std::vector to a file
 template<typename T>
 void savetxt(

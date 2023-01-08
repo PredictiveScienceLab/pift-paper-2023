@@ -22,16 +22,18 @@
 
 // Definition of some types
 using RNG = std::mt19937;
-using F = float;
+using F = double;
 using Domain = pift::UniformRectangularDomain<F, RNG>;
 // Type for parameterized field
 using FField = pift::Fourier1DField<F, Domain>;
 // Type for constrained parameterized field
 using CFField = pift::Constrained1DField<F, FField, Domain>;
 // The source field type
-using RBFField = pift::RBF1DField<F, Domain>;
-using SourceField = pift::ConstrainedMeanField<F, RBFField, Domain>;
-//using SourceField = pift::ConstrainedMeanField<F, FField, Domain>;
+//using RBFField = pift::RBF1DField<F, Domain>;
+//using SourceField = pift::ConstrainedMeanField<F, RBFField, Domain>;
+using Kernel = pift::SquaredExponential1DKernel<F>;
+// Karhunen-Loeve expansion only works in double precision
+using SourceField = pift::KLE<Domain,Kernel>;
 // Type for Hamiltonian
 using H = Example03BHamiltonian<F, SourceField>;
 // Type for likelihood
@@ -110,14 +112,20 @@ int main(int argc, char* argv[]) {
   CFField phi(psi, domain, config.field.boundary_values);
 
   // The field representing the source term
-  std::vector<F> rbf_centers(config.source.num_centers);
-  pift::linspace(F(0.0), F(1.0), rbf_centers.size(), rbf_centers.data());
-  F ell = F(0.1);
-  RBFField rf(rbf_centers, config.source.ell);
-  SourceField f(rf, domain, config.source.mean_value);
+  // std::vector<F> rbf_centers(config.source.num_centers);
+  // pift::linspace(F(0.0), F(1.0), rbf_centers.size(), rbf_centers.data());
+  // F ell = F(0.1);
+  // RBFField rf(rbf_centers, config.source.ell);
+  Kernel k(config.source.ell, config.source.s);
+  SourceField f(
+      domain, k,
+      config.source.num_terms,
+      config.source.mean_value,
+      config.source.nq
+  );
 
   // The Hamiltonian
-  H h(beta, f, config.source.precision);
+  H h(beta, f);
 
   // Initialize the parameters
   std::normal_distribution<F> norm(0, 1);

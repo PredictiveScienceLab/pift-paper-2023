@@ -16,6 +16,8 @@
 #include "field.hpp"
 #include "fourier.hpp"
 #include "rbf.hpp"
+#include "kernel.hpp"
+#include "kle.hpp"
 #include "hamiltonian.hpp"
 #include "sgld.hpp"
 #include "likelihood.hpp"

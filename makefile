@@ -8,13 +8,15 @@
 #
 # Path to YAML-CPP library. This is required for reading configuration fiels
 YAMLCPP=/opt/homebrew/Cellar/yaml-cpp/0.7.0/
+# Path to GLS library
+GSL=/opt/homebrew/Cellar/gsl/2.7.1
 # The compiler you wish to use
 CXX=g++
 # Compile options
 CXXFLAGS=-O3 -ffast-math -std=c++20 -I./src -I./examples \
-				 -I$(YAMLCPP)/include
+				 -I$(YAMLCPP)/include -I$(GSL)/include
 # Link options
-LDFLAGS=-L$(YAMLCPP)/lib -lyaml-cpp
+LDFLAGS=-L$(YAMLCPP)/lib -lyaml-cpp -L$(GSL)/lib -lgsl -lgslcblas -lm
 
 # all: test_domain test_fields test_hamiltonian test_posterior \
 # 		 test_free test_prior_exp test_post_exp\
@@ -31,6 +33,12 @@ test_constrained_mean: test_constrained_mean.o
 
 test_constrained_mean.o: tests/test_constrained_mean.cpp
 	$(CXX) -c tests/test_constrained_mean.cpp $(CXXFLAGS) -I./tests -o tests/test_constrained_mean.o
+
+test_cov: test_cov.o
+	$(CXX) -o tests/test_cov  tests/test_cov.o $(LDFLAGS)
+
+test_cov.o: tests/test_cov.cpp
+	$(CXX) -c tests/test_cov.cpp $(CXXFLAGS) -I./tests -o tests/test_cov.o
 
 example01: example01.o
 	$(CXX) -o examples/example01 examples/example01.o $(LDFLAGS)

@@ -8,10 +8,16 @@ domain:
   bounds:
     - [0.0, 1.0]
 source:
-  num_centers: 10
-  ell: 0.2
-  precision: 0.0
+  # Number of terms in Karhunen-Loeve expansion
+  num_terms: 10
+  # Lengthscale of squared exponential kernel
+  ell: 0.3
+  # Signal strength of squared exponential kernel
+  s: 1.0
+  # The mean value
   mean_value: -0.1892
+  # The number of collocation points used in the Nystrom approximation
+  nq: 100
 # Parameterization details
 field:
   # The number of Fourier terms to use

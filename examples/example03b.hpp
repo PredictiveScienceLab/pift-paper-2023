@@ -29,7 +29,7 @@ class Example03BHamiltonian : public pift::Hamiltonian<T> {
     std::vector<T> grad_w;
 
   public:
-    Example03BHamiltonian(const T& beta, FA& f, const T& tau=10) : 
+    Example03BHamiltonian(const T& beta, FA& f, const T& tau=1.0) : 
       pift::Hamiltonian<T>(2 + f.get_dim_w()), beta(beta), f(f),
       tau(tau)
     {
