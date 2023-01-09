@@ -14,7 +14,7 @@ examples, and the Python scripts that make the plots.
 
 ## Installing the code
 
-The main code is written in C++.
+The code for Examples 1-3 is written in C++.
 The plotting code is written in Python.
 
 The requirements for the C++ code is:
@@ -66,9 +66,14 @@ The requirements for the Python plotting scripts are (ignoring standard librarie
               }
   ```
 
+The code for Example 4 is in a Jupyter notebook.
+The requirements are:
++ [numpyro](https://num.pyro.ai/en/stable/getting_started.html)
+
 ## Reproducing the paper results
 
 Follow the links to see how you can reproduce the paper results for each eaxmple:
 + [Example 1](./examples/example01.md)
 + [Example 2](./examples/example02.md)
 + [Example 3](./examples/example03.md)
++ [Example 4](./2D-Allen-Cahn.ipynb)
