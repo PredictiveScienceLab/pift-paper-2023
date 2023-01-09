@@ -70,6 +70,7 @@ The code for Example 4 is in a Jupyter notebook.
 The requirements are:
 + [numpyro](https://num.pyro.ai/en/stable/getting_started.html)
 + [jax](https://github.com/google/jax)
++ [h5py](https://www.h5py.org)
 
 ## Reproducing the paper results
 
