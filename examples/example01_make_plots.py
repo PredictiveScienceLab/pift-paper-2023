@@ -55,7 +55,7 @@ for b in betas:
     l = f"10^{tmp[1][2:]}"
     ax.set_title(f"$\\beta={l}$")
     if b == 100 or b == 10000:
-        ax.set_ylabel("$y$")
+        ax.set_ylabel("$y$", rotation="horizontal")
     if b == 100000:
         plt.legend(loc="best", frameon=False)
     sns.despine(trim=True)

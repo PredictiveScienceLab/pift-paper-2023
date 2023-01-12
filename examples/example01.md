@@ -13,7 +13,7 @@ In this example the spatial domain is $[0, 1]$.
 The boundary value problem is:
 
 $$
-\kappa \frac{d^2\phi}{dx^2} = q(x),
+\D \frac{d^2\phi}{dx^2} = q(x),
 $$
 
 with the source term being:
@@ -25,7 +25,7 @@ $$
 and the conductivity being:
 
 $$
-\kappa = 0.25.
+\D = 0.25.
 $$
 
 The boundary conditions are:
@@ -43,7 +43,7 @@ $$
 The Hamiltonian is:
 
 $$
-H = \int dx \left\[\frac{1}{2}\kappa \left(\frac{d\phi}{dx}\right)^2 - \phi q\right].
+H = \int dx \left\[\frac{1}{2}\D \left(\frac{d\phi}{dx}\right)^2 - \phi q\right].
 $$
 
 ## Running the example
