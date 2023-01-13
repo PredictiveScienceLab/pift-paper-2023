@@ -79,3 +79,9 @@ Follow the links to see how you can reproduce the paper results for each eaxmple
 + [Example 2](./examples/example02.md)
 + [Example 3](./examples/example03.md)
 + [Example 4](./examples/2D-Allen-Cahn.ipynb)
+
+**Note:** Because the random seed changes every time your run the code,
+the figures your produce may be slightly different from the ones found in the
+paper.
+We dedided not to fix the random seed to avoid a positive results bias,
+or ``hero'' runs.
