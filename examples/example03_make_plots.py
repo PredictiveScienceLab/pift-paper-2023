@@ -70,7 +70,7 @@ theta_min = thetas[:, 1:].min()
 theta_max = thetas[:, 1:].max()
 ax.plot([skip, skip], [theta_min, theta_max],
         "k--", lw=0.5)
-ax.set_xlabel("Iteration")
+ax.set_xlabel("Iteration $\\times 10^5$")
 ax.set_ylabel("Parameters", rotation="horizontal")
 ax.yaxis.set_label_coords(0., 0.9)
 ax.text(skip + 100, theta_min, "End of warmup period")
