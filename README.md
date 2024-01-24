@@ -1,6 +1,6 @@
 # Physics-informed Information Field Theory
 
-This repository replicates the result of the paper **ADD DOI WHEN PUBLISHED**.
+This repository replicates the result of the paper (https://doi.org/10.1016/j.jcp.2023.112100).
 
 ## Code outline
 
